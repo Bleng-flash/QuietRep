@@ -1,7 +1,7 @@
 import { colors } from "@/styles/colors";
 import { Text, View } from "react-native";
 
-export default function HomeScreen() {
+export default function PlanScreen() {
   return (
     <View
       style={{
@@ -12,7 +12,7 @@ export default function HomeScreen() {
       }}
     >
       <Text style={{ color: colors.dark.text, fontSize: 32 }}>
-        the home screen.
+        plan screen.
       </Text>
     </View>
   );
