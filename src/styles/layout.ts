@@ -10,7 +10,7 @@ export const layout = StyleSheet.create({
   screenPadded: {
     flex: 1,
     backgroundColor: colors.dark.background,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.m,
   },
   row: {
     flexDirection: "row",
@@ -29,6 +29,6 @@ export const layout = StyleSheet.create({
   card: {
     backgroundColor: colors.dark.surface,
     borderRadius: 12,
-    padding: spacing.md,
+    padding: spacing.m,
   },
 });

@@ -1,4 +1,4 @@
-import { colors } from "@/styles/colors";
+import { colors } from "@/styles";
 import { Text, View } from "react-native";
 
 export default function WorkoutScreen() {

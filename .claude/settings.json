@@ -1,5 +1,17 @@
 {
   "enabledPlugins": {
     "expo@claude-plugins-official": true
+  },
+  "permissions": {
+    "allow": ["Read(**)", "Write(src/**)", "Write(CLAUDE.md)"],
+    "deny": [
+      "Write(package.json)",
+      "Write(tsconfig.json)",
+      "Write(app.json)",
+      "Write(.env*)",
+      "Bash(npm install *)",
+      "Bash(rm *)",
+      "Write(.git/**)"
+    ]
   }
 }

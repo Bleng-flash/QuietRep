@@ -14,11 +14,6 @@ export default function RootLayout() {
         for (const exercise of DEFAULT_EXERCISES) {
           await addExercise(exercise);
         }
-        console.log("Seeded default exercises");
-      } else {
-        console.log(
-          `Found ${existingExercises.length} existing exercises, skipping seed`,
-        );
       }
     }
     seedDefaultExercises();
