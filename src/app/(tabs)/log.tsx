@@ -11,10 +11,7 @@ export default function LogScreen() {
         backgroundColor: colors.dark.background,
       }}
     >
-      <Text style={{ color: colors.dark.text, fontSize: 32 }}>
-        {" "}
-        log screen.
-      </Text>
+      <Text style={{ color: colors.dark.text, fontSize: 32 }}>log screen.</Text>
     </View>
   );
 }
