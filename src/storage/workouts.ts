@@ -31,3 +31,13 @@ export async function deleteWorkout(id: string): Promise<void> {
     JSON.stringify(all.filter((workout) => workout.id !== id)),
   );
 }
+
+// Batch-delete multiple workouts by id. Used to cascade-delete embedded workouts when their split is deleted.
+export async function deleteWorkoutsByIds(ids: string[]): Promise<void> {
+  const all = await getWorkouts();
+  const idSet = new Set(ids);
+  await AsyncStorage.setItem(
+    KEY,
+    JSON.stringify(all.filter((workout) => !idSet.has(workout.id))),
+  );
+}

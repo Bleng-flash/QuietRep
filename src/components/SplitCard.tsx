@@ -2,7 +2,6 @@ import DayCircle from "@/components/DayCircle";
 import WorkoutCard from "@/components/WorkoutCard";
 import { colors, layout, spacing, typography } from "@/styles";
 import type { DayKey, Exercise, Split, Workout } from "@/types";
-import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
@@ -38,6 +37,7 @@ interface SplitCardProps {
   workouts: Workout[];
   allExercises: Exercise[];
   onPress: () => void;
+  onWorkoutPress: (workout: Workout) => void;
 }
 
 export default function SplitCard({
@@ -46,12 +46,12 @@ export default function SplitCard({
   workouts,
   allExercises,
   onPress,
+  onWorkoutPress,
 }: SplitCardProps) {
-  const router = useRouter();
   const [selectedDay, setSelectedDay] = useState<DayKey | null>(null);
 
   function handleDayPress(day: DayKey) {
-    setSelectedDay((prev) => (prev === day ? null : day));
+    setSelectedDay((previousSelectedDay) => (previousSelectedDay === day ? null : day));
   }
 
   const selectedWorkouts =
@@ -110,7 +110,7 @@ export default function SplitCard({
               <WorkoutCard
                 workout={workout}
                 allExercises={allExercises}
-                onPress={() => router.push(`/plan/workout/${workout.id}`)}
+                onPress={() => onWorkoutPress(workout)}
               />
             </View>
           ))}

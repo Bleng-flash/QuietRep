@@ -40,6 +40,7 @@ export interface Workout {
   id: string;
   name: string;
   exercises: WorkoutExercise[]; // ordered array => exercise order within workout
+  isStandalone: boolean; // true = created in Workouts section and shown there; false = embedded inside a split
 }
 
 /** A named weekly split */

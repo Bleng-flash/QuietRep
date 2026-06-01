@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   FlatList,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -14,6 +15,7 @@ import {
 import SectionHeader from "@/components/SectionHeader";
 import SplitCard from "@/components/SplitCard";
 import WorkoutCard from "@/components/WorkoutCard";
+import WorkoutViewer from "@/components/WorkoutViewer";
 import {
   getActiveSplitId,
   getExercises,
@@ -32,6 +34,13 @@ export default function PlanScreen() {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [activeSplitId, setActiveSplitId] = useState<string | null>(null);
+  // Tracks which workout to display in the read-only WorkoutViewer modal.
+  // Set when user taps a WorkoutCard inside a SplitCard day expansion.
+  const [viewingWorkout, setViewingWorkout] = useState<Workout | null>(null);
+
+  // Only standalone workouts are shown in the Workouts section.
+  // The full `workouts` list is still passed to SplitCard so it can resolve embedded workout ids.
+  const standaloneWorkouts = workouts.filter((workout) => workout.isStandalone);
 
   useFocusEffect(
     useCallback(() => {
@@ -79,6 +88,7 @@ export default function PlanScreen() {
               workouts={workouts}
               allExercises={exercises}
               onPress={() => router.push(`/plan/split/${item.id}`)}
+              onWorkoutPress={(workout) => setViewingWorkout(workout)}
             />
           )}
           ItemSeparatorComponent={() => <View style={{ height: spacing.s }} />}
@@ -90,11 +100,11 @@ export default function PlanScreen() {
         title="Workouts"
         onAdd={() => router.push("/plan/workout/new")}
       />
-      {workouts.length === 0 ? (
+      {standaloneWorkouts.length === 0 ? (
         <EmptyState message="No workouts yet. Create one to get started." />
       ) : (
         <FlatList
-          data={workouts}
+          data={standaloneWorkouts}
           keyExtractor={(item) => item.id}
           scrollEnabled={false}
           renderItem={({ item }) => (
@@ -138,6 +148,22 @@ export default function PlanScreen() {
       </Pressable>
 
       <View style={{ height: spacing.xl }} />
+
+      {/* ── WorkoutViewer modal — opened when user taps a WorkoutCard inside a SplitCard day expansion ── */}
+      <Modal
+        visible={viewingWorkout !== null}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setViewingWorkout(null)}
+      >
+        {viewingWorkout !== null && (
+          <WorkoutViewer
+            workout={viewingWorkout}
+            allExercises={exercises}
+            onClose={() => setViewingWorkout(null)}
+          />
+        )}
+      </Modal>
     </ScrollView>
   );
 }

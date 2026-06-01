@@ -56,7 +56,7 @@ export default function WorkoutEditor({
     }, []),
   );
 
-  const alreadyAddedIds = new Set(workoutExercises.map((we) => we.exerciseId));
+  const alreadyAddedIds = new Set(workoutExercises.map((workoutExercise) => workoutExercise.exerciseId));
 
   function handleAddExercise(exercise: Exercise) {
     const newEntry: WorkoutExercise = {
@@ -67,7 +67,7 @@ export default function WorkoutEditor({
   }
 
   function handleRemoveExercise(exerciseIndex: number) {
-    setWorkoutExercises((prev) => prev.filter((_, i) => i !== exerciseIndex));
+    setWorkoutExercises((prev) => prev.filter((_, index) => index !== exerciseIndex));
   }
 
   function handleSetsChange(exerciseIndex: number, updatedSets: SetScheme[]) {
@@ -185,7 +185,7 @@ export default function WorkoutEditor({
             key={workoutExercise.exerciseId}
             workoutExercise={workoutExercise}
             exercise={allExercises.find(
-              (ex) => ex.id === workoutExercise.exerciseId,
+              (exercise) => exercise.id === workoutExercise.exerciseId,
             )}
             isFirst={exerciseIndex === 0}
             isLast={exerciseIndex === workoutExercises.length - 1}

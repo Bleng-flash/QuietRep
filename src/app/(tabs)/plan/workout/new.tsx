@@ -5,7 +5,7 @@ import { router } from "expo-router";
 
 export default function NewWorkoutScreen() {
   async function handleSave(name: string, exercises: WorkoutExercise[]) {
-    await addWorkout({ name, exercises });
+    await addWorkout({ name, exercises, isStandalone: true });
     router.back();
   }
 
