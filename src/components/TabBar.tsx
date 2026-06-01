@@ -1,4 +1,3 @@
-// components/CustomTabBar.tsx
 import { colors } from "@/styles";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";

@@ -77,7 +77,7 @@ export default function PlanScreen() {
               split={item}
               isActive={item.id === activeSplitId}
               workouts={workouts}
-              exercises={exercises}
+              allExercises={exercises}
               onPress={() => router.push(`/plan/split/${item.id}`)}
             />
           )}
@@ -100,7 +100,7 @@ export default function PlanScreen() {
           renderItem={({ item }) => (
             <WorkoutCard
               workout={item}
-              exercises={exercises}
+              allExercises={exercises}
               onPress={() => router.push(`/plan/workout/${item.id}`)}
             />
           )}

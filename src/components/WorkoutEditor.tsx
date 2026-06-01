@@ -1,5 +1,5 @@
-import ExercisePicker from "@/components/ExercisePicker";
 import ExerciseCard from "@/components/ExerciseCard";
+import ExercisePicker from "@/components/ExercisePicker";
 import { getExercises } from "@/storage";
 import { colors, layout, spacing, typography } from "@/styles";
 import type { Exercise, SetScheme, Workout, WorkoutExercise } from "@/types";
@@ -7,16 +7,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -25,6 +25,7 @@ interface WorkoutEditorProps {
   onSave: (name: string, exercises: WorkoutExercise[]) => Promise<void>;
   onCancel: () => void;
   onCreateExercise: () => void;
+  onDelete?: () => void;
 }
 
 export default function WorkoutEditor({
@@ -32,6 +33,7 @@ export default function WorkoutEditor({
   onSave,
   onCancel,
   onCreateExercise,
+  onDelete,
 }: WorkoutEditorProps) {
   const isEditMode = initialWorkout !== undefined;
   const insets = useSafeAreaInsets();
@@ -100,6 +102,13 @@ export default function WorkoutEditor({
       ];
       return updated;
     });
+  }
+
+  function handleDelete() {
+    Alert.alert("Delete workout?", "This cannot be undone.", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Delete", style: "destructive", onPress: onDelete },
+    ]);
   }
 
   async function handleSave() {
@@ -206,6 +215,24 @@ export default function WorkoutEditor({
             pre-filled when you start a session.
           </Text>
         )}
+
+        {isEditMode && onDelete && (
+          <Pressable
+            onPress={handleDelete}
+            hitSlop={8}
+            style={({ pressed }) => [
+              styles.deleteButton,
+              pressed && { opacity: 0.7 },
+            ]}
+          >
+            <Ionicons
+              name="trash-outline"
+              size={18}
+              color={colors.dark.error}
+            />
+            <Text style={styles.deleteLabel}>Delete Workout</Text>
+          </Pressable>
+        )}
       </ScrollView>
 
       <ExercisePicker
@@ -272,5 +299,23 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingHorizontal: spacing.l,
     lineHeight: 18,
+  },
+  deleteButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.s,
+    borderWidth: 1,
+    borderColor: colors.dark.error,
+    borderStyle: "dashed",
+    borderRadius: 12,
+    paddingVertical: spacing.m,
+    marginTop: spacing.l,
+    backgroundColor: colors.dark.errorSubtle,
+  },
+  deleteLabel: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.dark.error,
   },
 });

@@ -6,7 +6,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 interface SetRowProps {
   setIndex: number;
-  scheme: SetScheme;
+  setScheme: SetScheme;
   isOnly: boolean;
   onChange: (updated: SetScheme) => void;
   onRemove: () => void;
@@ -14,7 +14,7 @@ interface SetRowProps {
 
 export default function SetRow({
   setIndex,
-  scheme,
+  setScheme,
   isOnly,
   onChange,
   onRemove,
@@ -23,10 +23,10 @@ export default function SetRow({
    * After that, on every re-render, the state just holds whatever was
    * last set via the setter function. */
   const [repsText, setRepsText] = useState(
-    scheme.reps > 0 ? String(scheme.reps) : "",
+    setScheme.reps > 0 ? String(setScheme.reps) : "",
   );
   const [loadText, setLoadText] = useState(
-    scheme.load > 0 ? String(scheme.load) : "",
+    setScheme.load > 0 ? String(setScheme.load) : "",
   );
 
   return (
@@ -42,7 +42,7 @@ export default function SetRow({
           placeholderTextColor={colors.dark.textDisabled}
           onChangeText={(text) => {
             setRepsText(text);
-            onChange({ ...scheme, reps: parseInt(text, 10) || 0 });
+            onChange({ ...setScheme, reps: parseInt(text, 10) || 0 });
           }}
         />
       </View>
@@ -56,7 +56,7 @@ export default function SetRow({
           placeholderTextColor={colors.dark.textDisabled}
           onChangeText={(text) => {
             setLoadText(text);
-            onChange({ ...scheme, load: parseFloat(text) || 0 });
+            onChange({ ...setScheme, load: parseFloat(text) || 0 });
           }}
         />
       </View>
@@ -65,7 +65,10 @@ export default function SetRow({
         onPress={onRemove}
         disabled={isOnly}
         hitSlop={8}
-        style={({ pressed }) => [styles.removeButton, pressed && !isOnly && { opacity: 0.5 }]}
+        style={({ pressed }) => [
+          styles.removeButton,
+          pressed && !isOnly && { opacity: 0.5 },
+        ]}
       >
         <Ionicons
           name="remove-circle-outline"

@@ -27,22 +27,25 @@ export default function ExerciseCard({
 }: ExerciseCardProps) {
   function handleSetChange(setIndex: number, updated: SetScheme) {
     onSetsChange(
-      workoutExercise.sets.map((currentSet, index) => (index === setIndex ? updated : currentSet)),
+      workoutExercise.sets.map((currentSet, index) =>
+        index === setIndex ? updated : currentSet,
+      ),
     );
   }
 
+  // In JavaScript/TypeScript, _ is a convention for a parameter you're required to declare but intentionally don't use
   function handleRemoveSet(setIndex: number) {
     onSetsChange(workoutExercise.sets.filter((_, index) => index !== setIndex));
   }
 
   function handleAddSet() {
     const lastSet = workoutExercise.sets[workoutExercise.sets.length - 1];
-    const newSet: SetScheme = lastSet ? { ...lastSet } : { reps: 8, load: 0 };
+    const newSet: SetScheme = lastSet ? { ...lastSet } : { reps: 0, load: 0 };
     onSetsChange([...workoutExercise.sets, newSet]);
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.card}>
       {/* Header row */}
       <View style={[layout.rowBetween, { marginBottom: spacing.s }]}>
         <View style={{ flex: 1 }}>
@@ -54,7 +57,7 @@ export default function ExerciseCard({
           ) : null}
         </View>
 
-        <View style={[layout.row, { gap: spacing.xs }]}>
+        <View style={[layout.row, { gap: spacing.s }]}>
           <Pressable
             onPress={onMoveUp}
             disabled={isFirst}
@@ -65,7 +68,7 @@ export default function ExerciseCard({
           >
             <Ionicons
               name="chevron-up"
-              size={18}
+              size={20}
               color={colors.dark.textSubtle}
             />
           </Pressable>
@@ -79,7 +82,7 @@ export default function ExerciseCard({
           >
             <Ionicons
               name="chevron-down"
-              size={18}
+              size={20}
               color={colors.dark.textSubtle}
             />
           </Pressable>
@@ -90,7 +93,7 @@ export default function ExerciseCard({
           >
             <Ionicons
               name="trash-outline"
-              size={18}
+              size={20}
               color={colors.dark.error}
             />
           </Pressable>
@@ -113,7 +116,7 @@ export default function ExerciseCard({
         <SetRow
           key={setIndex}
           setIndex={setIndex}
-          scheme={scheme}
+          setScheme={scheme}
           isOnly={workoutExercise.sets.length === 1}
           onChange={(updated) => handleSetChange(setIndex, updated)}
           onRemove={() => handleRemoveSet(setIndex)}
@@ -128,7 +131,7 @@ export default function ExerciseCard({
           pressed && { opacity: 0.6 },
         ]}
       >
-        <Ionicons name="add" size={14} color={colors.dark.primary} />
+        <Ionicons name="add" size={16} color={colors.dark.primary} />
         <Text style={styles.addSetLabel}>Add set</Text>
       </Pressable>
     </View>
@@ -136,11 +139,11 @@ export default function ExerciseCard({
 }
 
 const styles = StyleSheet.create({
-  container: {
+  card: {
     backgroundColor: colors.dark.surface,
     borderRadius: 12,
     padding: spacing.m,
-    marginBottom: spacing.s,
+    marginBottom: spacing.m,
     borderWidth: 1,
     borderColor: colors.dark.border,
   },
@@ -153,7 +156,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   addSetLabel: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "500",
     color: colors.dark.primary,
   },

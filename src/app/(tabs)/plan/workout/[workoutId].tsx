@@ -1,5 +1,5 @@
 import WorkoutEditor from "@/components/WorkoutEditor";
-import { getWorkouts, updateWorkout } from "@/storage";
+import { deleteWorkout, getWorkouts, updateWorkout } from "@/storage";
 import { colors, layout } from "@/styles";
 import type { Workout, WorkoutExercise } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
@@ -25,6 +25,11 @@ export default function EditWorkoutScreen() {
     router.back();
   }
 
+  async function handleDelete() {
+    await deleteWorkout(workoutId);
+    router.back();
+  }
+
   if (!workout) {
     return (
       <View
@@ -41,6 +46,7 @@ export default function EditWorkoutScreen() {
       onSave={handleSave}
       onCancel={() => router.back()}
       onCreateExercise={() => router.push("/plan/exercise/new")}
+      onDelete={handleDelete}
     />
   );
 }

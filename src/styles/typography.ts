@@ -24,7 +24,7 @@ export const typography = StyleSheet.create({
     color: colors.dark.text,
   },
   caption: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "400",
     color: colors.dark.textSubtle,
   },

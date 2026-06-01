@@ -47,7 +47,6 @@ export interface Split {
   id: string;
   name: string;
   days: Record<DayKey, string[]>;
-  // days: an object where keys are of type DayKey, and
-  // values are array of workoutId string to allow for 0 to n workouts per day
-  // (empty array means rest day)
+  // days: an object where keys are of type DayKey, and values are array of workoutId string to allow for
+  //  0 to n workouts per day (empty array means rest day)
 }

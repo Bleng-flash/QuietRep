@@ -1,25 +1,30 @@
-// src/components/WorkoutCard.tsx
-
 import { layout, spacing, typography } from "@/styles";
 import type { Exercise, MuscleGroup, Workout } from "@/types";
 import { Pressable, StyleSheet, Text } from "react-native";
 
 interface WorkoutCardProps {
   workout: Workout;
-  exercises: Exercise[];
+  allExercises: Exercise[];
   onPress: () => void;
 }
 
 export default function WorkoutCard({
   workout,
-  exercises,
+  allExercises,
   onPress,
 }: WorkoutCardProps) {
   const muscleGroups = Array.from(
     new Set(
       workout.exercises
-        .map((we) => exercises.find((e) => e.id === we.exerciseId)?.muscleGroup)
-        .filter((muscleGroup): muscleGroup is MuscleGroup => Boolean(muscleGroup)),
+        .map(
+          (workoutExercise) =>
+            allExercises.find(
+              (exercise) => exercise.id === workoutExercise.exerciseId,
+            )?.muscleGroup,
+        )
+        .filter((muscleGroup): muscleGroup is MuscleGroup =>
+          Boolean(muscleGroup),
+        ),
     ),
   );
 
@@ -28,7 +33,7 @@ export default function WorkoutCard({
     exerciseCount === 0
       ? "No exercises yet"
       : `${exerciseCount} exercise${exerciseCount === 1 ? "" : "s"}${
-          muscleGroups.length > 0 ? " · " + muscleGroups.join(", ") : ""
+          muscleGroups.length > 0 ? " : " + muscleGroups.join(" | ") : ""
         }`;
 
   return (

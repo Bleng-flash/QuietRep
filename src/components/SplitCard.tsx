@@ -1,5 +1,3 @@
-// src/components/SplitCard.tsx
-
 import DayCircle from "@/components/DayCircle";
 import WorkoutCard from "@/components/WorkoutCard";
 import { colors, layout, spacing, typography } from "@/styles";
@@ -38,7 +36,7 @@ interface SplitCardProps {
   split: Split;
   isActive: boolean;
   workouts: Workout[];
-  exercises: Exercise[];
+  allExercises: Exercise[];
   onPress: () => void;
 }
 
@@ -46,7 +44,7 @@ export default function SplitCard({
   split,
   isActive,
   workouts,
-  exercises,
+  allExercises,
   onPress,
 }: SplitCardProps) {
   const router = useRouter();
@@ -59,7 +57,7 @@ export default function SplitCard({
   const selectedWorkouts =
     selectedDay !== null
       ? split.days[selectedDay]
-          .map((id) => workouts.find((w) => w.id === id))
+          .map((id) => workouts.find((workout) => workout.id === id))
           .filter((workout): workout is Workout => Boolean(workout))
       : [];
 
@@ -111,7 +109,7 @@ export default function SplitCard({
             <View key={workout.id} style={styles.expandedWorkout}>
               <WorkoutCard
                 workout={workout}
-                exercises={exercises}
+                allExercises={allExercises}
                 onPress={() => router.push(`/plan/workout/${workout.id}`)}
               />
             </View>
