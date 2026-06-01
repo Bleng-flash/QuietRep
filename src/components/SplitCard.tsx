@@ -1,33 +1,10 @@
 import DayCircle from "@/components/DayCircle";
 import WorkoutCard from "@/components/WorkoutCard";
+import { DAY_KEYS, DAY_LABELS, DAY_NAMES } from "@/constants/days";
 import { colors, layout, spacing, typography } from "@/styles";
 import type { DayKey, Exercise, Split, Workout } from "@/types";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const DAY_KEYS: DayKey[] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
-
-const DAY_LABELS: Record<DayKey, string> = {
-  mon: "M",
-  tue: "T",
-  wed: "W",
-  thu: "T",
-  fri: "F",
-  sat: "S",
-  sun: "S",
-};
-
-const DAY_NAMES: Record<DayKey, string> = {
-  mon: "Monday",
-  tue: "Tuesday",
-  wed: "Wednesday",
-  thu: "Thursday",
-  fri: "Friday",
-  sat: "Saturday",
-  sun: "Sunday",
-};
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -136,7 +113,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.dark.primarySubtle,
     borderRadius: 6,
     paddingHorizontal: spacing.s,
-    paddingVertical: 3,
+    paddingVertical: spacing.xs,
   },
   activeBadgeText: {
     fontSize: 11,

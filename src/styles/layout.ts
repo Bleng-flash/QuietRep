@@ -31,4 +31,30 @@ export const layout = StyleSheet.create({
     borderRadius: 12,
     padding: spacing.m,
   },
+  // Top bar shared by editor screens (WorkoutEditor, SplitEditor, and future exercise editors)
+  topBar: {
+    paddingHorizontal: spacing.m,
+    paddingVertical: spacing.m,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.dark.borderSubtle,
+  },
+  // 1px horizontal rule — callers add their own margin/color overrides as needed
+  divider: {
+    height: 1,
+    backgroundColor: colors.dark.border,
+  },
+  // Dashed destructive action button used for delete operations in editors.
+  // Does not include margin — callers apply marginTop/marginHorizontal as needed.
+  dangerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.s,
+    borderWidth: 1,
+    borderColor: colors.dark.error,
+    borderStyle: "dashed",
+    borderRadius: 12,
+    paddingVertical: spacing.m,
+    backgroundColor: colors.dark.errorSubtle,
+  },
 });

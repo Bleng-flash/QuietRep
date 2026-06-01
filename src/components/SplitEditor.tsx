@@ -1,5 +1,6 @@
 import SplitDayRow from "@/components/SplitDayRow";
 import WorkoutPicker from "@/components/WorkoutPicker";
+import { DAY_KEYS, DAY_NAMES } from "@/constants/days";
 import { addWorkout, deleteWorkoutsByIds, getExercises, getWorkouts } from "@/storage";
 import {
   clearPendingNewWorkoutData,
@@ -35,20 +36,6 @@ type PendingDayWorkout = {
   localKey: string;
   name: string;
   exercises: WorkoutExercise[];
-};
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const DAY_KEYS: DayKey[] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
-
-const DAY_NAMES: Record<DayKey, string> = {
-  mon: "Monday",
-  tue: "Tuesday",
-  wed: "Wednesday",
-  thu: "Thursday",
-  fri: "Friday",
-  sat: "Saturday",
-  sun: "Sunday",
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -252,7 +239,7 @@ export default function SplitEditor({
       <View
         style={[
           layout.rowBetween,
-          styles.topBar,
+          layout.topBar,
           { paddingTop: insets.top + spacing.s },
         ]}
       >
@@ -261,7 +248,7 @@ export default function SplitEditor({
           hitSlop={8}
           style={({ pressed }) => [pressed && { opacity: 0.5 }]}
         >
-          <Text style={styles.cancelLabel}>Cancel</Text>
+          <Text style={typography.actionSubtle}>Cancel</Text>
         </Pressable>
 
         <Text style={typography.subheading}>
@@ -277,7 +264,7 @@ export default function SplitEditor({
           {isSaving ? (
             <ActivityIndicator size="small" color={colors.dark.primary} />
           ) : (
-            <Text style={styles.saveLabel}>Save</Text>
+            <Text style={typography.actionPrimary}>Save</Text>
           )}
         </Pressable>
       </View>
@@ -288,7 +275,7 @@ export default function SplitEditor({
       >
         {/* ── Split name ── */}
         <TextInput
-          style={styles.nameInput}
+          style={[typography.heading, styles.nameInput]}
           value={splitName}
           onChangeText={setSplitName}
           placeholder="Split name"
@@ -329,12 +316,13 @@ export default function SplitEditor({
             onPress={handleDeleteSplit}
             hitSlop={8}
             style={({ pressed }) => [
-              styles.deleteButton,
+              layout.dangerButton,
+              { marginHorizontal: spacing.m, marginTop: spacing.l },
               pressed && { opacity: 0.7 },
             ]}
           >
             <Ionicons name="trash-outline" size={18} color={colors.dark.error} />
-            <Text style={styles.deleteLabel}>Delete Split</Text>
+            <Text style={typography.actionDanger}>Delete Split</Text>
           </Pressable>
         )}
       </ScrollView>
@@ -359,29 +347,10 @@ export default function SplitEditor({
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  topBar: {
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.m,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.dark.borderSubtle,
-  },
-  cancelLabel: {
-    fontSize: 15,
-    color: colors.dark.textSubtle,
-  },
-  saveLabel: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: colors.dark.primary,
-  },
   scrollContent: {
     paddingBottom: spacing.xxl,
   },
   nameInput: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: colors.dark.text,
-    letterSpacing: 0.3,
     marginHorizontal: spacing.m,
     marginTop: spacing.m,
     marginBottom: spacing.l,
@@ -399,24 +368,5 @@ const styles = StyleSheet.create({
   },
   daysContainer: {
     marginBottom: spacing.l,
-  },
-  deleteButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.s,
-    borderWidth: 1,
-    borderColor: colors.dark.error,
-    borderStyle: "dashed",
-    borderRadius: 12,
-    paddingVertical: spacing.m,
-    marginHorizontal: spacing.m,
-    marginTop: spacing.l,
-    backgroundColor: colors.dark.errorSubtle,
-  },
-  deleteLabel: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: colors.dark.error,
   },
 });

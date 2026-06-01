@@ -34,52 +34,51 @@ Now, we are in iteration 1. The table below details our progress within iteratio
 | 5 | Shared components — DayCircle, SectionHeader, WorkoutCard, SplitCard | Done |
 | 6 | Plan index screen | Done |
 | 7 | WorkoutEditor — create and edit workouts | Done |
-| 8 | SplitEditor — create and edit splits | Not started |
+| 8 | SplitEditor — create and edit splits | Done |
 | 9 | Exercise screens — new exercise, view all exercises | Not started |
 
 ## Current State
 
-Steps 1–7 are complete, plus the architectural refactor required before Step 8 could begin. The following is fully functional:
+Steps 1–8 are complete. The following is fully functional:
 
 - Plan index screen with Splits, Workouts, and Exercises sections
 - Full WorkoutEditor flow — create and edit workouts, add/remove/reorder exercises, configure sets and reps, exercise picker modal with live search
+- Full SplitEditor flow — create and edit splits, assign workouts to days via WorkoutPicker, create new embedded workouts via round-trip to WorkoutEditor, active split toggle, cascade delete
 - All storage operations for exercises, workouts, splits, and active split
 - 24 default exercises seeded on first launch
 - Safe area insets applied correctly throughout
 
-A cleanup pass was also completed covering: `app.json` dark mode and splash color fixes, style imports consolidated to the `@/styles` barrel everywhere, `console.log` statements removed, abbreviated variable names corrected, duplicate set labels removed from `SetRow`, `DayCircle` given an overridable `disabled` prop, `ExerciseRow` renamed to `ExerciseCard`, column header alignment fixed in `ExerciseCard`/`SetRow`, and controlled `TextInput` decimal handling fixed in `SetRow`.
+**New in Step 8:**
+- `src/storage/pendingNewWorkout.ts` — in-memory module for the WorkoutEditor round-trip (see Key Design Decisions)
+- `src/components/WorkoutPicker.tsx` — pageSheet modal for selecting/creating workouts; mirrors ExercisePicker
+- `src/components/SplitDayRow.tsx` — per-day row in SplitEditor showing assigned workouts with add/remove buttons
+- `src/components/SplitEditor.tsx` — main split editor component
+- `plan/split/new.tsx` and `plan/split/[splitId].tsx` — replaced placeholder screens
 
-**Architectural refactor completed (pre-Step 8):**
-- `Workout.isStandalone: boolean` added to the type — `true` for workouts in the Workouts section, `false` for workouts embedded inside a split
-- `deleteWorkoutsByIds(ids: string[])` added to workout storage for cascade-deleting embedded workouts when their split is deleted
-- `plan/workout/new.tsx` passes `isStandalone: true` on save
-- Plan index Workouts section filters to standalone workouts only; full workout list still passed to SplitCard for day-expansion rendering
-- `SplitCard` gained `onWorkoutPress: (workout: Workout) => void` prop; no longer navigates directly to the edit screen from day expansions
-- New `WorkoutViewer` component — read-only workout display (name, exercises, sets/reps table) rendered in a pageSheet Modal on the plan index screen
+**Known issues in SplitEditor (to be fixed before Step 9):**
 
-Steps 8 and 9 currently navigate to placeholder screens. Step 8's pre-step refactor is done; the SplitEditor UI build is next.
+1. **Cannot edit an embedded workout from SplitEditor.** In `SplitDayRow`, the `WorkoutCard` has `onPress={() => {}}` (deliberate noop). Tapping an assigned workout does nothing — the user can only remove it. The fix requires wiring `onPress` to navigate to `plan/workout/[workoutId]`, but this is blocked by the design issue below.
+
+2. **Bifurcated state with fake id (design smell).** SplitEditor maintains two separate state records per day — `dayWorkouts` (already in storage) and `pendingDayWorkouts` (local-only, not yet saved). These are merged into a single display array via `buildDisplayWorkouts`, which requires casting pending entries into the `Workout` shape using a `localKey` UUID as a fake `id` field. This makes it impossible to cleanly distinguish a real storage workout from a pending one by id alone — which is exactly what the edit fix needs to do. The fix is to refactor `SplitEditor` and `SplitDayRow` to use a discriminated union (see Next Steps). The edit bug is unblocked once the refactor is done.
+
+Step 9 currently navigates to a placeholder screen.
 
 ## Next steps in current iteration
 
-### Step 8 — SplitEditor (Next)
+### Pre-Step-9 refactor — SplitEditor DayEntry discriminated union (Next)
 
-**Pre-step architectural refactor:**
-- Add `isStandalone: boolean` to `Workout` type (required, never undefined)
-- Add `deleteWorkoutsByIds(ids: string[])` to workout storage
-- Update `plan/workout/new.tsx` to pass `isStandalone: true` on save
-- Update `plan/workout/[workoutId].tsx` to preserve `isStandalone` on update
-- Filter plan index Workouts section to `isStandalone === true` only; pass all workouts to SplitCard
-- Add `onWorkoutPress: (workout: Workout) => void` prop to `SplitCard`; plan index opens `WorkoutViewer` modal
-- New `WorkoutViewer` component — read-only workout display, rendered in a modal on the plan index screen under the Splits section
+The current `SplitEditor` state is bifurcated into `dayWorkouts` (persisted) and `pendingDayWorkouts` (local-only), merged at render time via `buildDisplayWorkouts`. This requires casting pending entries into the `Workout` shape with a fake `id`. Replace both state records with a single discriminated union per day:
 
-**SplitEditor** — shared between `plan/split/new.tsx` and `plan/split/[splitId].tsx`:
-- Split name input
-- Seven day rows, each showing workouts assigned to that day
-- Tapping a day opens a WorkoutPicker modal: choose a standalone workout or create a new embedded workout
-- Assigning a standalone workout: save a copy with `isStandalone: false` and assign the copy's id to that day
-- Creating a new embedded workout: navigate to WorkoutEditor in embedded mode; on save, auto-assign to the correct day via `@quietrep/pendingEmbeddedWorkoutId` temp key (see Key Design Decisions)
-- Toggle to set as active split
-- Delete split cascades: call `deleteWorkoutsByIds` for all embedded workout ids, then delete the split
+```ts
+type DayEntry =
+  | { kind: "persisted"; workout: Workout }
+  | { kind: "pending"; localKey: string; name: string; exercises: WorkoutExercise[] }
+```
+
+- `SplitEditor` — replace `dayWorkouts` + `pendingDayWorkouts` with `dayEntries: Record<DayKey, DayEntry[]>`; remove `buildDisplayWorkouts`; update all handlers (add, remove, save) to switch on `kind`
+- `SplitDayRow` — accept `DayEntry[]` instead of `Workout[]`; render `WorkoutCard` for `persisted` entries, a simpler display for `pending` entries; `onEdit` only fires for `persisted` entries (no fake id needed)
+
+This also unblocks the open bug: **tapping a WorkoutCard in SplitDayRow should navigate to `plan/workout/[workoutId]` to edit it** — currently a noop. With the discriminated union, `persisted` entries have a real `workout.id` and `onEdit` can be wired cleanly. `pending` entries simply don't provide an edit action.
 
 ### Step 9 — Exercise screens
 
@@ -117,8 +116,11 @@ Screen files are wiring only — route params, storage calls, navigation. All UI
 **Cascade delete on split deletion**
 Embedded workouts are referenced only by their split. Deleting a split without its embedded workouts creates orphan records. Correct flow: call `deleteWorkoutsByIds(allEmbeddedWorkoutIds)` first, then `deleteSplit`. The `deleteWorkoutsByIds(ids: string[])` helper in workout storage handles batch deletion. Handled at the screen level (not inside the storage function) so the intent is explicit and visible.
 
-**Embedded workout creation round-trip via temp storage key**
-When SplitEditor navigates to WorkoutEditor to create a new embedded workout, SplitEditor's local React state (split name, day assignments) is preserved — the screen stays mounted in the stack with WorkoutEditor pushed on top. The pending day assignment is preserved by: (1) SplitEditor records `pendingDay` in local state before navigating; (2) WorkoutEditor saves the workout and writes its new id to `@quietrep/pendingEmbeddedWorkoutId` in AsyncStorage; (3) SplitEditor's `useFocusEffect` reads the temp key on return, assigns the workout to `pendingDay` in local state, then clears the key and resets `pendingDay`.
+**Deferred write — nothing reaches storage until split Save**
+When a user assigns a standalone workout to a day, SplitEditor does NOT call `addWorkout` immediately. Instead it stores the workout data as a `PendingDayWorkout` entry (`{ localKey, name, exercises }`) in local state. `addWorkout` is called for every pending entry only when the split's Save button is pressed, at which point embedded copies are created and their real ids are collected to build `finalDays`. Cancel requires no cleanup because nothing was ever written.
+
+**Embedded workout creation round-trip via in-memory module**
+When the user taps "Create new workout" in WorkoutPicker, SplitEditor records the target day in a `useRef` (`pendingEmbeddedDayRef`) and navigates to `plan/workout/new?embedded=true`. The `?embedded=true` query param tells that screen NOT to call `addWorkout`; instead it stores `{ name, exercises }` in a module-level in-memory variable (`src/storage/pendingNewWorkout.ts` — three functions: `set`, `get`, `clear`; no AsyncStorage). On return, SplitEditor's `useFocusEffect` reads the module variable, creates a `PendingDayWorkout` entry, clears the variable, and resets the ref. The workout is only saved to storage when the split is saved. `useRef` is used instead of `useState` for `pendingEmbeddedDayRef` so it can be read inside `useFocusEffect`'s empty-deps callback without stale closure issues.
 
 ## Code Rules — Must Follow in Every Generation
 

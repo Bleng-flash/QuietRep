@@ -140,7 +140,7 @@ export default function WorkoutEditor({
       <View
         style={[
           layout.rowBetween,
-          styles.topBar,
+          layout.topBar,
           { paddingTop: insets.top + spacing.s },
         ]}
       >
@@ -149,7 +149,7 @@ export default function WorkoutEditor({
           hitSlop={8}
           style={({ pressed }) => [pressed && { opacity: 0.5 }]}
         >
-          <Text style={styles.cancelLabel}>Cancel</Text>
+          <Text style={typography.actionSubtle}>Cancel</Text>
         </Pressable>
 
         <Text style={typography.subheading}>
@@ -165,7 +165,7 @@ export default function WorkoutEditor({
           {isSaving ? (
             <ActivityIndicator size="small" color={colors.dark.primary} />
           ) : (
-            <Text style={styles.saveLabel}>Save</Text>
+            <Text style={typography.actionPrimary}>Save</Text>
           )}
         </Pressable>
       </View>
@@ -175,7 +175,7 @@ export default function WorkoutEditor({
         keyboardShouldPersistTaps="handled"
       >
         <TextInput
-          style={styles.nameInput}
+          style={[typography.heading, styles.nameInput]}
           value={workoutName}
           onChangeText={setWorkoutName}
           placeholder="Workout name"
@@ -224,7 +224,8 @@ export default function WorkoutEditor({
             onPress={handleDelete}
             hitSlop={8}
             style={({ pressed }) => [
-              styles.deleteButton,
+              layout.dangerButton,
+              { marginTop: spacing.l },
               pressed && { opacity: 0.7 },
             ]}
           >
@@ -233,7 +234,7 @@ export default function WorkoutEditor({
               size={18}
               color={colors.dark.error}
             />
-            <Text style={styles.deleteLabel}>Delete Workout</Text>
+            <Text style={typography.actionDanger}>Delete Workout</Text>
           </Pressable>
         )}
       </ScrollView>
@@ -251,30 +252,11 @@ export default function WorkoutEditor({
 }
 
 const styles = StyleSheet.create({
-  topBar: {
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.m,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.dark.borderSubtle,
-  },
-  cancelLabel: {
-    fontSize: 15,
-    color: colors.dark.textSubtle,
-  },
-  saveLabel: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: colors.dark.primary,
-  },
   scrollContent: {
     padding: spacing.m,
     paddingBottom: spacing.xxl,
   },
   nameInput: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: colors.dark.text,
-    letterSpacing: 0.3,
     marginBottom: spacing.l,
     borderBottomWidth: 1,
     borderBottomColor: colors.dark.border,
@@ -302,23 +284,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingHorizontal: spacing.l,
     lineHeight: 18,
-  },
-  deleteButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.s,
-    borderWidth: 1,
-    borderColor: colors.dark.error,
-    borderStyle: "dashed",
-    borderRadius: 12,
-    paddingVertical: spacing.m,
-    marginTop: spacing.l,
-    backgroundColor: colors.dark.errorSubtle,
-  },
-  deleteLabel: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: colors.dark.error,
   },
 });

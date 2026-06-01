@@ -1,4 +1,4 @@
-import { colors, layout, spacing, typography } from "@/styles";
+import { colors, layout, picker, spacing, typography } from "@/styles";
 import type { Exercise } from "@/types";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
@@ -57,18 +57,18 @@ export default function ExercisePicker({
       presentationStyle="pageSheet"
       onRequestClose={handleClose}
     >
-      <View style={styles.container}>
-        <View style={[layout.rowBetween, styles.header]}>
+      <View style={picker.container}>
+        <View style={[layout.rowBetween, picker.header]}>
           <Text style={typography.heading}>Add Exercise</Text>
           <Pressable onPress={handleClose} hitSlop={8}>
             <Ionicons name="close" size={24} color={colors.dark.textSubtle} />
           </Pressable>
         </View>
 
-        <View style={styles.searchRow}>
+        <View style={picker.searchRow}>
           <Ionicons name="search" size={16} color={colors.dark.textSubtle} />
           <TextInput
-            style={styles.searchInput}
+            style={picker.searchInput}
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholder="Search exercises…"
@@ -115,7 +115,7 @@ export default function ExercisePicker({
             <Pressable
               onPress={handleCreateNew}
               style={({ pressed }) => [
-                styles.createNewButton,
+                picker.createButton,
                 pressed && { opacity: 0.6 },
               ]}
             >
@@ -124,7 +124,7 @@ export default function ExercisePicker({
                 size={18}
                 color={colors.dark.primary}
               />
-              <Text style={styles.createNewLabel}>Create new exercise</Text>
+              <Text style={picker.createLabel}>Create new exercise</Text>
             </Pressable>
           }
         />
@@ -134,33 +134,6 @@ export default function ExercisePicker({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.dark.background,
-    paddingTop: spacing.m,
-  },
-  header: {
-    paddingHorizontal: spacing.m,
-    marginBottom: spacing.m,
-  },
-  searchRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.s,
-    backgroundColor: colors.dark.inputBackground,
-    borderWidth: 1,
-    borderColor: colors.dark.border,
-    borderRadius: 10,
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.s + 2,
-    marginHorizontal: spacing.m,
-    marginBottom: spacing.s,
-  },
-  searchInput: {
-    flex: 1,
-    color: colors.dark.text,
-    fontSize: 15,
-  },
   exerciseItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -177,20 +150,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.s,
     paddingVertical: spacing.xs,
     borderRadius: 6,
-  },
-  createNewButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.s,
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.m + spacing.xs,
-    borderTopWidth: 1,
-    borderTopColor: colors.dark.border,
-    marginTop: spacing.s,
-  },
-  createNewLabel: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: colors.dark.primary,
   },
 });

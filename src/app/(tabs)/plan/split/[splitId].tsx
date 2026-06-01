@@ -9,13 +9,12 @@ import {
   setActiveSplit,
   updateSplit,
 } from "@/storage";
-import { layout } from "@/styles";
+import { DAY_KEYS } from "@/constants/days";
+import { colors, layout } from "@/styles";
 import type { DayKey, Split, Workout } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
-
-const DAY_KEYS: DayKey[] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
 export default function SplitDetailScreen() {
   const { splitId } = useLocalSearchParams<{ splitId: string }>();
@@ -78,7 +77,7 @@ export default function SplitDetailScreen() {
   if (!split || !resolvedDayWorkouts) {
     return (
       <View style={layout.centered}>
-        <ActivityIndicator color="white" />
+        <ActivityIndicator color={colors.dark.primary} />
       </View>
     );
   }

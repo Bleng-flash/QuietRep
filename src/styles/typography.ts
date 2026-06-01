@@ -28,4 +28,21 @@ export const typography = StyleSheet.create({
     fontWeight: "400",
     color: colors.dark.textSubtle,
   },
+  // Inline action button labels — used for Save, Create new, and similar primary CTAs
+  actionPrimary: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.dark.primary,
+  },
+  // Inline action button labels — used for Cancel and other low-emphasis actions
+  actionSubtle: {
+    fontSize: 15,
+    color: colors.dark.textSubtle,
+  },
+  // Inline action button labels — used for Delete and other destructive actions
+  actionDanger: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.dark.error,
+  },
 });
