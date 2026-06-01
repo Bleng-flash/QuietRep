@@ -56,18 +56,22 @@ export default function WorkoutEditor({
     }, []),
   );
 
-  const alreadyAddedIds = new Set(workoutExercises.map((workoutExercise) => workoutExercise.exerciseId));
+  const alreadyAddedIds = new Set(
+    workoutExercises.map((workoutExercise) => workoutExercise.exerciseId),
+  );
 
   function handleAddExercise(exercise: Exercise) {
     const newEntry: WorkoutExercise = {
       exerciseId: exercise.id,
-      sets: [{ reps: 8, load: 0 }],
+      sets: [{ reps: 0, load: 0 }],
     };
     setWorkoutExercises((prev) => [...prev, newEntry]);
   }
 
   function handleRemoveExercise(exerciseIndex: number) {
-    setWorkoutExercises((prev) => prev.filter((_, index) => index !== exerciseIndex));
+    setWorkoutExercises((prev) =>
+      prev.filter((_, index) => index !== exerciseIndex),
+    );
   }
 
   function handleSetsChange(exerciseIndex: number, updatedSets: SetScheme[]) {
@@ -211,8 +215,7 @@ export default function WorkoutEditor({
 
         {workoutExercises.length === 0 && (
           <Text style={[typography.caption, styles.emptyHint]}>
-            Add exercises to build your workout template. Sets and reps here are
-            pre-filled when you start a session.
+            Add exercises to build your workout template.
           </Text>
         )}
 
