@@ -1,6 +1,6 @@
 import ExerciseCard from "@/components/ExerciseCard";
 import ExercisePicker from "@/components/ExercisePicker";
-import { getExercises } from "@/storage";
+import { getAllExercises } from "@/storage";
 import { colors, layout, spacing, typography } from "@/styles";
 import type { Exercise, SetScheme, Workout, WorkoutExercise } from "@/types";
 import { Ionicons } from "@expo/vector-icons";
@@ -49,7 +49,7 @@ export default function WorkoutEditor({
   useFocusEffect(
     useCallback(() => {
       async function loadExercises() {
-        const exercises = await getExercises();
+        const exercises = await getAllExercises();
         setAllExercises(exercises);
       }
       loadExercises();

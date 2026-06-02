@@ -1,7 +1,7 @@
 import SplitDayRow from "@/components/SplitDayRow";
 import WorkoutPicker from "@/components/WorkoutPicker";
 import { DAY_KEYS, DAY_NAMES } from "@/constants/days";
-import { addWorkout, deleteWorkoutsByIds, getExercises, getWorkouts } from "@/storage";
+import { addWorkout, deleteWorkoutsByIds, getAllExercises, getWorkouts } from "@/storage";
 import {
   clearPendingNewWorkoutData,
   getPendingNewWorkoutData,
@@ -97,7 +97,7 @@ export default function SplitEditor({
   useFocusEffect(
     useCallback(() => {
       async function loadData() {
-        const [allWorkouts, exercises] = await Promise.all([getWorkouts(), getExercises()]);
+        const [allWorkouts, exercises] = await Promise.all([getWorkouts(), getAllExercises()]);
         setStandaloneWorkouts(allWorkouts.filter((workout) => workout.isStandalone));
         setAllExercises(exercises);
 

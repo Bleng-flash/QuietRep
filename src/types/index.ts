@@ -24,7 +24,7 @@ export interface SetScheme {
 /** An interface describing one exercise */
 export interface Exercise {
   id: string;
-  name: string;
+  name: string; // must be unique across all exercises — enforced in addExercise
   muscleGroup: MuscleGroup;
   isDefault: boolean; // whether this exercise is from the seed list or added by user
 }
@@ -49,5 +49,5 @@ export interface Split {
   name: string;
   days: Record<DayKey, string[]>;
   // days: an object where keys are of type DayKey, and values are array of workoutId string to allow for
-  //  0 to n workouts per day (empty array means rest day)
+  // 0 to n workouts per day (empty array means rest day)
 }

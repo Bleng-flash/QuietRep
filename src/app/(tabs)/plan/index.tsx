@@ -18,7 +18,7 @@ import WorkoutCard from "@/components/WorkoutCard";
 import WorkoutViewer from "@/components/WorkoutViewer";
 import {
   getActiveSplitId,
-  getExercises,
+  getAllExercises,
   getSplits,
   getWorkouts,
 } from "@/storage";
@@ -48,7 +48,7 @@ export default function PlanScreen() {
         const [splits, workouts, exercises, activeSplitId] = await Promise.all([
           getSplits(),
           getWorkouts(),
-          getExercises(),
+          getAllExercises(),
           getActiveSplitId(),
         ]);
         setSplits(splits);
