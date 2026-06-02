@@ -45,10 +45,11 @@ Steps 1–8 are complete. The following is fully functional:
 - Full WorkoutEditor flow — create and edit workouts, add/remove/reorder exercises, configure sets and reps, exercise picker modal with live search
 - Full SplitEditor flow — create and edit splits, assign workouts to days via WorkoutPicker, create new embedded workouts via round-trip to WorkoutEditor, active split toggle, cascade delete
 - All storage operations for exercises, workouts, splits, and active split
-- 24 default exercises seeded on first launch
+- 24 default exercises seeded on first launch via `seedDefaultExercises` in `src/storage/exercises.ts`
 - Safe area insets applied correctly throughout
 
 **New in Step 8:**
+
 - `src/storage/pendingNewWorkout.ts` — in-memory module for the WorkoutEditor round-trip (see Key Design Decisions)
 - `src/components/WorkoutPicker.tsx` — pageSheet modal for selecting/creating workouts; mirrors ExercisePicker
 - `src/components/SplitDayRow.tsx` — per-day row in SplitEditor showing assigned workouts with add/remove buttons
@@ -72,7 +73,12 @@ The current `SplitEditor` state is bifurcated into `dayWorkouts` (persisted) and
 ```ts
 type DayEntry =
   | { kind: "persisted"; workout: Workout }
-  | { kind: "pending"; localKey: string; name: string; exercises: WorkoutExercise[] }
+  | {
+      kind: "pending";
+      localKey: string;
+      name: string;
+      exercises: WorkoutExercise[];
+    };
 ```
 
 - `SplitEditor` — replace `dayWorkouts` + `pendingDayWorkouts` with `dayEntries: Record<DayKey, DayEntry[]>`; remove `buildDisplayWorkouts`; update all handlers (add, remove, save) to switch on `kind`
@@ -113,6 +119,20 @@ Screen files are wiring only — route params, storage calls, navigation. All UI
 **Standalone vs Embedded Workouts**
 `Workout.isStandalone` distinguishes two types. `true` means created in the Workouts section and shown there. `false` means embedded inside a specific split, never shown in the Workouts section. When a user assigns a standalone workout to a split day, a new copy is created with `isStandalone: false` and a fresh id — the original standalone is untouched. This fully decouples the two sections. Edits to a standalone workout after copying do not propagate to the split's embedded copy — splits are fixed snapshots.
 
+**Exercise storage split into two AsyncStorage keys**
+Default and user-created exercises are stored under separate keys — `@quietrep/defaultExercises` and `@quietrep/userExercises`. This makes `seedDefaultExercises` trivial: it reads only `DEFAULTS_KEY` and compares names, with no need to filter by `isDefault` flag at query time. The public API in `src/storage/exercises.ts` is:
+
+- `getDefaultExercises()` — reads `DEFAULTS_KEY` only
+- `getUserExercises()` — reads `USER_KEY` only
+- `getAllExercises()` — parallel read of both, returns defaults first then user exercises
+- `addExercise(data)` — writes to `USER_KEY`; enforces name uniqueness across both keys via Alert
+- `deleteExercise(id)` — removes from `USER_KEY` only; default exercises are not deletable
+- `seedDefaultExercises()` — diffs `DEFAULT_EXERCISES` against both keys (not just `DEFAULTS_KEY`) before writing, so a user-created exercise that shares a name with a newly added default is not duplicated. If the user later deletes their custom version, the next launch seeds the default correctly.
+- `updateExercise` is intentionally omitted — see comment in `exercises.ts` for the reason.
+
+**Types are designed for backend transition**
+All entity types (`Exercise`, `Workout`, `Split`) keep `id: string` as their primary key, even though AsyncStorage is the current backend. When the real backend arrives, every database entity will have a surrogate UUID PK — removing `id` now would need to be fully reversed. Relationships between entities always use ID references (`exerciseId: string` → `Exercise.id`, workout IDs in `Split.days`), never embedded objects or name-based references. Name uniqueness for exercises is enforced as a constraint in `addExercise` (mirroring a future UNIQUE DB constraint) alongside the ID — not as a replacement for it. This means the type definitions closely mirror what a REST API would return, making the transition minimal.
+
 **Cascade delete on split deletion**
 Embedded workouts are referenced only by their split. Deleting a split without its embedded workouts creates orphan records. Correct flow: call `deleteWorkoutsByIds(allEmbeddedWorkoutIds)` first, then `deleteSplit`. The `deleteWorkoutsByIds(ids: string[])` helper in workout storage handles batch deletion. Handled at the screen level (not inside the storage function) so the intent is explicit and visible.
 
@@ -131,7 +151,7 @@ When the user taps "Create new workout" in WorkoutPicker, SplitEditor records th
 
 ### Comments
 
-- Comments are welcome and encouraged — this is a personal learning project
+- Comments are welcome and encouraged — but make sure they are concise and value-adding
 - Do not delete or suggest removing comments during cleanup or code generation, unless they are extremely verbose and add no value whatsoever
 - "Self-documenting code" here means well-chosen variable and function names, not the absence of comments
 
@@ -177,6 +197,6 @@ When the user taps "Create new workout" in WorkoutPicker, SplitEditor records th
 ## Technical Notes
 
 - `@/` alias points to `src/` via `tsconfig.json`
-- `react-native-get-random-values` must be the absolute first import in `_layout.tsx`
+- `react-native-get-random-values` must be the absolute first import in `src/app/_layout.tsx`
 - Expo Router typed routes are enabled — all route files must exist before navigating to them
 - Never use `sudo` with npm

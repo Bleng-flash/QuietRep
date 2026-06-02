@@ -1,7 +1,7 @@
 import { Exercise } from "@/types";
 
-/** Omit is a TypeScript utility type that takes an existing interface and produces a new type with one or more fields removed.
- *  So Omit<Exercise, "id"> means the shape of Exercise but without id field */
+/* Omit is a TypeScript utility type that takes an existing interface and produces a new type with one or more fields removed.
+  So Omit<Exercise, "id"> means the shape of Exercise but without id field */
 export const DEFAULT_EXERCISES: Omit<Exercise, "id">[] = [
   // -------- Chest --------
   { name: "Barbell Bench Press", muscleGroup: "Chest", isDefault: true },

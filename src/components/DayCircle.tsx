@@ -6,15 +6,14 @@ type DayCircleState = "rest" | "workout" | "selected";
 interface DayCircleProps {
   label: string;
   state: DayCircleState;
-  onPress?: () => void;
-  disabled?: boolean;
+  onPress: () => void;
 }
 
-export default function DayCircle({ label, state, onPress, disabled }: DayCircleProps) {
+export default function DayCircle({ label, state, onPress }: DayCircleProps) {
   return (
     <Pressable
       onPress={onPress}
-      disabled={disabled ?? state === "rest"}
+      disabled={state === "rest"} // day circle is not pressable if it is a rest day
       hitSlop={4}
       style={[styles.circle, styles[state]]}
     >

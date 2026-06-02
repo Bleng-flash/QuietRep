@@ -28,7 +28,9 @@ export default function SplitCard({
   const [selectedDay, setSelectedDay] = useState<DayKey | null>(null);
 
   function handleDayPress(day: DayKey) {
-    setSelectedDay((previousSelectedDay) => (previousSelectedDay === day ? null : day));
+    setSelectedDay((previousSelectedDay) =>
+      previousSelectedDay === day ? null : day,
+    );
   }
 
   const selectedWorkouts =
@@ -58,8 +60,8 @@ export default function SplitCard({
       {/* ── Day circles ── */}
       <View style={styles.dayRow}>
         {DAY_KEYS.map((day) => {
-          const hasWorkouts = split.days[day].length > 0;
-          const isSelected = selectedDay === day;
+          const hasWorkouts: boolean = split.days[day].length > 0;
+          const isSelected: boolean = selectedDay === day;
           const circleState = isSelected
             ? "selected"
             : hasWorkouts

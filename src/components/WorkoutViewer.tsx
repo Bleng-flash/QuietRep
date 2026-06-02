@@ -9,6 +9,8 @@ interface WorkoutViewerProps {
   onClose: () => void;
 }
 
+// This is a read-only display of workouts when user clicks WorkoutCard from plan screens' SplitCard day expansion.
+// It is not used for workout creation or editing.
 export default function WorkoutViewer({
   workout,
   allExercises,
@@ -55,7 +57,10 @@ export default function WorkoutViewer({
             );
 
             return (
-              <View key={workoutExercise.exerciseId} style={styles.exerciseCard}>
+              <View
+                key={workoutExercise.exerciseId}
+                style={styles.exerciseCard}
+              >
                 {/* Exercise name + muscle group */}
                 <Text style={typography.subheading} numberOfLines={1}>
                   {exercise?.name ?? "Unknown exercise"}
@@ -76,14 +81,10 @@ export default function WorkoutViewer({
                   ]}
                 >
                   <View style={styles.setIndexCell} />
-                  <Text
-                    style={[typography.caption, styles.setValueCell]}
-                  >
+                  <Text style={[typography.caption, styles.setValueCell]}>
                     Reps
                   </Text>
-                  <Text
-                    style={[typography.caption, styles.setValueCell]}
-                  >
+                  <Text style={[typography.caption, styles.setValueCell]}>
                     Load (kg)
                   </Text>
                 </View>
@@ -92,25 +93,15 @@ export default function WorkoutViewer({
                 {workoutExercise.sets.map((setScheme, setIndex) => (
                   <View
                     key={setIndex}
-                    style={[
-                      layout.row,
-                      styles.setRow,
-                      { gap: spacing.s },
-                    ]}
+                    style={[layout.row, styles.setRow, { gap: spacing.s }]}
                   >
-                    <Text
-                      style={[typography.body, styles.setIndexCell]}
-                    >
+                    <Text style={[typography.body, styles.setIndexCell]}>
                       {setIndex + 1}
                     </Text>
-                    <Text
-                      style={[typography.body, styles.setValueCell]}
-                    >
+                    <Text style={[typography.body, styles.setValueCell]}>
                       {setScheme.reps}
                     </Text>
-                    <Text
-                      style={[typography.body, styles.setValueCell]}
-                    >
+                    <Text style={[typography.body, styles.setValueCell]}>
                       {setScheme.load}
                     </Text>
                   </View>

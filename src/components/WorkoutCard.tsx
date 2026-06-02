@@ -1,12 +1,12 @@
-import { buildWorkoutSubtitle } from "@/utils/workout";
 import { layout, spacing, typography } from "@/styles";
 import type { Exercise, Workout } from "@/types";
+import { buildWorkoutSubtitle } from "@/utils/workout";
 import { Pressable, StyleSheet, Text } from "react-native";
 
 interface WorkoutCardProps {
   workout: Workout;
   allExercises: Exercise[];
-  onPress: () => void;
+  onPress: () => void; // different behaviour depending on where WorkoutCard gets pressed from
 }
 
 export default function WorkoutCard({

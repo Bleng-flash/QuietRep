@@ -80,6 +80,8 @@ export default function PlanScreen() {
         <FlatList
           data={splits}
           keyExtractor={(item) => item.id}
+          // disable FlatList's own scroll container so the outer ScrollView
+          // (which wraps the whole screen) handles scrolling instead
           scrollEnabled={false}
           renderItem={({ item }) => (
             <SplitCard
@@ -149,13 +151,17 @@ export default function PlanScreen() {
 
       <View style={{ height: spacing.xl }} />
 
-      {/* ── WorkoutViewer modal — opened when user taps a WorkoutCard inside a SplitCard day expansion ── */}
+      {/* ── WorkoutViewer modal — read-only view opened when user taps a WorkoutCard inside a SplitCard day expansion ── */}
       <Modal
         visible={viewingWorkout !== null}
         animationType="slide"
         presentationStyle="pageSheet"
+        // Handles OS-level dismissal (swipe down on iOS, hardware back on Android).
+        // Without this, those gestures close the modal visually but viewingWorkout
+        // stays non-null, causing the modal to snap back open immediately.
         onRequestClose={() => setViewingWorkout(null)}
       >
+        {/* Guard prevents WorkoutViewer rendering with null during the closing animation. */}
         {viewingWorkout !== null && (
           <WorkoutViewer
             workout={viewingWorkout}
