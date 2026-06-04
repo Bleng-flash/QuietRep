@@ -1,12 +1,12 @@
 {
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true,
+  "editor.formatOnSave": false,
   "editor.tabSize": 2,
   "editor.indentSize": 2,
   "editor.detectIndentation": false,
   "editor.suggestSelection": "first",
   "editor.acceptSuggestionOnEnter": "on",
-  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "js/ts.preferences.includePackageJsonAutoImports": "on",
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
     "source.organizeImports": "explicit"

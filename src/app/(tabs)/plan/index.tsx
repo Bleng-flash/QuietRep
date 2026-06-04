@@ -2,12 +2,11 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import SectionHeader from '@/components/SectionHeader';
 import SplitCard from '@/components/SplitCard';
 import WorkoutCard from '@/components/WorkoutCard';
-import WorkoutViewer from '@/components/WorkoutViewer';
 import { getActiveSplitId, getAllExercises, getSplits, getWorkouts } from '@/storage';
 import { colors, layout, spacing, typography } from '@/styles';
 import type { Exercise, Split, Workout } from '@/types';
@@ -54,7 +53,8 @@ export default function PlanScreen() {
       showsVerticalScrollIndicator={false}
     >
       {/* ── Splits ── */}
-      <SectionHeader title="Splits" onAdd={() => router.push('/plan/split/new')} />
+      <SectionHeader title="Splits" onAdd={() => {}} />
+
       {splits.length === 0 ? (
         <EmptyState message="No splits yet. Create one to get started." />
       ) : (
@@ -70,7 +70,7 @@ export default function PlanScreen() {
               isActive={item.id === activeSplitId}
               workouts={workouts}
               allExercises={exercises}
-              onPress={() => router.push(`/plan/split/${item.id}`)}
+              onPress={() => {}}
               onWorkoutPress={(workout) => setViewingWorkout(workout)}
             />
           )}
@@ -116,25 +116,6 @@ export default function PlanScreen() {
 
       <View style={{ height: spacing.xl }} />
 
-      {/* ── WorkoutViewer modal — read-only view opened when user taps a WorkoutCard inside a SplitCard day expansion ── */}
-      <Modal
-        visible={viewingWorkout !== null}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        // Handles OS-level dismissal (swipe down on iOS, hardware back on Android).
-        // Without this, those gestures close the modal visually but viewingWorkout
-        // stays non-null, causing the modal to snap back open immediately.
-        onRequestClose={() => setViewingWorkout(null)}
-      >
-        {/* Guard prevents WorkoutViewer rendering with null during the closing animation. */}
-        {viewingWorkout !== null && (
-          <WorkoutViewer
-            workout={viewingWorkout}
-            allExercises={exercises}
-            onClose={() => setViewingWorkout(null)}
-          />
-        )}
-      </Modal>
     </ScrollView>
   );
 }
