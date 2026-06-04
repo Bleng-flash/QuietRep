@@ -9,27 +9,32 @@ export async function getWorkouts(): Promise<Workout[]> {
   return raw ? JSON.parse(raw) : [];
 }
 
+export async function getWorkoutById(id: string): Promise<Workout | null> {
+  const allWorkouts = await getWorkouts();
+  return allWorkouts.find((workout) => workout.id === id) ?? null;
+}
+
 export async function addWorkout(data: Omit<Workout, 'id'>): Promise<Workout> {
-  const all = await getWorkouts();
+  const allWorkouts = await getWorkouts();
   const workout: Workout = { ...data, id: uuid() };
-  await AsyncStorage.setItem(KEY, JSON.stringify([...all, workout]));
+  await AsyncStorage.setItem(KEY, JSON.stringify([...allWorkouts, workout]));
   return workout;
 }
 
 export async function updateWorkout(updated: Workout): Promise<void> {
-  const all = await getWorkouts();
-  const next = all.map((workout) => (workout.id === updated.id ? updated : workout));
+  const allWorkouts = await getWorkouts();
+  const next = allWorkouts.map((workout) => (workout.id === updated.id ? updated : workout));
   await AsyncStorage.setItem(KEY, JSON.stringify(next));
 }
 
 export async function deleteWorkout(id: string): Promise<void> {
-  const all = await getWorkouts();
-  await AsyncStorage.setItem(KEY, JSON.stringify(all.filter((workout) => workout.id !== id)));
+  const allWorkouts = await getWorkouts();
+  await AsyncStorage.setItem(KEY, JSON.stringify(allWorkouts.filter((workout) => workout.id !== id)));
 }
 
 // Batch-delete multiple workouts by id. Used to cascade-delete embedded workouts when their split is deleted.
 export async function deleteWorkoutsByIds(ids: string[]): Promise<void> {
-  const all = await getWorkouts();
+  const allWorkouts = await getWorkouts();
   const idSet = new Set(ids);
-  await AsyncStorage.setItem(KEY, JSON.stringify(all.filter((workout) => !idSet.has(workout.id))));
+  await AsyncStorage.setItem(KEY, JSON.stringify(allWorkouts.filter((workout) => !idSet.has(workout.id))));
 }

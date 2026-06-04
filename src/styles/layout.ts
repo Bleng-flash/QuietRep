@@ -30,8 +30,10 @@ export const layout = StyleSheet.create({
     backgroundColor: colors.dark.surface,
     borderRadius: 12,
     padding: spacing.m,
+    borderWidth: 2,
+    borderColor: colors.dark.border,
   },
-  // Top bar shared by editor screens (WorkoutEditor, SplitEditor, and future exercise editors)
+  // Top bar shared by editor screens (WorkoutEditor, and future exercise editors)
   topBar: {
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.m,
@@ -56,5 +58,11 @@ export const layout = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: spacing.m,
     backgroundColor: colors.dark.errorSubtle,
+  },
+  pressedButton: {
+    opacity: 0.6,
+  },
+  pressedCard: {
+    opacity: 0.75,
   },
 });

@@ -13,7 +13,6 @@ export default function DayCircle({ label, state, onPress }: DayCircleProps) {
   return (
     <Pressable
       onPress={onPress}
-      disabled={state === 'rest'} // day circle is not pressable if it is a rest day
       hitSlop={4}
       style={[styles.circle, styles[state]]}
     >

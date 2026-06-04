@@ -19,7 +19,7 @@ export const typography = StyleSheet.create({
     color: colors.dark.text,
   },
   label: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '500',
     color: colors.dark.text,
   },
@@ -33,6 +33,11 @@ export const typography = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     color: colors.dark.primary,
+  },
+  actionSecondary: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.dark.primaryMuted,
   },
   // Inline action button labels — used for Cancel and other low-emphasis actions
   actionSubtle: {

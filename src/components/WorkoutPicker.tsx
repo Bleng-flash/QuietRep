@@ -1,6 +1,6 @@
-import { buildWorkoutSubtitle } from '@/utils/workout';
 import { colors, layout, picker, spacing, typography } from '@/styles';
 import type { Exercise, Workout } from '@/types';
+import { buildWorkoutSubtitle } from '@/utils/workout';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { FlatList, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -58,7 +58,7 @@ export default function WorkoutPicker({
           </Pressable>
         </View>
 
-        <View style={picker.searchRow}>
+        <View style={picker.searchBar}>
           <Ionicons name="search" size={16} color={colors.dark.textSubtle} />
           <TextInput
             style={picker.searchInput}
@@ -78,7 +78,7 @@ export default function WorkoutPicker({
           renderItem={({ item: workout }) => (
             <Pressable
               onPress={() => handleSelect(workout)}
-              style={({ pressed }) => [styles.workoutItem, pressed && { opacity: 0.6 }]}
+              style={({ pressed }) => [styles.workoutItem, pressed && layout.pressedCard]}
             >
               <Text style={typography.body} numberOfLines={1}>
                 {workout.name}
@@ -96,7 +96,7 @@ export default function WorkoutPicker({
           ListFooterComponent={
             <Pressable
               onPress={handleCreateNew}
-              style={({ pressed }) => [picker.createButton, pressed && { opacity: 0.6 }]}
+              style={({ pressed }) => [picker.createButton, pressed && layout.pressedButton]}
             >
               <Ionicons name="add-circle-outline" size={18} color={colors.dark.primary} />
               <Text style={picker.createLabel}>Create new workout</Text>

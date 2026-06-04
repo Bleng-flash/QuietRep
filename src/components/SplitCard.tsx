@@ -43,7 +43,7 @@ export default function SplitCard({
       {/* ── Header: name + badge — tapping navigates to split detail ── */}
       <Pressable
         onPress={onPress}
-        style={({ pressed }) => [layout.rowBetween, pressed && styles.pressed]}
+        style={({ pressed }) => [layout.rowBetween, pressed && layout.pressedCard]}
       >
         <Text style={typography.subheading} numberOfLines={1}>
           {split.name}
@@ -100,10 +100,6 @@ const styles = StyleSheet.create({
     borderLeftWidth: 3,
     borderLeftColor: colors.dark.primary,
   },
-  pressed: {
-    opacity: 0.75,
-  },
-
   // ── Active badge ──
   activeBadge: {
     backgroundColor: colors.dark.primarySubtle,

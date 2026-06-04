@@ -1,5 +1,6 @@
 import { colors, layout, picker, spacing, typography } from '@/styles';
 import type { Exercise } from '@/types';
+import { matchesSearchQuery } from '@/utils/exercise';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { FlatList, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -23,8 +24,8 @@ export default function ExercisePicker({
 }: ExercisePickerProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredExercises = allExercises.filter((exercise) =>
-    exercise.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  const filteredExercises: Exercise[] = allExercises.filter((exercise) =>
+    matchesSearchQuery(exercise, searchQuery)
   );
 
   function handleClose() {
@@ -57,7 +58,7 @@ export default function ExercisePicker({
           </Pressable>
         </View>
 
-        <View style={picker.searchRow}>
+        <View style={picker.searchBar}>
           <Ionicons name="search" size={16} color={colors.dark.textSubtle} />
           <TextInput
             style={picker.searchInput}
@@ -81,8 +82,8 @@ export default function ExercisePicker({
                 onPress={() => !alreadyAdded && handleSelect(exercise)}
                 style={({ pressed }) => [
                   styles.exerciseItem,
-                  alreadyAdded && { opacity: 0.45 },
-                  pressed && !alreadyAdded && { opacity: 0.6 },
+                  alreadyAdded && { opacity: 0.4 },
+                  pressed && !alreadyAdded && layout.pressedCard,
                 ]}
               >
                 <View style={{ flex: 1 }}>
@@ -101,7 +102,7 @@ export default function ExercisePicker({
           ListFooterComponent={
             <Pressable
               onPress={handleCreateNew}
-              style={({ pressed }) => [picker.createButton, pressed && { opacity: 0.6 }]}
+              style={({ pressed }) => [picker.createButton, pressed && layout.pressedButton]}
             >
               <Ionicons name="add-circle-outline" size={18} color={colors.dark.primary} />
               <Text style={picker.createLabel}>Create new exercise</Text>

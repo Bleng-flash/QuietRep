@@ -1,7 +1,7 @@
 import { layout, spacing, typography } from '@/styles';
 import type { Exercise, Workout } from '@/types';
 import { buildWorkoutSubtitle } from '@/utils/workout';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, Text } from 'react-native';
 
 interface WorkoutCardProps {
   workout: Workout;
@@ -13,7 +13,10 @@ export default function WorkoutCard({ workout, allExercises, onPress }: WorkoutC
   const subtitle = buildWorkoutSubtitle(workout, allExercises);
 
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [layout.card, pressed && styles.pressed]}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [layout.card, {marginBottom: spacing.xs}, pressed && layout.pressedCard]}
+    >
       <Text style={typography.subheading} numberOfLines={1}>
         {workout.name}
       </Text>
@@ -23,9 +26,3 @@ export default function WorkoutCard({ workout, allExercises, onPress }: WorkoutC
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  pressed: {
-    opacity: 0.75,
-  },
-});

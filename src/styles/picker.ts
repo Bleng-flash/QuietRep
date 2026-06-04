@@ -13,7 +13,7 @@ export const picker = StyleSheet.create({
     paddingHorizontal: spacing.m,
     marginBottom: spacing.m,
   },
-  searchRow: {
+  searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.s,

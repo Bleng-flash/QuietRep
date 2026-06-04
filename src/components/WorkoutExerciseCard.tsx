@@ -4,7 +4,7 @@ import type { Exercise, SetScheme, WorkoutExercise } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-interface ExerciseCardProps {
+interface WorkoutExerciseCardProps {
   workoutExercise: WorkoutExercise;
   exercise: Exercise | undefined;
   isFirst: boolean;
@@ -15,7 +15,8 @@ interface ExerciseCardProps {
   onMoveDown: () => void;
 }
 
-export default function ExerciseCard({
+/** A card for displaying and editing an exercise within a workout. */
+export default function WorkoutExerciseCard({
   workoutExercise,
   exercise,
   isFirst,
@@ -24,7 +25,7 @@ export default function ExerciseCard({
   onRemove,
   onMoveUp,
   onMoveDown,
-}: ExerciseCardProps) {
+}: WorkoutExerciseCardProps) {
   function handleSetChange(setIndex: number, updated: SetScheme) {
     onSetsChange(
       workoutExercise.sets.map((currentSet, index) => (index === setIndex ? updated : currentSet)),
@@ -43,7 +44,7 @@ export default function ExerciseCard({
   }
 
   return (
-    <View style={styles.card}>
+    <View style={[layout.card, { marginBottom: spacing.m }]}>
       {/* Header row */}
       <View style={[layout.rowBetween, { marginBottom: spacing.s }]}>
         <View style={{ flex: 1 }}>
@@ -90,11 +91,11 @@ export default function ExerciseCard({
         <View style={{ width: 36 }} />
       </View>
 
-      {workoutExercise.sets.map((scheme, setIndex) => (
+      {workoutExercise.sets.map((setScheme, setIndex) => (
         <SetRow
           key={setIndex}
           setIndex={setIndex}
-          setScheme={scheme}
+          setScheme={setScheme}
           isOnly={workoutExercise.sets.length === 1}
           onChange={(updated) => handleSetChange(setIndex, updated)}
           onRemove={() => handleRemoveSet(setIndex)}
@@ -104,24 +105,16 @@ export default function ExerciseCard({
       <Pressable
         onPress={handleAddSet}
         hitSlop={8}
-        style={({ pressed }) => [styles.addSetButton, pressed && { opacity: 0.6 }]}
+        style={({ pressed }) => [styles.addSetButton, pressed && layout.pressedButton]}
       >
         <Ionicons name="add" size={16} color={colors.dark.primary} />
-        <Text style={styles.addSetLabel}>Add set</Text>
+        <Text style={typography.actionSecondary}>Add set</Text>
       </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.dark.surface,
-    borderRadius: 12,
-    padding: spacing.m,
-    marginBottom: spacing.m,
-    borderWidth: 1,
-    borderColor: colors.dark.border,
-  },
   addSetButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -129,10 +122,5 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginTop: spacing.s,
     paddingVertical: spacing.xs,
-  },
-  addSetLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.dark.primary,
   },
 });

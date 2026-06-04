@@ -55,7 +55,7 @@ export default function SetRow({ setIndex, setScheme, isOnly, onChange, onRemove
         onPress={onRemove}
         disabled={isOnly}
         hitSlop={8}
-        style={({ pressed }) => [styles.removeButton, pressed && !isOnly && { opacity: 0.5 }]}
+        style={({ pressed }) => [styles.removeButton, pressed && !isOnly && layout.pressedButton]}
       >
         <Ionicons
           name="remove-circle-outline"

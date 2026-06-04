@@ -1,6 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -20,12 +19,7 @@ export default function PlanScreen() {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [activeSplitId, setActiveSplitId] = useState<string | null>(null);
-  // Tracks which workout to display in the read-only WorkoutViewer modal.
-  // Set when user taps a WorkoutCard inside a SplitCard day expansion.
-  const [viewingWorkout, setViewingWorkout] = useState<Workout | null>(null);
-
   // Only standalone workouts are shown in the Workouts section.
-  // The full `workouts` list is still passed to SplitCard so it can resolve embedded workout ids.
   const standaloneWorkouts = workouts.filter((workout) => workout.isStandalone);
 
   useFocusEffect(
@@ -53,7 +47,7 @@ export default function PlanScreen() {
       showsVerticalScrollIndicator={false}
     >
       {/* ── Splits ── */}
-      <SectionHeader title="Splits" onAdd={() => {}} />
+      <SectionHeader title="Splits" onButtonPress={() => {}} buttonLabel="New Split" />
 
       {splits.length === 0 ? (
         <EmptyState message="No splits yet. Create one to get started." />
@@ -71,7 +65,7 @@ export default function PlanScreen() {
               workouts={workouts}
               allExercises={exercises}
               onPress={() => {}}
-              onWorkoutPress={(workout) => setViewingWorkout(workout)}
+              onWorkoutPress={(workout) => {}}
             />
           )}
           ItemSeparatorComponent={() => <View style={{ height: spacing.s }} />}
@@ -79,7 +73,11 @@ export default function PlanScreen() {
       )}
 
       {/* ── Workouts ── */}
-      <SectionHeader title="Workouts" onAdd={() => router.push('/plan/workout/new')} />
+      <SectionHeader
+        title="Workouts"
+        onButtonPress={() => router.push('/plan/workout/new')}
+        buttonLabel="New Workout"
+      />
       {standaloneWorkouts.length === 0 ? (
         <EmptyState message="No workouts yet. Create one to get started." />
       ) : (
@@ -99,9 +97,9 @@ export default function PlanScreen() {
       )}
 
       {/* ── Exercises ── */}
-      <SectionHeader title="Exercises" onAdd={() => router.push('/plan/exercise/new')} />
+      <SectionHeader title="Exercises" />
       <Pressable
-        style={({ pressed }) => [layout.card, layout.row, pressed && styles.pressed]}
+        style={({ pressed }) => [layout.card, layout.row, pressed && layout.pressedButton]}
         onPress={() => router.push('/plan/exercise')}
       >
         <MaterialCommunityIcons name="view-list-outline" size={20} color={colors.dark.text} />
@@ -115,7 +113,6 @@ export default function PlanScreen() {
       </Pressable>
 
       <View style={{ height: spacing.xl }} />
-
     </ScrollView>
   );
 }
@@ -132,9 +129,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: spacing.m,
     // paddingTop determined at runtime due to safe inset
-  },
-  pressed: {
-    opacity: 0.75,
   },
   exerciseActionText: {
     marginLeft: spacing.s,

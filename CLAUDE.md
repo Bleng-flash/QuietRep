@@ -167,6 +167,19 @@ When the user taps "Create new workout" in WorkoutPicker, SplitEditor records th
 - `interface` for component props
 - `type` for unions and aliases
 
+### Imports
+
+| Hook                   | Import from |
+| ---------------------- | ----------- |
+| `useState`             | react       |
+| `useEffect`            | react       |
+| `useCallback`          | react       |
+| `useMemo`              | react       |
+| `useRef`               | react       |
+| `useFocusEffect`       | expo-router |
+| `useRouter`            | expo-router |
+| `useLocalSearchParams` | expo-router |
+
 ### Components
 
 - Use abstraction — split into child components, do not generate monolithic files

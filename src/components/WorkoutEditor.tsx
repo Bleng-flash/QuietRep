@@ -1,5 +1,5 @@
-import ExerciseCard from '@/components/ExerciseCard';
 import ExercisePicker from '@/components/ExercisePicker';
+import WorkoutExerciseCard from '@/components/WorkoutExerciseCard';
 import { getAllExercises } from '@/storage';
 import { colors, layout, spacing, typography } from '@/styles';
 import type { Exercise, SetScheme, Workout, WorkoutExercise } from '@/types';
@@ -137,7 +137,7 @@ export default function WorkoutEditor({
         <Pressable
           onPress={onCancel}
           hitSlop={8}
-          style={({ pressed }) => [pressed && { opacity: 0.5 }]}
+          style={({ pressed }) => [pressed && layout.pressedButton]}
         >
           <Text style={typography.actionSubtle}>Cancel</Text>
         </Pressable>
@@ -148,7 +148,7 @@ export default function WorkoutEditor({
           onPress={handleSave}
           disabled={isSaving}
           hitSlop={8}
-          style={({ pressed }) => [pressed && { opacity: 0.5 }]}
+          style={({ pressed }) => [pressed && layout.pressedButton]}
         >
           {isSaving ? (
             <ActivityIndicator size="small" color={colors.dark.primary} />
@@ -170,7 +170,7 @@ export default function WorkoutEditor({
         />
 
         {workoutExercises.map((workoutExercise, exerciseIndex) => (
-          <ExerciseCard
+          <WorkoutExerciseCard
             key={workoutExercise.exerciseId}
             workoutExercise={workoutExercise}
             exercise={allExercises.find((exercise) => exercise.id === workoutExercise.exerciseId)}
