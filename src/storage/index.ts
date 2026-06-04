@@ -1,6 +1,6 @@
-export * from "./exercises";
-export * from "./splits";
-export * from "./workouts";
+export * from './exercises';
+export * from './splits';
+export * from './workouts';
 
 /* We use local storage now.
 Every function under storage follows the same pattern read the entire array from AsyncStorage, modify it in memory, write the entire array back.

@@ -1,5 +1,5 @@
-import { colors } from "@/styles";
-import { Stack } from "expo-router";
+import { colors } from '@/styles';
+import { Stack } from 'expo-router';
 
 export default function PlanLayout() {
   return (

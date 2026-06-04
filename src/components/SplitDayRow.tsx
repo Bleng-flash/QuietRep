@@ -1,8 +1,8 @@
-import WorkoutCard from "@/components/WorkoutCard";
-import { colors, layout, spacing, typography } from "@/styles";
-import type { Exercise, Workout } from "@/types";
-import { Ionicons } from "@expo/vector-icons";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import WorkoutCard from '@/components/WorkoutCard';
+import { colors, layout, spacing, typography } from '@/styles';
+import type { Exercise, Workout } from '@/types';
+import { Ionicons } from '@expo/vector-icons';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 interface SplitDayRowProps {
   dayLabel: string;
@@ -24,11 +24,7 @@ export default function SplitDayRow({
       {/* ── Day header ── */}
       <View style={[layout.rowBetween, styles.header]}>
         <Text style={[typography.label, styles.dayLabel]}>{dayLabel}</Text>
-        <Pressable
-          onPress={onAdd}
-          hitSlop={8}
-          style={({ pressed }) => pressed && styles.pressed}
-        >
+        <Pressable onPress={onAdd} hitSlop={8} style={({ pressed }) => pressed && styles.pressed}>
           <Ionicons name="add" size={22} color={colors.dark.primary} />
         </Pressable>
       </View>
@@ -39,25 +35,14 @@ export default function SplitDayRow({
           {workouts.map((workout) => (
             <View key={workout.id} style={styles.workoutRow}>
               <View style={styles.workoutCardWrapper}>
-                <WorkoutCard
-                  workout={workout}
-                  allExercises={allExercises}
-                  onPress={() => {}}
-                />
+                <WorkoutCard workout={workout} allExercises={allExercises} onPress={() => {}} />
               </View>
               <Pressable
                 onPress={() => onRemove(workout.id)}
                 hitSlop={8}
-                style={({ pressed }) => [
-                  styles.removeButton,
-                  pressed && styles.pressed,
-                ]}
+                style={({ pressed }) => [styles.removeButton, pressed && styles.pressed]}
               >
-                <Ionicons
-                  name="close-circle"
-                  size={22}
-                  color={colors.dark.error}
-                />
+                <Ionicons name="close-circle" size={22} color={colors.dark.error} />
               </Pressable>
             </View>
           ))}
@@ -88,8 +73,8 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.s,
   },
   workoutRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing.s,
   },
   workoutCardWrapper: {

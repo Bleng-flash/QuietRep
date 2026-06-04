@@ -1,8 +1,8 @@
-import SetRow from "@/components/SetRow";
-import { colors, layout, spacing, typography } from "@/styles";
-import type { Exercise, SetScheme, WorkoutExercise } from "@/types";
-import { Ionicons } from "@expo/vector-icons";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import SetRow from '@/components/SetRow';
+import { colors, layout, spacing, typography } from '@/styles';
+import type { Exercise, SetScheme, WorkoutExercise } from '@/types';
+import { Ionicons } from '@expo/vector-icons';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 interface ExerciseCardProps {
   workoutExercise: WorkoutExercise;
@@ -27,9 +27,7 @@ export default function ExerciseCard({
 }: ExerciseCardProps) {
   function handleSetChange(setIndex: number, updated: SetScheme) {
     onSetsChange(
-      workoutExercise.sets.map((currentSet, index) =>
-        index === setIndex ? updated : currentSet,
-      ),
+      workoutExercise.sets.map((currentSet, index) => (index === setIndex ? updated : currentSet)),
     );
   }
 
@@ -50,7 +48,7 @@ export default function ExerciseCard({
       <View style={[layout.rowBetween, { marginBottom: spacing.s }]}>
         <View style={{ flex: 1 }}>
           <Text style={typography.subheading} numberOfLines={1}>
-            {exercise?.name ?? "Unknown exercise"}
+            {exercise?.name ?? 'Unknown exercise'}
           </Text>
           {exercise?.muscleGroup ? (
             <Text style={typography.caption}>{exercise.muscleGroup}</Text>
@@ -62,40 +60,24 @@ export default function ExerciseCard({
             onPress={onMoveUp}
             disabled={isFirst}
             hitSlop={8}
-            style={({ pressed }) => [
-              { opacity: isFirst ? 0.25 : pressed ? 0.5 : 1 },
-            ]}
+            style={({ pressed }) => [{ opacity: isFirst ? 0.25 : pressed ? 0.5 : 1 }]}
           >
-            <Ionicons
-              name="chevron-up"
-              size={20}
-              color={colors.dark.textSubtle}
-            />
+            <Ionicons name="chevron-up" size={20} color={colors.dark.textSubtle} />
           </Pressable>
           <Pressable
             onPress={onMoveDown}
             disabled={isLast}
             hitSlop={8}
-            style={({ pressed }) => [
-              { opacity: isLast ? 0.25 : pressed ? 0.5 : 1 },
-            ]}
+            style={({ pressed }) => [{ opacity: isLast ? 0.25 : pressed ? 0.5 : 1 }]}
           >
-            <Ionicons
-              name="chevron-down"
-              size={20}
-              color={colors.dark.textSubtle}
-            />
+            <Ionicons name="chevron-down" size={20} color={colors.dark.textSubtle} />
           </Pressable>
           <Pressable
             onPress={onRemove}
             hitSlop={8}
             style={({ pressed }) => [pressed && { opacity: 0.5 }]}
           >
-            <Ionicons
-              name="trash-outline"
-              size={20}
-              color={colors.dark.error}
-            />
+            <Ionicons name="trash-outline" size={20} color={colors.dark.error} />
           </Pressable>
         </View>
       </View>
@@ -103,12 +85,8 @@ export default function ExerciseCard({
       {/* Column labels */}
       <View style={[layout.row, { gap: spacing.s, marginBottom: spacing.xs }]}>
         <View style={{ width: 44 }} />
-        <Text style={[typography.caption, { flex: 1, textAlign: "center" }]}>
-          Reps
-        </Text>
-        <Text style={[typography.caption, { flex: 1, textAlign: "center" }]}>
-          Load (kg)
-        </Text>
+        <Text style={[typography.caption, { flex: 1, textAlign: 'center' }]}>Reps</Text>
+        <Text style={[typography.caption, { flex: 1, textAlign: 'center' }]}>Load (kg)</Text>
         <View style={{ width: 36 }} />
       </View>
 
@@ -126,10 +104,7 @@ export default function ExerciseCard({
       <Pressable
         onPress={handleAddSet}
         hitSlop={8}
-        style={({ pressed }) => [
-          styles.addSetButton,
-          pressed && { opacity: 0.6 },
-        ]}
+        style={({ pressed }) => [styles.addSetButton, pressed && { opacity: 0.6 }]}
       >
         <Ionicons name="add" size={16} color={colors.dark.primary} />
         <Text style={styles.addSetLabel}>Add set</Text>
@@ -148,16 +123,16 @@ const styles = StyleSheet.create({
     borderColor: colors.dark.border,
   },
   addSetButton: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing.xs,
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
     marginTop: spacing.s,
     paddingVertical: spacing.xs,
   },
   addSetLabel: {
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: '500',
     color: colors.dark.primary,
   },
 });

@@ -1,10 +1,10 @@
-import WorkoutEditor from "@/components/WorkoutEditor";
-import { deleteWorkout, getWorkouts, updateWorkout } from "@/storage";
-import { colors, layout } from "@/styles";
-import type { Workout, WorkoutExercise } from "@/types";
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, View } from "react-native";
+import WorkoutEditor from '@/components/WorkoutEditor';
+import { deleteWorkout, getWorkouts, updateWorkout } from '@/storage';
+import { colors, layout } from '@/styles';
+import type { Workout, WorkoutExercise } from '@/types';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 
 export default function EditWorkoutScreen() {
   const { workoutId } = useLocalSearchParams<{ workoutId: string }>();
@@ -32,9 +32,7 @@ export default function EditWorkoutScreen() {
 
   if (!workout) {
     return (
-      <View
-        style={[layout.centered, { backgroundColor: colors.dark.background }]}
-      >
+      <View style={[layout.centered, { backgroundColor: colors.dark.background }]}>
         <ActivityIndicator color={colors.dark.primary} />
       </View>
     );
@@ -45,7 +43,7 @@ export default function EditWorkoutScreen() {
       initialWorkout={workout}
       onSave={handleSave}
       onCancel={() => router.back()}
-      onCreateExercise={() => router.push("/plan/exercise/new")}
+      onCreateExercise={() => router.push('/plan/exercise/new')}
       onDelete={handleDelete}
     />
   );

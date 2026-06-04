@@ -1,11 +1,11 @@
-import { DEFAULT_EXERCISES } from "@/constants/defaultExercises";
-import type { Exercise } from "@/types";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Alert } from "react-native";
-import { v4 as uuid } from "uuid";
+import { DEFAULT_EXERCISES } from '@/constants/defaultExercises';
+import type { Exercise } from '@/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
+import { v4 as uuid } from 'uuid';
 
-const DEFAULTS_KEY = "@quietrep/defaultExercises";
-const USER_KEY = "@quietrep/userExercises";
+const DEFAULTS_KEY = '@quietrep/defaultExercises';
+const USER_KEY = '@quietrep/userExercises';
 
 export async function getDefaultExercises(): Promise<Exercise[]> {
   const defaultRaw = await AsyncStorage.getItem(DEFAULTS_KEY);
@@ -31,9 +31,7 @@ export async function getAllExercises(): Promise<Exercise[]> {
 // Adds a user-created exercise. Returns null (and shows an Alert) if an exercise
 // with the same name already exists — name uniqueness is enforced across both
 // default and user exercises since the picker shows them together.
-export async function addExercise(
-  data: Omit<Exercise, "id">,
-): Promise<Exercise | null> {
+export async function addExercise(data: Omit<Exercise, 'id'>): Promise<Exercise | null> {
   // Parallel reads so we have both lists without a redundant third read at write time.
   const [defaultExercises, userExercises] = await Promise.all([
     getDefaultExercises(),
@@ -45,17 +43,14 @@ export async function addExercise(
   );
   if (existingExercise) {
     Alert.alert(
-      "Name already exists",
+      'Name already exists',
       `An exercise called "${existingExercise.name}" already exists.`,
     );
     return null;
   }
 
   const newExercise: Exercise = { ...data, id: uuid() };
-  await AsyncStorage.setItem(
-    USER_KEY,
-    JSON.stringify([...userExercises, newExercise]),
-  );
+  await AsyncStorage.setItem(USER_KEY, JSON.stringify([...userExercises, newExercise]));
   return newExercise;
 }
 

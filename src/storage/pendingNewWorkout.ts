@@ -6,13 +6,16 @@
 // Using a module-level variable lets WorkoutEditor hand off data to SplitEditor
 // without writing anything to storage before the split's Save button is pressed.
 
-import type { WorkoutExercise } from "@/types";
+import type { WorkoutExercise } from '@/types';
 
 type PendingWorkoutData = { name: string; exercises: WorkoutExercise[] } | null;
 
 let pendingData: PendingWorkoutData = null;
 
-export function setPendingNewWorkoutData(data: { name: string; exercises: WorkoutExercise[] }): void {
+export function setPendingNewWorkoutData(data: {
+  name: string;
+  exercises: WorkoutExercise[];
+}): void {
   pendingData = data;
 }
 

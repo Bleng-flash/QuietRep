@@ -1,6 +1,6 @@
-import { StyleSheet } from "react-native";
-import { colors } from "./colors";
-import { spacing } from "./spacing";
+import { StyleSheet } from 'react-native';
+import { colors } from './colors';
+import { spacing } from './spacing';
 
 export const layout = StyleSheet.create({
   screen: {
@@ -13,18 +13,18 @@ export const layout = StyleSheet.create({
     paddingHorizontal: spacing.m,
   },
   row: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   rowBetween: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   centered: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   card: {
     backgroundColor: colors.dark.surface,
@@ -46,13 +46,13 @@ export const layout = StyleSheet.create({
   // Dashed destructive action button used for delete operations in editors.
   // Does not include margin — callers apply marginTop/marginHorizontal as needed.
   dangerButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: spacing.s,
     borderWidth: 1,
     borderColor: colors.dark.error,
-    borderStyle: "dashed",
+    borderStyle: 'dashed',
     borderRadius: 12,
     paddingVertical: spacing.m,
     backgroundColor: colors.dark.errorSubtle,

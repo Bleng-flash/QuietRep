@@ -1,7 +1,7 @@
-import { colors } from "@/styles";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { colors } from '@/styles';
+import { Pressable, StyleSheet, Text } from 'react-native';
 
-type DayCircleState = "rest" | "workout" | "selected";
+type DayCircleState = 'rest' | 'workout' | 'selected';
 
 interface DayCircleProps {
   label: string;
@@ -13,7 +13,7 @@ export default function DayCircle({ label, state, onPress }: DayCircleProps) {
   return (
     <Pressable
       onPress={onPress}
-      disabled={state === "rest"} // day circle is not pressable if it is a rest day
+      disabled={state === 'rest'} // day circle is not pressable if it is a rest day
       hitSlop={4}
       style={[styles.circle, styles[state]]}
     >
@@ -27,14 +27,14 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
   },
 
   // Circle states
   rest: {
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
     borderColor: colors.dark.border,
   },
   workout: {
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   // Label base
   label: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: '600',
   },
 
   // Label states

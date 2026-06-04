@@ -1,8 +1,8 @@
-import { colors, layout, spacing, typography } from "@/styles";
-import type { SetScheme } from "@/types";
-import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { colors, layout, spacing, typography } from '@/styles';
+import type { SetScheme } from '@/types';
+import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 interface SetRowProps {
   setIndex: number;
@@ -12,22 +12,12 @@ interface SetRowProps {
   onRemove: () => void;
 }
 
-export default function SetRow({
-  setIndex,
-  setScheme,
-  isOnly,
-  onChange,
-  onRemove,
-}: SetRowProps) {
+export default function SetRow({ setIndex, setScheme, isOnly, onChange, onRemove }: SetRowProps) {
   /** Only when React mounts a component it runs useState once to set the initial value.
    * After that, on every re-render, the state just holds whatever was
    * last set via the setter function. */
-  const [repsText, setRepsText] = useState(
-    setScheme.reps > 0 ? String(setScheme.reps) : "",
-  );
-  const [loadText, setLoadText] = useState(
-    setScheme.load > 0 ? String(setScheme.load) : "",
-  );
+  const [repsText, setRepsText] = useState(setScheme.reps > 0 ? String(setScheme.reps) : '');
+  const [loadText, setLoadText] = useState(setScheme.load > 0 ? String(setScheme.load) : '');
 
   return (
     <View style={[layout.row, styles.row]}>
@@ -65,10 +55,7 @@ export default function SetRow({
         onPress={onRemove}
         disabled={isOnly}
         hitSlop={8}
-        style={({ pressed }) => [
-          styles.removeButton,
-          pressed && !isOnly && { opacity: 0.5 },
-        ]}
+        style={({ pressed }) => [styles.removeButton, pressed && !isOnly && { opacity: 0.5 }]}
       >
         <Ionicons
           name="remove-circle-outline"
@@ -90,14 +77,14 @@ const styles = StyleSheet.create({
   },
   fieldGroup: {
     flex: 1,
-    alignItems: "center",
+    alignItems: 'center',
   },
   removeButton: {
     width: 36,
-    alignItems: "center",
+    alignItems: 'center',
   },
   input: {
-    width: "100%",
+    width: '100%',
     backgroundColor: colors.dark.inputBackground,
     borderWidth: 1,
     borderColor: colors.dark.border,
@@ -106,6 +93,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs + 2,
     color: colors.dark.text,
     fontSize: 15,
-    textAlign: "center",
+    textAlign: 'center',
   },
 });

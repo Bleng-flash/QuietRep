@@ -1,16 +1,16 @@
-import type { Split } from "@/types";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { v4 as uuid } from "uuid";
+import type { Split } from '@/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { v4 as uuid } from 'uuid';
 
-const KEY = "@quietrep/splits";
-const ACTIVE_KEY = "@quietrep/activeSplit";
+const KEY = '@quietrep/splits';
+const ACTIVE_KEY = '@quietrep/activeSplit';
 
 export async function getSplits(): Promise<Split[]> {
   const raw = await AsyncStorage.getItem(KEY);
   return raw ? JSON.parse(raw) : [];
 }
 
-export async function addSplit(data: Omit<Split, "id">): Promise<Split> {
+export async function addSplit(data: Omit<Split, 'id'>): Promise<Split> {
   const all = await getSplits();
   const split: Split = { ...data, id: uuid() };
   await AsyncStorage.setItem(KEY, JSON.stringify([...all, split]));
@@ -25,10 +25,7 @@ export async function updateSplit(updated: Split): Promise<void> {
 
 export async function deleteSplit(id: string): Promise<void> {
   const all = await getSplits();
-  await AsyncStorage.setItem(
-    KEY,
-    JSON.stringify(all.filter((split) => split.id !== id)),
-  );
+  await AsyncStorage.setItem(KEY, JSON.stringify(all.filter((split) => split.id !== id)));
   const active = await getActiveSplitId();
   if (active === id) await clearActiveSplit();
 }

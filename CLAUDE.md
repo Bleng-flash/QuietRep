@@ -72,9 +72,9 @@ The current `SplitEditor` state is bifurcated into `dayWorkouts` (persisted) and
 
 ```ts
 type DayEntry =
-  | { kind: "persisted"; workout: Workout }
+  | { kind: 'persisted'; workout: Workout }
   | {
-      kind: "pending";
+      kind: 'pending';
       localKey: string;
       name: string;
       exercises: WorkoutExercise[];

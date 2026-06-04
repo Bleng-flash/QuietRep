@@ -1,30 +1,17 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useFocusEffect } from "@react-navigation/native";
-import { useRouter } from "expo-router";
-import { useCallback, useState } from "react";
-import {
-  FlatList,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import SectionHeader from "@/components/SectionHeader";
-import SplitCard from "@/components/SplitCard";
-import WorkoutCard from "@/components/WorkoutCard";
-import WorkoutViewer from "@/components/WorkoutViewer";
-import {
-  getActiveSplitId,
-  getAllExercises,
-  getSplits,
-  getWorkouts,
-} from "@/storage";
-import { colors, layout, spacing, typography } from "@/styles";
-import type { Exercise, Split, Workout } from "@/types";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import SectionHeader from '@/components/SectionHeader';
+import SplitCard from '@/components/SplitCard';
+import WorkoutCard from '@/components/WorkoutCard';
+import WorkoutViewer from '@/components/WorkoutViewer';
+import { getActiveSplitId, getAllExercises, getSplits, getWorkouts } from '@/storage';
+import { colors, layout, spacing, typography } from '@/styles';
+import type { Exercise, Split, Workout } from '@/types';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function PlanScreen() {
   const router = useRouter();
@@ -63,17 +50,11 @@ export default function PlanScreen() {
   return (
     <ScrollView
       style={layout.screen}
-      contentContainerStyle={[
-        styles.scrollContent,
-        { paddingTop: insets.top + spacing.s },
-      ]}
+      contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + spacing.s }]}
       showsVerticalScrollIndicator={false}
     >
       {/* ── Splits ── */}
-      <SectionHeader
-        title="Splits"
-        onAdd={() => router.push("/plan/split/new")}
-      />
+      <SectionHeader title="Splits" onAdd={() => router.push('/plan/split/new')} />
       {splits.length === 0 ? (
         <EmptyState message="No splits yet. Create one to get started." />
       ) : (
@@ -98,10 +79,7 @@ export default function PlanScreen() {
       )}
 
       {/* ── Workouts ── */}
-      <SectionHeader
-        title="Workouts"
-        onAdd={() => router.push("/plan/workout/new")}
-      />
+      <SectionHeader title="Workouts" onAdd={() => router.push('/plan/workout/new')} />
       {standaloneWorkouts.length === 0 ? (
         <EmptyState message="No workouts yet. Create one to get started." />
       ) : (
@@ -121,31 +99,18 @@ export default function PlanScreen() {
       )}
 
       {/* ── Exercises ── */}
-      <SectionHeader
-        title="Exercises"
-        onAdd={() => router.push("/plan/exercise/new")}
-      />
+      <SectionHeader title="Exercises" onAdd={() => router.push('/plan/exercise/new')} />
       <Pressable
-        style={({ pressed }) => [
-          layout.card,
-          layout.row,
-          pressed && styles.pressed,
-        ]}
-        onPress={() => router.push("/plan/exercise")}
+        style={({ pressed }) => [layout.card, layout.row, pressed && styles.pressed]}
+        onPress={() => router.push('/plan/exercise')}
       >
-        <MaterialCommunityIcons
-          name="view-list-outline"
-          size={20}
-          color={colors.dark.text}
-        />
-        <Text style={[typography.body, styles.exerciseActionText]}>
-          View all exercises
-        </Text>
+        <MaterialCommunityIcons name="view-list-outline" size={20} color={colors.dark.text} />
+        <Text style={[typography.body, styles.exerciseActionText]}>View all exercises</Text>
         <MaterialCommunityIcons
           name="chevron-right"
           size={20}
           color={colors.dark.textSubtle}
-          style={{ marginLeft: "auto" }}
+          style={{ marginLeft: 'auto' }}
         />
       </Pressable>
 

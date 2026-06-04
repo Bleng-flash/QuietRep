@@ -1,16 +1,13 @@
-import SplitDayRow from "@/components/SplitDayRow";
-import WorkoutPicker from "@/components/WorkoutPicker";
-import { DAY_KEYS, DAY_NAMES } from "@/constants/days";
-import { addWorkout, deleteWorkoutsByIds, getAllExercises, getWorkouts } from "@/storage";
-import {
-  clearPendingNewWorkoutData,
-  getPendingNewWorkoutData,
-} from "@/storage/pendingNewWorkout";
-import { colors, layout, spacing, typography } from "@/styles";
-import type { DayKey, Exercise, Split, Workout, WorkoutExercise } from "@/types";
-import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect } from "expo-router";
-import { useCallback, useRef, useState } from "react";
+import SplitDayRow from '@/components/SplitDayRow';
+import WorkoutPicker from '@/components/WorkoutPicker';
+import { DAY_KEYS, DAY_NAMES } from '@/constants/days';
+import { addWorkout, deleteWorkoutsByIds, getAllExercises, getWorkouts } from '@/storage';
+import { clearPendingNewWorkoutData, getPendingNewWorkoutData } from '@/storage/pendingNewWorkout';
+import { colors, layout, spacing, typography } from '@/styles';
+import type { DayKey, Exercise, Split, Workout, WorkoutExercise } from '@/types';
+import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -23,9 +20,9 @@ import {
   Text,
   TextInput,
   View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { v4 as uuid } from "uuid";
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { v4 as uuid } from 'uuid';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -72,11 +69,11 @@ export default function SplitEditor({
   const [pendingDayWorkouts, setPendingDayWorkouts] = useState<Record<DayKey, PendingDayWorkout[]>>(
     { mon: [], tue: [], wed: [], thu: [], fri: [], sat: [], sun: [] },
   );
-  const [splitName, setSplitName] = useState(initialSplit?.name ?? "");
+  const [splitName, setSplitName] = useState(initialSplit?.name ?? '');
   const [isActive, setIsActive] = useState(isInitiallyActive);
   const [standaloneWorkouts, setStandaloneWorkouts] = useState<Workout[]>([]);
   const [allExercises, setAllExercises] = useState<Exercise[]>([]);
-  
+
   // Which day's WorkoutPicker is currently open (null = closed)
   const [pickerDayKey, setPickerDayKey] = useState<DayKey | null>(null);
   // Originally-embedded workout ids removed this session — deleted from storage on save
@@ -154,9 +151,7 @@ export default function SplitEditor({
       // Never in storage — just remove from local state
       setPendingDayWorkouts((prev) => ({
         ...prev,
-        [dayKey]: prev[dayKey].filter(
-          (pendingEntry) => pendingEntry.localKey !== workoutId,
-        ),
+        [dayKey]: prev[dayKey].filter((pendingEntry) => pendingEntry.localKey !== workoutId),
       }));
     } else {
       // Real embedded workout already in storage — remove from dayWorkouts and
@@ -173,7 +168,7 @@ export default function SplitEditor({
 
   async function handleSave() {
     if (!splitName.trim()) {
-      Alert.alert("Name required", "Please give this split a name.");
+      Alert.alert('Name required', 'Please give this split a name.');
       return;
     }
     setIsSaving(true);
@@ -212,9 +207,9 @@ export default function SplitEditor({
   }
 
   function handleDeleteSplit() {
-    Alert.alert("Delete split?", "This cannot be undone.", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Delete", style: "destructive", onPress: () => onDelete?.() },
+    Alert.alert('Delete split?', 'This cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: () => onDelete?.() },
     ]);
   }
 
@@ -233,16 +228,10 @@ export default function SplitEditor({
   return (
     <KeyboardAvoidingView
       style={layout.screen}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       {/* ── Top bar ── */}
-      <View
-        style={[
-          layout.rowBetween,
-          layout.topBar,
-          { paddingTop: insets.top + spacing.s },
-        ]}
-      >
+      <View style={[layout.rowBetween, layout.topBar, { paddingTop: insets.top + spacing.s }]}>
         <Pressable
           onPress={onCancel}
           hitSlop={8}
@@ -251,9 +240,7 @@ export default function SplitEditor({
           <Text style={typography.actionSubtle}>Cancel</Text>
         </Pressable>
 
-        <Text style={typography.subheading}>
-          {isEditMode ? "Edit Split" : "New Split"}
-        </Text>
+        <Text style={typography.subheading}>{isEditMode ? 'Edit Split' : 'New Split'}</Text>
 
         <Pressable
           onPress={handleSave}
@@ -269,10 +256,7 @@ export default function SplitEditor({
         </Pressable>
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         {/* ── Split name ── */}
         <TextInput
           style={[typography.heading, styles.nameInput]}

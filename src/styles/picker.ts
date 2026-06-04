@@ -1,6 +1,6 @@
-import { StyleSheet } from "react-native";
-import { colors } from "./colors";
-import { spacing } from "./spacing";
+import { StyleSheet } from 'react-native';
+import { colors } from './colors';
+import { spacing } from './spacing';
 
 // Shared chrome for pageSheet picker modals (ExercisePicker, WorkoutPicker, etc.)
 export const picker = StyleSheet.create({
@@ -14,8 +14,8 @@ export const picker = StyleSheet.create({
     marginBottom: spacing.m,
   },
   searchRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing.s,
     backgroundColor: colors.dark.inputBackground,
     borderWidth: 1,
@@ -33,8 +33,8 @@ export const picker = StyleSheet.create({
   },
   // Footer row in the list for creating a new item
   createButton: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing.s,
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.m + spacing.xs,
@@ -44,7 +44,7 @@ export const picker = StyleSheet.create({
   },
   createLabel: {
     fontSize: 15,
-    fontWeight: "500",
+    fontWeight: '500',
     color: colors.dark.primary,
   },
 });

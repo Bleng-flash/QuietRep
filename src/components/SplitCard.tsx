@@ -1,10 +1,10 @@
-import DayCircle from "@/components/DayCircle";
-import WorkoutCard from "@/components/WorkoutCard";
-import { DAY_KEYS, DAY_LABELS, DAY_NAMES } from "@/constants/days";
-import { colors, layout, spacing, typography } from "@/styles";
-import type { DayKey, Exercise, Split, Workout } from "@/types";
-import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import DayCircle from '@/components/DayCircle';
+import WorkoutCard from '@/components/WorkoutCard';
+import { DAY_KEYS, DAY_LABELS, DAY_NAMES } from '@/constants/days';
+import { colors, layout, spacing, typography } from '@/styles';
+import type { DayKey, Exercise, Split, Workout } from '@/types';
+import { useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -28,9 +28,7 @@ export default function SplitCard({
   const [selectedDay, setSelectedDay] = useState<DayKey | null>(null);
 
   function handleDayPress(day: DayKey) {
-    setSelectedDay((previousSelectedDay) =>
-      previousSelectedDay === day ? null : day,
-    );
+    setSelectedDay((previousSelectedDay) => (previousSelectedDay === day ? null : day));
   }
 
   const selectedWorkouts =
@@ -62,11 +60,7 @@ export default function SplitCard({
         {DAY_KEYS.map((day) => {
           const hasWorkouts: boolean = split.days[day].length > 0;
           const isSelected: boolean = selectedDay === day;
-          const circleState = isSelected
-            ? "selected"
-            : hasWorkouts
-              ? "workout"
-              : "rest";
+          const circleState = isSelected ? 'selected' : hasWorkouts ? 'workout' : 'rest';
 
           return (
             <DayCircle
@@ -119,14 +113,14 @@ const styles = StyleSheet.create({
   },
   activeBadgeText: {
     fontSize: 11,
-    fontWeight: "600",
+    fontWeight: '600',
     color: colors.dark.primary,
     letterSpacing: 0.4,
   },
 
   // ── Day row ──
   dayRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: spacing.xs,
     marginTop: spacing.m,
   },
@@ -142,7 +136,7 @@ const styles = StyleSheet.create({
   },
   expandedDayLabel: {
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: '600',
     color: colors.dark.textSubtle,
     marginBottom: spacing.s,
     letterSpacing: 0.3,

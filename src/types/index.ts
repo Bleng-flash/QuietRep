@@ -1,19 +1,19 @@
 /** Constraint on what strings are valid muscle group values */
 export type MuscleGroup =
-  | "Chest"
-  | "Back"
-  | "Shoulders"
-  | "Biceps"
-  | "Triceps"
-  | "Forearms"
-  | "Quads"
-  | "Hamstrings"
-  | "Glutes"
-  | "Calves"
-  | "Core"
-  | "Other";
+  | 'Chest'
+  | 'Back'
+  | 'Shoulders'
+  | 'Biceps'
+  | 'Triceps'
+  | 'Forearms'
+  | 'Quads'
+  | 'Hamstrings'
+  | 'Glutes'
+  | 'Calves'
+  | 'Core'
+  | 'Other';
 
-export type DayKey = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+export type DayKey = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 
 /** An interface describing one set */
 export interface SetScheme {

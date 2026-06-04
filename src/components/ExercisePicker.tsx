@@ -1,16 +1,8 @@
-import { colors, layout, picker, spacing, typography } from "@/styles";
-import type { Exercise } from "@/types";
-import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
-import {
-    FlatList,
-    Modal,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
-} from "react-native";
+import { colors, layout, picker, spacing, typography } from '@/styles';
+import type { Exercise } from '@/types';
+import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
+import { FlatList, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 interface ExercisePickerProps {
   visible: boolean;
@@ -29,14 +21,14 @@ export default function ExercisePicker({
   onCreateNew,
   onClose,
 }: ExercisePickerProps) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   const filteredExercises = allExercises.filter((exercise) =>
     exercise.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   function handleClose() {
-    setSearchQuery("");
+    setSearchQuery('');
     onClose();
   }
 
@@ -102,28 +94,16 @@ export default function ExercisePicker({
             );
           }}
           ListEmptyComponent={
-            <Text
-              style={[
-                typography.caption,
-                { textAlign: "center", marginTop: spacing.xl },
-              ]}
-            >
+            <Text style={[typography.caption, { textAlign: 'center', marginTop: spacing.xl }]}>
               No exercises found
             </Text>
           }
           ListFooterComponent={
             <Pressable
               onPress={handleCreateNew}
-              style={({ pressed }) => [
-                picker.createButton,
-                pressed && { opacity: 0.6 },
-              ]}
+              style={({ pressed }) => [picker.createButton, pressed && { opacity: 0.6 }]}
             >
-              <Ionicons
-                name="add-circle-outline"
-                size={18}
-                color={colors.dark.primary}
-              />
+              <Ionicons name="add-circle-outline" size={18} color={colors.dark.primary} />
               <Text style={picker.createLabel}>Create new exercise</Text>
             </Pressable>
           }
@@ -135,8 +115,8 @@ export default function ExercisePicker({
 
 const styles = StyleSheet.create({
   exerciseItem: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.m,
     borderBottomWidth: 1,
@@ -144,7 +124,7 @@ const styles = StyleSheet.create({
   },
   addedBadge: {
     fontSize: 12,
-    fontWeight: "500",
+    fontWeight: '500',
     color: colors.dark.primary,
     backgroundColor: colors.dark.primarySubtle,
     paddingHorizontal: spacing.s,

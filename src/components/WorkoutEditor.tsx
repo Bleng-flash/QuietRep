@@ -1,11 +1,11 @@
-import ExerciseCard from "@/components/ExerciseCard";
-import ExercisePicker from "@/components/ExercisePicker";
-import { getAllExercises } from "@/storage";
-import { colors, layout, spacing, typography } from "@/styles";
-import type { Exercise, SetScheme, Workout, WorkoutExercise } from "@/types";
-import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import ExerciseCard from '@/components/ExerciseCard';
+import ExercisePicker from '@/components/ExercisePicker';
+import { getAllExercises } from '@/storage';
+import { colors, layout, spacing, typography } from '@/styles';
+import type { Exercise, SetScheme, Workout, WorkoutExercise } from '@/types';
+import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -17,8 +17,8 @@ import {
   Text,
   TextInput,
   View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface WorkoutEditorProps {
   initialWorkout?: Workout;
@@ -38,7 +38,7 @@ export default function WorkoutEditor({
   const isEditMode = initialWorkout !== undefined;
   const insets = useSafeAreaInsets();
 
-  const [workoutName, setWorkoutName] = useState(initialWorkout?.name ?? "");
+  const [workoutName, setWorkoutName] = useState(initialWorkout?.name ?? '');
   const [workoutExercises, setWorkoutExercises] = useState<WorkoutExercise[]>(
     initialWorkout?.exercises ?? [],
   );
@@ -69,17 +69,13 @@ export default function WorkoutEditor({
   }
 
   function handleRemoveExercise(exerciseIndex: number) {
-    setWorkoutExercises((prev) =>
-      prev.filter((_, index) => index !== exerciseIndex),
-    );
+    setWorkoutExercises((prev) => prev.filter((_, index) => index !== exerciseIndex));
   }
 
   function handleSetsChange(exerciseIndex: number, updatedSets: SetScheme[]) {
     setWorkoutExercises((prev) =>
       prev.map((workoutExercise, i) =>
-        i === exerciseIndex
-          ? { ...workoutExercise, sets: updatedSets }
-          : workoutExercise,
+        i === exerciseIndex ? { ...workoutExercise, sets: updatedSets } : workoutExercise,
       ),
     );
   }
@@ -109,19 +105,19 @@ export default function WorkoutEditor({
   }
 
   function handleDelete() {
-    Alert.alert("Delete workout?", "This cannot be undone.", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Delete", style: "destructive", onPress: onDelete },
+    Alert.alert('Delete workout?', 'This cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: onDelete },
     ]);
   }
 
   async function handleSave() {
     if (!workoutName.trim()) {
-      Alert.alert("Name required", "Please give this workout a name.");
+      Alert.alert('Name required', 'Please give this workout a name.');
       return;
     }
     if (workoutExercises.length === 0) {
-      Alert.alert("No exercises", "Add at least one exercise before saving.");
+      Alert.alert('No exercises', 'Add at least one exercise before saving.');
       return;
     }
     setIsSaving(true);
@@ -135,15 +131,9 @@ export default function WorkoutEditor({
   return (
     <KeyboardAvoidingView
       style={layout.screen}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View
-        style={[
-          layout.rowBetween,
-          layout.topBar,
-          { paddingTop: insets.top + spacing.s },
-        ]}
-      >
+      <View style={[layout.rowBetween, layout.topBar, { paddingTop: insets.top + spacing.s }]}>
         <Pressable
           onPress={onCancel}
           hitSlop={8}
@@ -152,9 +142,7 @@ export default function WorkoutEditor({
           <Text style={typography.actionSubtle}>Cancel</Text>
         </Pressable>
 
-        <Text style={typography.subheading}>
-          {isEditMode ? "Edit Workout" : "New Workout"}
-        </Text>
+        <Text style={typography.subheading}>{isEditMode ? 'Edit Workout' : 'New Workout'}</Text>
 
         <Pressable
           onPress={handleSave}
@@ -170,10 +158,7 @@ export default function WorkoutEditor({
         </Pressable>
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <TextInput
           style={[typography.heading, styles.nameInput]}
           value={workoutName}
@@ -188,14 +173,10 @@ export default function WorkoutEditor({
           <ExerciseCard
             key={workoutExercise.exerciseId}
             workoutExercise={workoutExercise}
-            exercise={allExercises.find(
-              (exercise) => exercise.id === workoutExercise.exerciseId,
-            )}
+            exercise={allExercises.find((exercise) => exercise.id === workoutExercise.exerciseId)}
             isFirst={exerciseIndex === 0}
             isLast={exerciseIndex === workoutExercises.length - 1}
-            onSetsChange={(updatedSets) =>
-              handleSetsChange(exerciseIndex, updatedSets)
-            }
+            onSetsChange={(updatedSets) => handleSetsChange(exerciseIndex, updatedSets)}
             onRemove={() => handleRemoveExercise(exerciseIndex)}
             onMoveUp={() => handleMoveUp(exerciseIndex)}
             onMoveDown={() => handleMoveDown(exerciseIndex)}
@@ -204,10 +185,7 @@ export default function WorkoutEditor({
 
         <Pressable
           onPress={() => setIsPickerVisible(true)}
-          style={({ pressed }) => [
-            styles.addExerciseButton,
-            pressed && { opacity: 0.6 },
-          ]}
+          style={({ pressed }) => [styles.addExerciseButton, pressed && { opacity: 0.6 }]}
         >
           <Ionicons name="add" size={20} color={colors.dark.primary} />
           <Text style={styles.addExerciseLabel}>Add exercise</Text>
@@ -229,11 +207,7 @@ export default function WorkoutEditor({
               pressed && { opacity: 0.7 },
             ]}
           >
-            <Ionicons
-              name="trash-outline"
-              size={18}
-              color={colors.dark.error}
-            />
+            <Ionicons name="trash-outline" size={18} color={colors.dark.error} />
             <Text style={typography.actionDanger}>Delete Workout</Text>
           </Pressable>
         )}
@@ -263,13 +237,13 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.s,
   },
   addExerciseButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: spacing.s,
     borderWidth: 1,
     borderColor: colors.dark.primary,
-    borderStyle: "dashed",
+    borderStyle: 'dashed',
     borderRadius: 12,
     paddingVertical: spacing.m,
     marginBottom: spacing.m,
@@ -277,11 +251,11 @@ const styles = StyleSheet.create({
   },
   addExerciseLabel: {
     fontSize: 15,
-    fontWeight: "600",
+    fontWeight: '600',
     color: colors.dark.primary,
   },
   emptyHint: {
-    textAlign: "center",
+    textAlign: 'center',
     paddingHorizontal: spacing.l,
     lineHeight: 18,
   },

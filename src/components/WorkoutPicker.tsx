@@ -1,17 +1,9 @@
-import { buildWorkoutSubtitle } from "@/utils/workout";
-import { colors, layout, picker, spacing, typography } from "@/styles";
-import type { Exercise, Workout } from "@/types";
-import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
-import {
-  FlatList,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { buildWorkoutSubtitle } from '@/utils/workout';
+import { colors, layout, picker, spacing, typography } from '@/styles';
+import type { Exercise, Workout } from '@/types';
+import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
+import { FlatList, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 interface WorkoutPickerProps {
   visible: boolean;
@@ -30,14 +22,14 @@ export default function WorkoutPicker({
   onCreateNew,
   onClose,
 }: WorkoutPickerProps) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   const filteredWorkouts = standaloneWorkouts.filter((workout) =>
     workout.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   function handleClose() {
-    setSearchQuery("");
+    setSearchQuery('');
     onClose();
   }
 
@@ -86,10 +78,7 @@ export default function WorkoutPicker({
           renderItem={({ item: workout }) => (
             <Pressable
               onPress={() => handleSelect(workout)}
-              style={({ pressed }) => [
-                styles.workoutItem,
-                pressed && { opacity: 0.6 },
-              ]}
+              style={({ pressed }) => [styles.workoutItem, pressed && { opacity: 0.6 }]}
             >
               <Text style={typography.body} numberOfLines={1}>
                 {workout.name}
@@ -100,28 +89,16 @@ export default function WorkoutPicker({
             </Pressable>
           )}
           ListEmptyComponent={
-            <Text
-              style={[
-                typography.caption,
-                { textAlign: "center", marginTop: spacing.xl },
-              ]}
-            >
+            <Text style={[typography.caption, { textAlign: 'center', marginTop: spacing.xl }]}>
               No workouts found
             </Text>
           }
           ListFooterComponent={
             <Pressable
               onPress={handleCreateNew}
-              style={({ pressed }) => [
-                picker.createButton,
-                pressed && { opacity: 0.6 },
-              ]}
+              style={({ pressed }) => [picker.createButton, pressed && { opacity: 0.6 }]}
             >
-              <Ionicons
-                name="add-circle-outline"
-                size={18}
-                color={colors.dark.primary}
-              />
+              <Ionicons name="add-circle-outline" size={18} color={colors.dark.primary} />
               <Text style={picker.createLabel}>Create new workout</Text>
             </Pressable>
           }

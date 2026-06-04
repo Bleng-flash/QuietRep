@@ -1,4 +1,4 @@
-import SplitEditor from "@/components/SplitEditor";
+import SplitEditor from '@/components/SplitEditor';
 import {
   clearActiveSplit,
   deleteWorkoutsByIds,
@@ -8,19 +8,21 @@ import {
   getWorkouts,
   setActiveSplit,
   updateSplit,
-} from "@/storage";
-import { DAY_KEYS } from "@/constants/days";
-import { colors, layout } from "@/styles";
-import type { DayKey, Split, Workout } from "@/types";
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, View } from "react-native";
+} from '@/storage';
+import { DAY_KEYS } from '@/constants/days';
+import { colors, layout } from '@/styles';
+import type { DayKey, Split, Workout } from '@/types';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 
 export default function SplitDetailScreen() {
   const { splitId } = useLocalSearchParams<{ splitId: string }>();
 
   const [split, setSplit] = useState<Split | null>(null);
-  const [resolvedDayWorkouts, setResolvedDayWorkouts] = useState<Record<DayKey, Workout[]> | null>(null);
+  const [resolvedDayWorkouts, setResolvedDayWorkouts] = useState<Record<DayKey, Workout[]> | null>(
+    null,
+  );
   const [isActiveSplit, setIsActiveSplit] = useState(false);
 
   useEffect(() => {
@@ -49,11 +51,7 @@ export default function SplitDetailScreen() {
     loadSplit();
   }, [splitId]);
 
-  async function handleSave(
-    name: string,
-    days: Record<DayKey, string[]>,
-    setAsActive: boolean,
-  ) {
+  async function handleSave(name: string, days: Record<DayKey, string[]>, setAsActive: boolean) {
     if (!split) return;
     await updateSplit({ ...split, name, days });
     if (setAsActive) {
@@ -89,7 +87,7 @@ export default function SplitDetailScreen() {
       isInitiallyActive={isActiveSplit}
       onSave={handleSave}
       onCancel={() => router.back()}
-      onCreateWorkout={() => router.push("/plan/workout/new?embedded=true")}
+      onCreateWorkout={() => router.push('/plan/workout/new?embedded=true')}
       onDelete={handleDelete}
     />
   );

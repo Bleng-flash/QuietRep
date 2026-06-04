@@ -1,7 +1,7 @@
-import { colors, layout, spacing, typography } from "@/styles";
-import type { Exercise, Workout } from "@/types";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { colors, layout, spacing, typography } from '@/styles';
+import type { Exercise, Workout } from '@/types';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface WorkoutViewerProps {
   workout: Workout;
@@ -11,23 +11,13 @@ interface WorkoutViewerProps {
 
 // This is a read-only display of workouts when user clicks WorkoutCard from plan screens' SplitCard day expansion.
 // It is not used for workout creation or editing.
-export default function WorkoutViewer({
-  workout,
-  allExercises,
-  onClose,
-}: WorkoutViewerProps) {
+export default function WorkoutViewer({ workout, allExercises, onClose }: WorkoutViewerProps) {
   const insets = useSafeAreaInsets();
 
   return (
     <View style={layout.screen}>
       {/* ── Header ── */}
-      <View
-        style={[
-          layout.rowBetween,
-          styles.topBar,
-          { paddingTop: insets.top + spacing.s },
-        ]}
-      >
+      <View style={[layout.rowBetween, styles.topBar, { paddingTop: insets.top + spacing.s }]}>
         {/* Left spacer mirrors the width of Close so the title is visually centred */}
         <View style={styles.headerSpacer} />
 
@@ -47,9 +37,7 @@ export default function WorkoutViewer({
       {/* ── Exercise list ── */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {workout.exercises.length === 0 ? (
-          <Text style={[typography.caption, styles.emptyHint]}>
-            This workout has no exercises.
-          </Text>
+          <Text style={[typography.caption, styles.emptyHint]}>This workout has no exercises.</Text>
         ) : (
           workout.exercises.map((workoutExercise) => {
             const exercise = allExercises.find(
@@ -57,53 +45,30 @@ export default function WorkoutViewer({
             );
 
             return (
-              <View
-                key={workoutExercise.exerciseId}
-                style={styles.exerciseCard}
-              >
+              <View key={workoutExercise.exerciseId} style={styles.exerciseCard}>
                 {/* Exercise name + muscle group */}
                 <Text style={typography.subheading} numberOfLines={1}>
-                  {exercise?.name ?? "Unknown exercise"}
+                  {exercise?.name ?? 'Unknown exercise'}
                 </Text>
                 {exercise?.muscleGroup ? (
-                  <Text
-                    style={[typography.caption, { marginBottom: spacing.s }]}
-                  >
+                  <Text style={[typography.caption, { marginBottom: spacing.s }]}>
                     {exercise.muscleGroup}
                   </Text>
                 ) : null}
 
                 {/* Column headers — same layout as ExerciseCard */}
-                <View
-                  style={[
-                    layout.row,
-                    { gap: spacing.s, marginBottom: spacing.xs },
-                  ]}
-                >
+                <View style={[layout.row, { gap: spacing.s, marginBottom: spacing.xs }]}>
                   <View style={styles.setIndexCell} />
-                  <Text style={[typography.caption, styles.setValueCell]}>
-                    Reps
-                  </Text>
-                  <Text style={[typography.caption, styles.setValueCell]}>
-                    Load (kg)
-                  </Text>
+                  <Text style={[typography.caption, styles.setValueCell]}>Reps</Text>
+                  <Text style={[typography.caption, styles.setValueCell]}>Load (kg)</Text>
                 </View>
 
                 {/* One row per set */}
                 {workoutExercise.sets.map((setScheme, setIndex) => (
-                  <View
-                    key={setIndex}
-                    style={[layout.row, styles.setRow, { gap: spacing.s }]}
-                  >
-                    <Text style={[typography.body, styles.setIndexCell]}>
-                      {setIndex + 1}
-                    </Text>
-                    <Text style={[typography.body, styles.setValueCell]}>
-                      {setScheme.reps}
-                    </Text>
-                    <Text style={[typography.body, styles.setValueCell]}>
-                      {setScheme.load}
-                    </Text>
+                  <View key={setIndex} style={[layout.row, styles.setRow, { gap: spacing.s }]}>
+                    <Text style={[typography.body, styles.setIndexCell]}>{setIndex + 1}</Text>
+                    <Text style={[typography.body, styles.setValueCell]}>{setScheme.reps}</Text>
+                    <Text style={[typography.body, styles.setValueCell]}>{setScheme.load}</Text>
                   </View>
                 ))}
               </View>
@@ -154,15 +119,15 @@ const styles = StyleSheet.create({
   // Fixed-width column for the set number (matches ExerciseCard's set-number spacer width)
   setIndexCell: {
     width: 44,
-    textAlign: "center",
+    textAlign: 'center',
   },
   setValueCell: {
     flex: 1,
-    textAlign: "center",
+    textAlign: 'center',
   },
 
   emptyHint: {
-    textAlign: "center",
+    textAlign: 'center',
     paddingHorizontal: spacing.l,
     lineHeight: 18,
     marginTop: spacing.m,
