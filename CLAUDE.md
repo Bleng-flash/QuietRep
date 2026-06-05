@@ -34,62 +34,36 @@ Now, we are in iteration 1. The table below details our progress within iteratio
 | 5 | Shared components — DayCircle, SectionHeader, WorkoutCard, SplitCard | Done |
 | 6 | Plan index screen | Done |
 | 7 | WorkoutEditor — create and edit workouts | Done |
-| 8 | SplitEditor — create and edit splits | Done |
-| 9 | Exercise screens — new exercise, view all exercises | Not started |
+| 8 | SplitEditor — create and edit splits | Not started |
+| 9 | Exercise screens — new exercise, view all exercises | Done |
 
 ## Current State
 
-Steps 1–8 are complete. The following is fully functional:
+Steps 1–7 and 9 are complete. The following is fully functional:
 
 - Plan index screen with Splits, Workouts, and Exercises sections
 - Full WorkoutEditor flow — create and edit workouts, add/remove/reorder exercises, configure sets and reps, exercise picker modal with live search
-- Full SplitEditor flow — create and edit splits, assign workouts to days via WorkoutPicker, create new embedded workouts via round-trip to WorkoutEditor, active split toggle, cascade delete
 - All storage operations for exercises, workouts, splits, and active split
-- 24 default exercises seeded on first launch via `seedDefaultExercises` in `src/storage/exercises.ts`
+- 97 default exercises seeded on first launch via `seedDefaultExercises` in `src/storage/exercises.ts`
 - Safe area insets applied correctly throughout
+- `darkGreen` color theme added to `src/styles/colors.ts` alongside `dark` (purple)
 
-**New in Step 8:**
+**New in Step 9:**
 
-- `src/storage/pendingNewWorkout.ts` — in-memory module for the WorkoutEditor round-trip (see Key Design Decisions)
-- `src/components/WorkoutPicker.tsx` — pageSheet modal for selecting/creating workouts; mirrors ExercisePicker
-- `src/components/SplitDayRow.tsx` — per-day row in SplitEditor showing assigned workouts with add/remove buttons
-- `src/components/SplitEditor.tsx` — main split editor component
-- `plan/split/new.tsx` and `plan/split/[splitId].tsx` — replaced placeholder screens
+- `plan/exercise/index.tsx` — full exercise catalog grouped by muscle group via `SectionList`, with live search (collapses empty sections), delete button on user-created exercises (with confirmation Alert), and a "Create new exercise" footer CTA
+- `plan/exercise/new.tsx` — create exercise form with name `TextInput` and inline muscle group dropdown; trims name, validates both fields, calls `addExercise` (which enforces name uniqueness), navigates back on success
 
-**Known issues in SplitEditor (to be fixed before Step 9):**
+**Known bugs:**
 
-1. **Cannot edit an embedded workout from SplitEditor.** In `SplitDayRow`, the `WorkoutCard` has `onPress={() => {}}` (deliberate noop). Tapping an assigned workout does nothing — the user can only remove it. The fix requires wiring `onPress` to navigate to `plan/workout/[workoutId]`, but this is blocked by the design issue below.
-
-2. **Bifurcated state with fake id (design smell).** SplitEditor maintains two separate state records per day — `dayWorkouts` (already in storage) and `pendingDayWorkouts` (local-only, not yet saved). These are merged into a single display array via `buildDisplayWorkouts`, which requires casting pending entries into the `Workout` shape using a `localKey` UUID as a fake `id` field. This makes it impossible to cleanly distinguish a real storage workout from a pending one by id alone — which is exactly what the edit fix needs to do. The fix is to refactor `SplitEditor` and `SplitDayRow` to use a discriminated union (see Next Steps). The edit bug is unblocked once the refactor is done.
-
-Step 9 currently navigates to a placeholder screen.
+1. **"New Split" button in `plan/index.tsx` is a noop.** `SectionHeader` `onButtonPress={() => {}}` — blocked until Step 8 screens exist.
+2. **`SplitCard` interactions in `plan/index.tsx` are noops.** `onPress` and `onWorkoutPress` are both `() => {}` — blocked until Step 8.
+3. **`src/components/CardList.tsx` is an empty unused stub.** Never imported anywhere — should be deleted before Step 8.
 
 ## Next steps in current iteration
 
-### Pre-Step-9 refactor — SplitEditor DayEntry discriminated union (Next)
+### Step 8 — SplitEditor (Next)
 
-The current `SplitEditor` state is bifurcated into `dayWorkouts` (persisted) and `pendingDayWorkouts` (local-only), merged at render time via `buildDisplayWorkouts`. This requires casting pending entries into the `Workout` shape with a fake `id`. Replace both state records with a single discriminated union per day:
-
-```ts
-type DayEntry =
-  | { kind: 'persisted'; workout: Workout }
-  | {
-      kind: 'pending';
-      localKey: string;
-      name: string;
-      exercises: WorkoutExercise[];
-    };
-```
-
-- `SplitEditor` — replace `dayWorkouts` + `pendingDayWorkouts` with `dayEntries: Record<DayKey, DayEntry[]>`; remove `buildDisplayWorkouts`; update all handlers (add, remove, save) to switch on `kind`
-- `SplitDayRow` — accept `DayEntry[]` instead of `Workout[]`; render `WorkoutCard` for `persisted` entries, a simpler display for `pending` entries; `onEdit` only fires for `persisted` entries (no fake id needed)
-
-This also unblocks the open bug: **tapping a WorkoutCard in SplitDayRow should navigate to `plan/workout/[workoutId]` to edit it** — currently a noop. With the discriminated union, `persisted` entries have a real `workout.id` and `onEdit` can be wired cleanly. `pending` entries simply don't provide an edit action.
-
-### Step 9 — Exercise screens
-
-- `plan/exercise/index.tsx` — full catalog of all exercises (default + user-created), with a delete button on user-created ones and an "Add exercise" button that pushes to `plan/exercise/new.tsx`
-- `plan/exercise/new.tsx` — two fields: name and muscle group chip selector
+Build the full split creation and editing flow — create/edit splits, assign workouts to days, active split selection, and cascade delete. Implementation details to be planned when ready.
 
 ---
 
