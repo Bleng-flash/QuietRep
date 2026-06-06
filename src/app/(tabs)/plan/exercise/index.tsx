@@ -6,7 +6,7 @@ import { Exercise } from '@/types';
 import { matchesSearchQuery } from '@/utils/exercise';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, SectionList, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -17,15 +17,22 @@ export default function ExerciseListScreen() {
   const [allExercises, setAllExercises] = useState<Exercise[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredExercises: Exercise[] = allExercises.filter((exercise) =>
-    matchesSearchQuery(exercise, searchQuery),
+  // We use memoisation through memo, useMemo and useCallback to prevent repeated
+  // re-rendering of the ExerciseEntry component and re-computation of values/functions
+  const filteredExercises = useMemo(
+    () => allExercises.filter((exercise) => matchesSearchQuery(exercise, searchQuery)),
+    [allExercises, searchQuery],
   );
 
   // Group filtered exercises by muscle group in canonical order, skipping empty groups
-  const sections = MUSCLE_GROUPS.map((muscleGroup) => ({
-    title: muscleGroup,
-    data: filteredExercises.filter((exercise) => exercise.muscleGroup === muscleGroup),
-  })).filter((section) => section.data.length > 0);
+  const sections = useMemo(
+    () =>
+      MUSCLE_GROUPS.map((muscleGroup) => ({
+        title: muscleGroup,
+        data: filteredExercises.filter((exercise) => exercise.muscleGroup === muscleGroup),
+      })).filter((section) => section.data.length > 0),
+    [filteredExercises],
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -41,7 +48,7 @@ export default function ExerciseListScreen() {
     router.push('/plan/exercise/new');
   }
 
-  function handleDeleteExercise(id: string): void {
+  const handleDeleteExercise = useCallback(function handleDeleteExercise(id: string): void {
     Alert.alert('Delete exercise', 'This exercise will be removed from your library.', [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -54,7 +61,7 @@ export default function ExerciseListScreen() {
         },
       },
     ]);
-  }
+  }, []);
 
   return (
     <View style={{ flex: 1 }}>
@@ -96,9 +103,17 @@ export default function ExerciseListScreen() {
         <SectionList
           sections={sections}
           keyExtractor={(item) => item.id}
-          renderSectionHeader={({ section }) => <SectionHeader title={section.title} />}
-          renderItem={({ item }) => (
-            <ExerciseEntry exercise={item} onDelete={() => handleDeleteExercise(item.id)} />
+          renderSectionHeader={useCallback(
+            ({ section }: { section: { title: string; data: Exercise[] } }) => (
+              <SectionHeader title={section.title} />
+            ),
+            [],
+          )}
+          renderItem={useCallback(
+            ({ item }: { item: Exercise }) => (
+              <ExerciseEntry exercise={item} onDelete={handleDeleteExercise} />
+            ),
+            [handleDeleteExercise],
           )}
           ListEmptyComponent={
             <Text style={[typography.caption, { textAlign: 'center', marginTop: spacing.xl }]}>
@@ -123,10 +138,10 @@ export default function ExerciseListScreen() {
 
 interface ExerciseEntryProps {
   exercise: Exercise;
-  onDelete: () => void;
+  onDelete: (id: string) => void;
 }
 
-function ExerciseEntry({ exercise, onDelete }: ExerciseEntryProps) {
+const ExerciseEntry = memo(function ExerciseEntry({ exercise, onDelete }: ExerciseEntryProps) {
   return (
     <View style={styles.exerciseEntry}>
       <View style={{ flex: 1, paddingVertical: spacing.xs }}>
@@ -135,7 +150,7 @@ function ExerciseEntry({ exercise, onDelete }: ExerciseEntryProps) {
       {/* Trash button only shown for user-created exercises; default exercises are not deletable */}
       {!exercise.isDefault && (
         <Pressable
-          onPress={onDelete}
+          onPress={() => onDelete(exercise.id)}
           hitSlop={8}
           style={({ pressed }) => pressed && layout.pressedButton}
         >
@@ -144,7 +159,7 @@ function ExerciseEntry({ exercise, onDelete }: ExerciseEntryProps) {
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   exerciseEntry: {

@@ -116,6 +116,19 @@ When a user assigns a standalone workout to a day, SplitEditor does NOT call `ad
 **Embedded workout creation round-trip via in-memory module**
 When the user taps "Create new workout" in WorkoutPicker, SplitEditor records the target day in a `useRef` (`pendingEmbeddedDayRef`) and navigates to `plan/workout/new?embedded=true`. The `?embedded=true` query param tells that screen NOT to call `addWorkout`; instead it stores `{ name, exercises }` in a module-level in-memory variable (`src/storage/pendingNewWorkout.ts` — three functions: `set`, `get`, `clear`; no AsyncStorage). On return, SplitEditor's `useFocusEffect` reads the module variable, creates a `PendingDayWorkout` entry, clears the variable, and resets the ref. The workout is only saved to storage when the split is saved. `useRef` is used instead of `useState` for `pendingEmbeddedDayRef` so it can be read inside `useFocusEffect`'s empty-deps callback without stale closure issues.
 
+**Pre-joining normalized data — ResolvedX view model pattern**
+When a child component needs fields from two normalized entities (e.g., `WorkoutExercise` for sets data + `Exercise` for display data), do not pass two separate props and resolve the join inline in the render loop — that produces O(n²) `.find()` calls. Instead, pre-join in the parent:
+
+1. Build an id → entity `Map` with `useMemo` (O(n), recomputes only when the source list changes).
+2. Derive a `ResolvedX[]` array with a second `useMemo` that spreads each base entity and attaches the looked-up related entity (O(n)).
+3. Pass the single `resolvedX` prop to the child.
+
+When the same joined shape is consumed by more than one component, define `type ResolvedX = BaseEntity & { relatedEntity: RelatedEntity | undefined }` in `src/types/index.ts`. For a one-off join used in a single spot, a named type is optional.
+
+`ResolvedX` types are **frontend view models only** — they do not correspond to database tables. They represent what the UI needs after joining storage entities. When the real backend arrives, the API may return pre-expanded data that maps directly to this shape, or the join may still happen on the frontend after separate fetches. Either way, the type lives only in the frontend layer.
+
+The `| undefined` on the related entity is intentional — it covers dangling FK references (e.g., a user-created exercise deleted from the catalog while still present in a workout). The child handles this gracefully with a fallback. See `ResolvedWorkoutExercise` in `src/types/index.ts` and `WorkoutEditor` → `WorkoutExerciseCard` for the canonical example.
+
 ## Code Rules — Must Follow in Every Generation
 
 ### Naming
@@ -169,6 +182,18 @@ When the user taps "Create new workout" in WorkoutPicker, SplitEditor records th
 ### Storage
 
 - `addX` functions take `Omit<X, "id">` — never pass an id manually
+
+### Performance — Large Lists
+
+For any `FlatList` or `SectionList` rendering more than ~20 items, apply this memoisation chain to prevent every item re-rendering on every parent re-render:
+
+1. **`memo` on the item component** — bails out of re-render when all props are the same reference
+2. **`useCallback` on `renderItem` / `renderSectionHeader`** — keeps the function reference stable so `memo` can do its job; deps are the handlers passed into it
+3. **`useCallback` on handlers passed as item props** — e.g. `onDelete`; a new function reference here means `memo` always sees changed props and never bails out
+4. **`useMemo` on derived list data** — e.g. filtered/grouped arrays; avoids recomputing on renders unrelated to search or data changes
+5. **Id-based callback props** — type item handler props as `(id: string) => void` rather than `() => void`; this lets `renderItem` pass the stable handler directly instead of wrapping it in a per-item arrow (`() => handleDelete(item.id)`), which would be a new reference every render
+
+See `plan/exercise/index.tsx` for the canonical example of this pattern.
 
 ## How to Behave
 

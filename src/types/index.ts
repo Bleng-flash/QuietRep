@@ -36,6 +36,11 @@ export interface WorkoutExercise {
   sets: SetScheme[];
 }
 
+/** WorkoutExercise with its Exercise resolved — used where both are needed together.
+ *  exercise is | undefined because a user can delete an exercise from the catalog
+ *  after it was added to a workout, leaving a dangling exerciseId FK. */
+export type ResolvedWorkoutExercise = WorkoutExercise & { exercise: Exercise | undefined };
+
 /** A named (ordered) collection of WorkoutExercise entries */
 export interface Workout {
   id: string;

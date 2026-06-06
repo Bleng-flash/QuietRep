@@ -1,12 +1,11 @@
 import SetRow from '@/components/SetRow';
 import { colors, layout, spacing, typography } from '@/styles';
-import type { Exercise, SetScheme, WorkoutExercise } from '@/types';
+import type { ResolvedWorkoutExercise, SetScheme } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 interface WorkoutExerciseCardProps {
-  workoutExercise: WorkoutExercise;
-  exercise: Exercise | undefined;
+  resolvedWorkoutExercise: ResolvedWorkoutExercise;
   isFirst: boolean;
   isLast: boolean;
   onSetsChange: (sets: SetScheme[]) => void;
@@ -17,8 +16,7 @@ interface WorkoutExerciseCardProps {
 
 /** A card for displaying and editing an exercise within a workout. */
 export default function WorkoutExerciseCard({
-  workoutExercise,
-  exercise,
+  resolvedWorkoutExercise,
   isFirst,
   isLast,
   onSetsChange,
@@ -26,21 +24,24 @@ export default function WorkoutExerciseCard({
   onMoveUp,
   onMoveDown,
 }: WorkoutExerciseCardProps) {
+  // Destructure for convenient access in handlers and JSX below
+  const { exercise, sets } = resolvedWorkoutExercise;
+
   function handleSetChange(setIndex: number, updated: SetScheme) {
     onSetsChange(
-      workoutExercise.sets.map((currentSet, index) => (index === setIndex ? updated : currentSet)),
+      sets.map((currentSet: SetScheme, index: number) => (index === setIndex ? updated : currentSet)),
     );
   }
 
   // In JavaScript/TypeScript, _ is a convention for a parameter you're required to declare but intentionally don't use
   function handleRemoveSet(setIndex: number) {
-    onSetsChange(workoutExercise.sets.filter((_, index) => index !== setIndex));
+    onSetsChange(sets.filter((_: SetScheme, index: number) => index !== setIndex));
   }
 
   function handleAddSet() {
-    const lastSet = workoutExercise.sets[workoutExercise.sets.length - 1];
+    const lastSet = sets[sets.length - 1];
     const newSet: SetScheme = lastSet ? { ...lastSet } : { reps: 0, load: 0 };
-    onSetsChange([...workoutExercise.sets, newSet]);
+    onSetsChange([...sets, newSet]);
   }
 
   return (
@@ -91,12 +92,12 @@ export default function WorkoutExerciseCard({
         <View style={{ width: 36 }} />
       </View>
 
-      {workoutExercise.sets.map((setScheme, setIndex) => (
+      {sets.map((setScheme, setIndex) => (
         <SetRow
           key={setIndex}
           setIndex={setIndex}
           setScheme={setScheme}
-          isOnly={workoutExercise.sets.length === 1}
+          isOnly={sets.length === 1}
           onChange={(updated) => handleSetChange(setIndex, updated)}
           onRemove={() => handleRemoveSet(setIndex)}
         />

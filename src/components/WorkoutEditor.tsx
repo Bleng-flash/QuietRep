@@ -2,10 +2,10 @@ import ExercisePicker from '@/components/ExercisePicker';
 import WorkoutExerciseCard from '@/components/WorkoutExerciseCard';
 import { getAllExercises } from '@/storage';
 import { colors, layout, spacing, typography } from '@/styles';
-import type { Exercise, SetScheme, Workout, WorkoutExercise } from '@/types';
+import type { Exercise, ResolvedWorkoutExercise, SetScheme, Workout, WorkoutExercise } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -60,6 +60,26 @@ export default function WorkoutEditor({
     workoutExercises.map((workoutExercise) => workoutExercise.exerciseId),
   );
 
+  // Pre-build an id→Exercise map once so the join below is O(1) per entry rather than
+  // O(n) — without this, resolving each WorkoutExercise would call .find() across all
+  // exercises on every render, which is O(n²) across the whole list.
+  const exerciseMap = useMemo(
+    () => new Map(allExercises.map((exercise) => [exercise.id, exercise])),
+    [allExercises],
+  );
+
+  // Join WorkoutExercise (sets data) with Exercise (display data) once per render cycle.
+  // WorkoutExerciseCard receives a single ResolvedWorkoutExercise prop instead of two
+  // separate props, and the O(n²) .find()-per-card in the render loop is eliminated.
+  const resolvedWorkoutExercises: ResolvedWorkoutExercise[] = useMemo(
+    () =>
+      workoutExercises.map((workoutExercise) => ({
+        ...workoutExercise,
+        exercise: exerciseMap.get(workoutExercise.exerciseId),
+      })),
+    [workoutExercises, exerciseMap],
+  );
+
   function handleAddExercise(exercise: Exercise) {
     const newEntry: WorkoutExercise = {
       exerciseId: exercise.id,
@@ -74,8 +94,8 @@ export default function WorkoutEditor({
 
   function handleSetsChange(exerciseIndex: number, updatedSets: SetScheme[]) {
     setWorkoutExercises((prev) =>
-      prev.map((workoutExercise, i) =>
-        i === exerciseIndex ? { ...workoutExercise, sets: updatedSets } : workoutExercise,
+      prev.map((workoutExercise, index) =>
+        index === exerciseIndex ? { ...workoutExercise, sets: updatedSets } : workoutExercise,
       ),
     );
   }
@@ -169,11 +189,10 @@ export default function WorkoutEditor({
           maxLength={60}
         />
 
-        {workoutExercises.map((workoutExercise, exerciseIndex) => (
+        {resolvedWorkoutExercises.map((resolvedWorkoutExercise, exerciseIndex) => (
           <WorkoutExerciseCard
-            key={workoutExercise.exerciseId}
-            workoutExercise={workoutExercise}
-            exercise={allExercises.find((exercise) => exercise.id === workoutExercise.exerciseId)}
+            key={resolvedWorkoutExercise.exerciseId}
+            resolvedWorkoutExercise={resolvedWorkoutExercise}
             isFirst={exerciseIndex === 0}
             isLast={exerciseIndex === workoutExercises.length - 1}
             onSetsChange={(updatedSets) => handleSetsChange(exerciseIndex, updatedSets)}

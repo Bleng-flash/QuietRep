@@ -41,6 +41,7 @@ export async function addExercise(data: Omit<Exercise, 'id'>): Promise<Exercise 
   const existingExercise = [...defaultExercises, ...userExercises].find(
     (exercise) => exercise.name.toLowerCase() === data.name.toLowerCase(),
   );
+  
   if (existingExercise) {
     Alert.alert(
       'Name already exists',
