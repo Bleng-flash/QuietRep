@@ -1,3 +1,4 @@
+import EditorHeader from '@/components/EditorHeader';
 import { MUSCLE_GROUPS } from '@/constants/muscleGroups';
 import { addExercise } from '@/storage';
 import { colors, layout, spacing, typography } from '@/styles';
@@ -17,10 +18,8 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function NewExerciseScreen() {
-  const insets = useSafeAreaInsets();
   const router = useRouter();
 
   const [exerciseName, setExerciseName] = useState('');
@@ -57,24 +56,12 @@ export default function NewExerciseScreen() {
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={[layout.rowBetween, layout.topBar, { paddingTop: insets.top + spacing.s }]}>
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={8}
-          style={({ pressed }) => pressed && layout.pressedButton}
-        >
-          <Text style={typography.actionSubtle}>Cancel</Text>
-        </Pressable>
-        <Text style={typography.subheading}>New Exercise</Text>
-        <Pressable
-          onPress={handleSave}
-          disabled={isSaving}
-          hitSlop={8}
-          style={({ pressed }) => pressed && layout.pressedButton}
-        >
-          <Text style={typography.actionPrimary}>Save</Text>
-        </Pressable>
-      </View>
+      <EditorHeader
+        title="New Exercise"
+        onCancel={() => router.back()}
+        onSave={handleSave}
+        isSaving={isSaving}
+      />
 
       {/*
         Tapping any blank area dismisses the keyboard AND closes the Muscle Group dropdown if

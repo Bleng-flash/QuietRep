@@ -1,3 +1,4 @@
+import EditorHeader from '@/components/EditorHeader';
 import ExercisePicker from '@/components/ExercisePicker';
 import WorkoutExerciseCard from '@/components/WorkoutExerciseCard';
 import { getAllExercises } from '@/storage';
@@ -13,7 +14,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -22,9 +22,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { v4 as uuid } from 'uuid';
 
 interface WorkoutEditorProps {
@@ -53,7 +51,6 @@ export default function WorkoutEditor({
   onDelete,
 }: WorkoutEditorProps) {
   const isEditMode = initialWorkout !== undefined;
-  const insets = useSafeAreaInsets();
 
   const [workoutName, setWorkoutName] = useState(initialWorkout?.name ?? '');
   // Seed with localKeys attached so set rows have stable identities from the first render.
@@ -183,30 +180,12 @@ export default function WorkoutEditor({
       style={layout.screen}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={[layout.rowBetween, layout.topBar, { paddingTop: insets.top + spacing.s }]}>
-        <Pressable
-          onPress={onCancel}
-          hitSlop={8}
-          style={({ pressed }) => [pressed && layout.pressedButton]}
-        >
-          <Text style={typography.actionSubtle}>Cancel</Text>
-        </Pressable>
-
-        <Text style={typography.subheading}>{isEditMode ? 'Edit Workout' : 'New Workout'}</Text>
-
-        <Pressable
-          onPress={handleSave}
-          disabled={isSaving}
-          hitSlop={8}
-          style={({ pressed }) => [pressed && layout.pressedButton]}
-        >
-          {isSaving ? (
-            <ActivityIndicator size="small" color={colors.dark.primary} />
-          ) : (
-            <Text style={typography.actionPrimary}>Save</Text>
-          )}
-        </Pressable>
-      </View>
+      <EditorHeader
+        title={isEditMode ? 'Edit Workout' : 'New Workout'}
+        onCancel={onCancel}
+        onSave={handleSave}
+        isSaving={isSaving}
+      />
 
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <TextInput
