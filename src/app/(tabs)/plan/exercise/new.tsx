@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   Alert,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -24,6 +25,7 @@ export default function NewExerciseScreen() {
 
   const [exerciseName, setExerciseName] = useState('');
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<MuscleGroup | null>(null);
+  const [isMuscleGroupDropdownOpen, setIsMuscleGroupDropdownOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   async function handleSave(): Promise<void> {
@@ -74,24 +76,51 @@ export default function NewExerciseScreen() {
         </Pressable>
       </View>
 
-      <View style={{ padding: spacing.m, gap: spacing.xl }}>
-        <View>
-          <Text style={[typography.caption, { marginBottom: spacing.s }]}>Name</Text>
-          <TextInput
-            style={styles.textInput}
-            value={exerciseName}
-            onChangeText={setExerciseName}
-            placeholder="e.g  Barbell Squat"
-            placeholderTextColor={colors.dark.textDisabled}
-            autoCorrect={false}
-            autoFocus
-          />
+      {/*
+        Tapping any blank area dismisses the keyboard AND closes the Muscle Group dropdown if
+        it's open — the standard "click-away" convention dropdowns/menus follow across apps.
+        This relies on React Native's gesture responder system: on touch-down, RN walks from
+        the deepest view outward and asks each one in turn "do you want to claim this touch?"
+        (onStartShouldSetResponder). Children get first refusal — Pressable and TextInput both
+        answer yes, so the Name field and the dropdown (trigger + option list) claim touches on
+        themselves and handle them directly, and those touches never reach this wrapper's
+        onPress. Only touches that land on plain View/Text (which don't claim responder status)
+        fall through to here, where both Keyboard.dismiss and the dropdown close fire.
+      */}
+      <Pressable
+        style={{ flex: 1 }}
+        onPress={() => {
+          Keyboard.dismiss();
+          setIsMuscleGroupDropdownOpen(false);
+        }}
+      >
+        <View style={{ padding: spacing.m, gap: spacing.xl }}>
+          <View>
+            <Text style={[typography.caption, { marginBottom: spacing.s }]}>Name</Text>
+            <TextInput
+              style={styles.textInput}
+              value={exerciseName}
+              onChangeText={setExerciseName}
+              placeholder="e.g  Barbell Squat"
+              placeholderTextColor={colors.dark.textDisabled}
+              autoCorrect={false}
+              autoFocus
+              // Refocusing Name is claimed by the TextInput itself (same responder-priority
+              // reasoning as above), so it needs its own handler to mirror the click-away close
+              onFocus={() => setIsMuscleGroupDropdownOpen(false)}
+            />
+          </View>
+          <View>
+            <Text style={[typography.caption, { marginBottom: spacing.s }]}>Muscle Group</Text>
+            <MuscleGroupDropdown
+              selected={selectedMuscleGroup}
+              onSelect={setSelectedMuscleGroup}
+              isOpen={isMuscleGroupDropdownOpen}
+              onOpenChange={setIsMuscleGroupDropdownOpen}
+            />
+          </View>
         </View>
-        <View>
-          <Text style={[typography.caption, { marginBottom: spacing.s }]}>Muscle Group</Text>
-          <MuscleGroupDropdown selected={selectedMuscleGroup} onSelect={setSelectedMuscleGroup} />
-        </View>
-      </View>
+      </Pressable>
     </KeyboardAvoidingView>
   );
 }
@@ -99,20 +128,27 @@ export default function NewExerciseScreen() {
 interface MuscleGroupDropdownProps {
   selected: MuscleGroup | null;
   onSelect: (muscleGroup: MuscleGroup) => void;
+  // isOpen lives in the parent (rather than local state) so the screen can close the dropdown
+  // from outside it — tapping away or refocusing Name — mirroring the controlled selected/onSelect pair
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
 }
 
-function MuscleGroupDropdown({ selected, onSelect }: MuscleGroupDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
+function MuscleGroupDropdown({ selected, onSelect, isOpen, onOpenChange }: MuscleGroupDropdownProps) {
   function handleSelect(muscleGroup: MuscleGroup): void {
     onSelect(muscleGroup);
-    setIsOpen(false);
+    onOpenChange(false);
   }
 
   return (
     <View>
       <Pressable
-        onPress={() => setIsOpen((prev) => !prev)}
+        onPress={() => {
+          // Direct taps on the trigger are claimed by this Pressable, so the wrapper's
+          // dismiss-on-tap-out never fires — dismiss here too so the open list isn't cramped
+          Keyboard.dismiss();
+          onOpenChange(!isOpen); // toggle
+        }}
         style={({ pressed }) => [styles.dropdownTrigger, pressed && layout.pressedButton]}
       >
         <Text style={[typography.body, !selected && { color: colors.dark.textDisabled }]}>

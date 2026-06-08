@@ -78,8 +78,8 @@ An Exercise is just a name and muscle group. Sets, reps, and load live on Workou
 **WorkoutCard is the single source of truth for workout appearance**
 Used identically in the Workouts section and inside expanded split day views. One component, consistent appearance everywhere.
 
-**Tab bar is self-contained**
-The custom tab bar does not use global style tokens. It has unique geometry — floating FAB, slot sizing, pressed states — that does not map to general-purpose tokens.
+**Tab bar is self-contained, but still draws from the `spacing` scale for safe-area padding**
+The custom tab bar does not use `layout`/`typography` style tokens — its floating FAB, slot sizing, and pressed states have unique geometry that doesn't map to general-purpose style objects. It does, however, use the numeric `spacing` scale for safe-area-aware padding: `paddingBottom: insets.bottom + spacing.s`, applied inline (not in `StyleSheet.create`, since `useSafeAreaInsets` is a runtime value), mirroring the `insets.top + spacing.s` convention used by every top bar in the app. `minHeight: 70` (not `height`) lets the bar grow to clear the device's home indicator / gesture bar without clipping its content.
 
 **Tab screens use useFocusEffect, stack screens use useEffect**
 Tab screens stay mounted when you switch tabs so plain `useEffect` with empty deps only runs once and will not reload data when you return. Stack screens unmount when popped so plain `useEffect` is correct there.
@@ -89,6 +89,11 @@ Any component or screen that renders its own top bar must apply `useSafeAreaInse
 
 **Thin screens, fat components**
 Screen files are wiring only — route params, storage calls, navigation. All UI and logic live in shared components. As much as possible, try to abstract out child components.
+
+**Own behaviour at the right level — don't over-prop or over-drill**
+Two related rules:
+1. If a prop always receives the same value at every call site, it is not a prop — move it inside the component. Examples: `onCreateExercise` was removed from `WorkoutEditorProps`, and `onCreateNew` was removed from `ExercisePickerProps`, because every caller passed `() => router.push('/plan/exercise/new')`; the navigation now lives inside each component via `useRouter`.
+2. When a prop IS genuinely variable, pass it from the *closest* ancestor that has all the context needed to implement the handler — not from further up the tree than necessary. Threading a prop through layers that don't use it is a sign the handler belongs lower down.
 
 **Standalone vs Embedded Workouts**
 `Workout.isStandalone` distinguishes two types. `true` means created in the Workouts section and shown there. `false` means embedded inside a specific split, never shown in the Workouts section. When a user assigns a standalone workout to a split day, a new copy is created with `isStandalone: false` and a fresh id — the original standalone is untouched. This fully decouples the two sections. Edits to a standalone workout after copying do not propagate to the split's embedded copy — splits are fixed snapshots.
@@ -192,6 +197,7 @@ For any `FlatList` or `SectionList` rendering more than ~20 items, apply this me
 3. **`useCallback` on handlers passed as item props** — e.g. `onDelete`; a new function reference here means `memo` always sees changed props and never bails out
 4. **`useMemo` on derived list data** — e.g. filtered/grouped arrays; avoids recomputing on renders unrelated to search or data changes
 5. **Id-based callback props** — type item handler props as `(id: string) => void` rather than `() => void`; this lets `renderItem` pass the stable handler directly instead of wrapping it in a per-item arrow (`() => handleDelete(item.id)`), which would be a new reference every render
+6. **Stabilise all deps of `renderItem`'s `useCallback` at the parent** — any value used inside `renderItem` (e.g. a `Set` for deduplication like `alreadyAddedIds`) must itself be `useMemo`-wrapped at the parent level; a plain `new Set(...)` creates a new reference every render, causing `renderItem` to recompute on every parent render regardless of whether the data changed
 
 See `plan/exercise/index.tsx` for the canonical example of this pattern.
 

@@ -1,7 +1,8 @@
-import { colors } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const TABS = [
   { name: 'index', label: 'Home', icon: 'home-outline', lib: 'Ion' },
@@ -9,7 +10,7 @@ const TABS = [
   { name: 'workout', label: null, icon: 'dumbbell', lib: 'MCI' },
   {
     name: 'log',
-    label: 'Past Workouts',
+    label: 'History',
     icon: 'book-open-outline',
     lib: 'MCI',
   },
@@ -22,11 +23,16 @@ const TABS = [
 ];
 
 export default function TabBar({ state, navigation }: BottomTabBarProps) {
+  const insets = useSafeAreaInsets();
+
   return (
     // outerWrapper must be positioned relative so the workout button can position absolutely against it
     <View style={styles.outerWrapper}>
       {/* --- The actual bar --- */}
-      <View style={styles.bar}>
+      {/* paddingBottom clears the device's home indicator / gesture bar — same insets.bottom +
+          spacing pattern used for paddingTop on every top bar in the app, applied inline since
+          useSafeAreaInsets is a runtime value and StyleSheet.create runs at module load time */}
+      <View style={[styles.bar, { paddingBottom: insets.bottom + spacing.s }]}>
         {/* maps each item (tab) in the TABS array to a Pressable (except workout tab) */}
         {TABS.map((tab) => {
           const isFocused: boolean = state.routes[state.index].name === tab.name;
@@ -77,8 +83,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.dark.backgroundSubtle,
     borderTopWidth: 0.5,
     borderTopColor: colors.dark.border,
-    height: 70,
-    paddingBottom: Platform.OS === 'ios' ? 16 : 10,
+    minHeight: 70, // floor for the content area; paddingBottom (set inline) grows the bar past this to clear the safe area
     paddingTop: 5,
   },
 
