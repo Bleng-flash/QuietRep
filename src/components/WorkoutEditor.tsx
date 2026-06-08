@@ -2,7 +2,13 @@ import ExercisePicker from '@/components/ExercisePicker';
 import WorkoutExerciseCard from '@/components/WorkoutExerciseCard';
 import { getAllExercises } from '@/storage';
 import { colors, layout, spacing, typography } from '@/styles';
-import type { Exercise, ResolvedWorkoutExercise, SetScheme, Workout, WorkoutExercise } from '@/types';
+import type {
+  EditableSet,
+  Exercise,
+  ResolvedEditableWorkoutExercise,
+  Workout,
+  WorkoutExercise,
+} from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
@@ -19,12 +25,25 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { v4 as uuid } from 'uuid';
 
 interface WorkoutEditorProps {
   initialWorkout?: Workout;
   onSave: (name: string, exercises: WorkoutExercise[]) => Promise<void>;
   onCancel: () => void;
   onDelete?: () => void;
+}
+
+// The editor's working shape: each exercise's sets carry an editor-only localKey, but the
+// Exercise join hasn't happened yet — i.e. ResolvedEditableWorkoutExercise minus `exercise`.
+type EditableWorkoutExercise = Omit<ResolvedEditableWorkoutExercise, 'exercise'>;
+
+// Attach a fresh localKey to every set when seeding editor state from stored data.
+function toEditableExercises(exercises: WorkoutExercise[]): EditableWorkoutExercise[] {
+  return exercises.map((workoutExercise) => ({
+    ...workoutExercise,
+    sets: workoutExercise.sets.map((setScheme) => ({ ...setScheme, localKey: uuid() })),
+  }));
 }
 
 export default function WorkoutEditor({
@@ -37,8 +56,9 @@ export default function WorkoutEditor({
   const insets = useSafeAreaInsets();
 
   const [workoutName, setWorkoutName] = useState(initialWorkout?.name ?? '');
-  const [workoutExercises, setWorkoutExercises] = useState<WorkoutExercise[]>(
-    initialWorkout?.exercises ?? [],
+  // Seed with localKeys attached so set rows have stable identities from the first render.
+  const [workoutExercises, setWorkoutExercises] = useState<EditableWorkoutExercise[]>(() =>
+    toEditableExercises(initialWorkout?.exercises ?? []),
   );
   const [allExercises, setAllExercises] = useState<Exercise[]>([]);
   const [isPickerVisible, setIsPickerVisible] = useState(false);
@@ -62,17 +82,17 @@ export default function WorkoutEditor({
   );
 
   // Pre-build an id→Exercise map once so the join below is O(1) per entry rather than
-  // O(n) — without this, resolving each WorkoutExercise would call .find() across all
+  // O(n) — without this, resolving each EditableWorkoutExercise would call .find() across all
   // exercises on every render, which is O(n²) across the whole list.
   const exerciseMap = useMemo(
     () => new Map(allExercises.map((exercise) => [exercise.id, exercise])),
     [allExercises],
   );
 
-  // Join WorkoutExercise (sets data) with Exercise (display data) once per render cycle.
-  // WorkoutExerciseCard receives a single ResolvedWorkoutExercise prop instead of two
+  // Join EditableWorkoutExercise (sets data) with Exercise (display data) once per render cycle.
+  // WorkoutExerciseCard receives a single ResolvedEditableWorkoutExercise prop instead of two
   // separate props, and the O(n²) .find()-per-card in the render loop is eliminated.
-  const resolvedWorkoutExercises: ResolvedWorkoutExercise[] = useMemo(
+  const resolvedWorkoutExercises: ResolvedEditableWorkoutExercise[] = useMemo(
     () =>
       workoutExercises.map((workoutExercise) => ({
         ...workoutExercise,
@@ -82,9 +102,9 @@ export default function WorkoutEditor({
   );
 
   function handleAddExercise(exercise: Exercise) {
-    const newEntry: WorkoutExercise = {
+    const newEntry: EditableWorkoutExercise = {
       exerciseId: exercise.id,
-      sets: [{ reps: 0, load: 0 }],
+      sets: [{ reps: 0, load: 0, localKey: uuid() }],
     };
     setWorkoutExercises((prev) => [...prev, newEntry]);
   }
@@ -93,7 +113,7 @@ export default function WorkoutEditor({
     setWorkoutExercises((prev) => prev.filter((_, index) => index !== exerciseIndex));
   }
 
-  function handleSetsChange(exerciseIndex: number, updatedSets: SetScheme[]) {
+  function handleSetsChange(exerciseIndex: number, updatedSets: EditableSet[]) {
     setWorkoutExercises((prev) =>
       prev.map((workoutExercise, index) =>
         index === exerciseIndex ? { ...workoutExercise, sets: updatedSets } : workoutExercise,
@@ -143,7 +163,16 @@ export default function WorkoutEditor({
     }
     setIsSaving(true);
     try {
-      await onSave(workoutName.trim(), workoutExercises);
+      // Strip the editor-only localKey so storage receives plain SetScheme ({ reps, load }).
+      // This is the single guard keeping localKey out of persisted data.
+      const exercisesToSave: WorkoutExercise[] = workoutExercises.map((workoutExercise) => ({
+        ...workoutExercise,
+        sets: workoutExercise.sets.map((setScheme) => ({
+          reps: setScheme.reps,
+          load: setScheme.load,
+        })),
+      }));
+      await onSave(workoutName.trim(), exercisesToSave);
     } finally {
       setIsSaving(false);
     }

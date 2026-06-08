@@ -134,6 +134,14 @@ When the same joined shape is consumed by more than one component, define `type 
 
 The `| undefined` on the related entity is intentional — it covers dangling FK references (e.g., a user-created exercise deleted from the catalog while still present in a workout). The child handles this gracefully with a fallback. See `ResolvedWorkoutExercise` in `src/types/index.ts` and `WorkoutEditor` → `WorkoutExerciseCard` for the canonical example.
 
+**Stable identity keys for stateful list rows — `localKey` pattern**
+
+When a list-item component holds local state derived from props (e.g., `SetRow`'s `repsText`/`loadText` buffers, seeded once at mount via `useState` and never re-synced — see `src/components/SetRow.tsx`), keying the list by array index breaks under insertion, removal, or reorder. React reuses component instances by *position*: removing item 0 shifts items 1..n into slots 0..n-1, but each reused instance keeps its stale local state, which now describes the wrong logical item. The underlying data is correct (verified by saving and reopening) — only the display is wrong, and a row appears to vanish from the wrong end of the list.
+
+Fix: give each item a stable, client-generated `localKey` (via `uuid()`) and key the list by it instead of by array index, so each component instance stays bound to the same logical item across any reordering operation. `localKey` is a render-only identity — generated when editor state is seeded or created, and stripped before the data reaches storage, so persisted entities keep their canonical `{ reps, load }` shape.
+
+This is implemented as a pair of frontend-only view models — `EditableSet` and `ResolvedEditableWorkoutExercise` in `src/types/index.ts` — following the exact "frontend view model, no DB counterpart" framing as `ResolvedWorkoutExercise` above (do not add `localKey` directly to `SetScheme`; that would blur the "types mirror the backend shape" contract — see Types are designed for backend transition below). See `WorkoutEditor` → `WorkoutExerciseCard` → `SetRow` for the canonical example, and apply the same approach anywhere else a list of stateful rows can be reordered or have items removed (e.g., the live session view in Iteration 2).
+
 ## Code Rules — Must Follow in Every Generation
 
 ### Naming

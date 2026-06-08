@@ -1,14 +1,15 @@
 import SetRow from '@/components/SetRow';
 import { colors, layout, spacing, typography } from '@/styles';
-import type { ResolvedWorkoutExercise, SetScheme } from '@/types';
+import type { EditableSet, ResolvedEditableWorkoutExercise, SetScheme } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { v4 as uuid } from 'uuid';
 
 interface WorkoutExerciseCardProps {
-  resolvedWorkoutExercise: ResolvedWorkoutExercise;
+  resolvedWorkoutExercise: ResolvedEditableWorkoutExercise;
   isFirst: boolean;
   isLast: boolean;
-  onSetsChange: (sets: SetScheme[]) => void;
+  onSetsChange: (sets: EditableSet[]) => void;
   onRemove: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
@@ -28,19 +29,27 @@ export default function WorkoutExerciseCard({
   const { exercise, sets } = resolvedWorkoutExercise;
 
   function handleSetChange(setIndex: number, updated: SetScheme) {
+    // SetRow emits a plain SetScheme ({ reps, load }) — spread currentSet first so the
+    // EditableSet's localKey survives the merge instead of being dropped.
     onSetsChange(
-      sets.map((currentSet: SetScheme, index: number) => (index === setIndex ? updated : currentSet)),
+      sets.map((currentSet: EditableSet, index: number) =>
+        index === setIndex ? { ...currentSet, ...updated } : currentSet,
+      ),
     );
   }
 
   // In JavaScript/TypeScript, _ is a convention for a parameter you're required to declare but intentionally don't use
   function handleRemoveSet(setIndex: number) {
-    onSetsChange(sets.filter((_: SetScheme, index: number) => index !== setIndex));
+    onSetsChange(sets.filter((_: EditableSet, index: number) => index !== setIndex));
   }
 
   function handleAddSet() {
     const lastSet = sets[sets.length - 1];
-    const newSet: SetScheme = lastSet ? { ...lastSet } : { reps: 0, load: 0 };
+    // Copy the previous set's values but mint a fresh localKey — the new set is a distinct
+    // identity, so it must not share a key (and thus a SetRow instance) with any existing set.
+    const newSet: EditableSet = lastSet
+      ? { ...lastSet, localKey: uuid() }
+      : { reps: 0, load: 0, localKey: uuid() };
     onSetsChange([...sets, newSet]);
   }
 
@@ -94,7 +103,10 @@ export default function WorkoutExerciseCard({
 
       {sets.map((setScheme, setIndex) => (
         <SetRow
-          key={setIndex}
+          // Key by the set's stable localKey (not its array index) so each SetRow instance
+          // stays bound to the same logical set across removals/reorders — this is what
+          // prevents SetRow's local text-buffer state from sticking to the wrong set.
+          key={setScheme.localKey}
           setIndex={setIndex}
           setScheme={setScheme}
           isOnly={sets.length === 1}
