@@ -44,7 +44,6 @@ export default function EditWorkoutScreen() {
       initialWorkout={workout}
       onSave={handleSave}
       onCancel={() => router.back()}
-      onCreateExercise={() => router.push('/plan/exercise/new')}
       onDelete={handleDelete}
     />
   );

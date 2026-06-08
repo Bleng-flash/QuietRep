@@ -95,9 +95,6 @@ export default function ExerciseListScreen() {
             autoCorrect={false}
             clearButtonMode="while-editing"
           />
-          <Pressable onPress={() => {}} style={({ pressed }) => pressed && layout.pressedButton}>
-            <Ionicons name="funnel-outline" size={24} color={colors.dark.textSubtle} />
-          </Pressable>
         </View>
 
         <SectionList

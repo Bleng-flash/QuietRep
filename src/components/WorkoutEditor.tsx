@@ -24,7 +24,6 @@ interface WorkoutEditorProps {
   initialWorkout?: Workout;
   onSave: (name: string, exercises: WorkoutExercise[]) => Promise<void>;
   onCancel: () => void;
-  onCreateExercise: () => void;
   onDelete?: () => void;
 }
 
@@ -32,7 +31,6 @@ export default function WorkoutEditor({
   initialWorkout,
   onSave,
   onCancel,
-  onCreateExercise,
   onDelete,
 }: WorkoutEditorProps) {
   const isEditMode = initialWorkout !== undefined;
@@ -56,8 +54,11 @@ export default function WorkoutEditor({
     }, []),
   );
 
-  const alreadyAddedIds = new Set(
-    workoutExercises.map((workoutExercise) => workoutExercise.exerciseId),
+  // Stable Set reference — only recomputes when workoutExercises changes, so ExercisePicker's
+  // renderItem useCallback dep doesn't fire on every WorkoutEditor re-render
+  const alreadyAddedIds = useMemo(
+    () => new Set(workoutExercises.map((workoutExercise) => workoutExercise.exerciseId)),
+    [workoutExercises],
   );
 
   // Pre-build an id→Exercise map once so the join below is O(1) per entry rather than
@@ -237,7 +238,6 @@ export default function WorkoutEditor({
         allExercises={allExercises}
         alreadyAddedIds={alreadyAddedIds}
         onSelect={handleAddExercise}
-        onCreateNew={onCreateExercise}
         onClose={() => setIsPickerVisible(false)}
       />
     </KeyboardAvoidingView>

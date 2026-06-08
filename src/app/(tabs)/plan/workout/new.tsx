@@ -21,7 +21,6 @@ export default function NewWorkoutScreen() {
     <WorkoutEditor
       onSave={handleSave}
       onCancel={handleCancel}
-      onCreateExercise={() => router.push('/plan/exercise/new')}
     />
   );
 }

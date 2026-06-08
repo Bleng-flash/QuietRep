@@ -2,7 +2,8 @@ import { colors, layout, picker, spacing, typography } from '@/styles';
 import type { Exercise } from '@/types';
 import { matchesSearchQuery } from '@/utils/exercise';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useRouter } from 'expo-router';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { FlatList, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 interface ExercisePickerProps {
@@ -10,7 +11,6 @@ interface ExercisePickerProps {
   allExercises: Exercise[];
   alreadyAddedIds: Set<string>;
   onSelect: (exercise: Exercise) => void;
-  onCreateNew: () => void;
   onClose: () => void;
 }
 
@@ -19,29 +19,34 @@ export default function ExercisePicker({
   allExercises,
   alreadyAddedIds,
   onSelect,
-  onCreateNew,
   onClose,
 }: ExercisePickerProps) {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredExercises: Exercise[] = allExercises.filter((exercise) =>
-    matchesSearchQuery(exercise, searchQuery)
+  const filteredExercises = useMemo(
+    () => allExercises.filter((exercise) => matchesSearchQuery(exercise, searchQuery)),
+    [allExercises, searchQuery],
   );
 
-  function handleClose() {
+  const handleClose = useCallback(() => {
     setSearchQuery('');
-    onClose();
-  }
+    onClose(); // set ExercisePicker to not visible
+  }, [onClose]);
 
-  function handleSelect(exercise: Exercise) {
-    onSelect(exercise);
-    handleClose();
-  }
+  // id-based — stable reference; looks up Exercise once per user tap (not per render)
+  const handleSelect = useCallback((id: string) => {
+    const exercise = allExercises.find((allExercise) => allExercise.id === id);
+    if (exercise) {
+      onSelect(exercise);
+      handleClose();
+    }
+  }, [allExercises, onSelect, handleClose]);
 
-  function handleCreateNew() {
+  const handleCreateNew = useCallback(() => {
     handleClose();
-    onCreateNew();
-  }
+    router.push('/plan/exercise/new');
+  }, [handleClose, router]);
 
   return (
     <Modal
@@ -75,25 +80,16 @@ export default function ExercisePicker({
           data={filteredExercises}
           keyExtractor={(exercise) => exercise.id}
           contentContainerStyle={{ paddingBottom: spacing.xxl }}
-          renderItem={({ item: exercise }) => {
-            const alreadyAdded = alreadyAddedIds.has(exercise.id);
-            return (
-              <Pressable
-                onPress={() => !alreadyAdded && handleSelect(exercise)}
-                style={({ pressed }) => [
-                  styles.exerciseItem,
-                  alreadyAdded && { opacity: 0.4 },
-                  pressed && !alreadyAdded && layout.pressedCard,
-                ]}
-              >
-                <View style={{ flex: 1 }}>
-                  <Text style={typography.body}>{exercise.name}</Text>
-                  <Text style={typography.caption}>{exercise.muscleGroup}</Text>
-                </View>
-                {alreadyAdded && <Text style={styles.addedBadge}>Added</Text>}
-              </Pressable>
-            );
-          }}
+          renderItem={useCallback(
+            ({ item }: { item: Exercise }) => (
+              <ExercisePickerItem
+                exercise={item}
+                isAdded={alreadyAddedIds.has(item.id)}
+                onSelect={handleSelect}
+              />
+            ),
+            [handleSelect, alreadyAddedIds],
+          )}
           ListEmptyComponent={
             <Text style={[typography.caption, { textAlign: 'center', marginTop: spacing.xl }]}>
               No exercises found
@@ -113,6 +109,35 @@ export default function ExercisePicker({
     </Modal>
   );
 }
+
+interface ExercisePickerItemProps {
+  exercise: Exercise;
+  isAdded: boolean;
+  onSelect: (id: string) => void;
+}
+
+const ExercisePickerItem = memo(function ExercisePickerItem({
+  exercise,
+  isAdded,
+  onSelect,
+}: ExercisePickerItemProps) {
+  return (
+    <Pressable
+      onPress={() => !isAdded && onSelect(exercise.id)}
+      style={({ pressed }) => [
+        styles.exerciseItem,
+        isAdded && { opacity: 0.4 },
+        pressed && !isAdded && layout.pressedCard,
+      ]}
+    >
+      <View style={{ flex: 1 }}>
+        <Text style={typography.body}>{exercise.name}</Text>
+        <Text style={typography.caption}>{exercise.muscleGroup}</Text>
+      </View>
+      {isAdded && <Text style={styles.addedBadge}>Added</Text>}
+    </Pressable>
+  );
+});
 
 const styles = StyleSheet.create({
   exerciseItem: {
