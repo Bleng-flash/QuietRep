@@ -1,0 +1,167 @@
+import WorkoutCard from '@/components/WorkoutCard';
+import WorkoutPicker from '@/components/WorkoutPicker';
+import { addWorkoutToSplit, deleteWorkout, updateSplit } from '@/storage';
+import { colors, layout, spacing, typography } from '@/styles';
+import type { DayKey, Exercise, Split, Workout } from '@/types';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+
+interface DayWorkoutListProps {
+  split: Split;
+  day: DayKey; // the currently selected day
+  dayWorkouts: Workout[]; // that day's workouts, already resolved from ids
+  standaloneWorkouts: Workout[]; // candidates for the "add existing" picker
+  allExercises: Exercise[];
+  onChanged: () => void; // ask the owning screen to reload after a storage mutation
+}
+
+// The inline section revealed beneath a SplitCard when a day is selected. Owns all per-day
+// workout mutations directly (add / remove) and the picker, so the parent only needs to be
+// told when to refresh. Editing/creating a workout navigates to the workout editor screen.
+export default function DayWorkoutList({
+  split,
+  day,
+  dayWorkouts,
+  standaloneWorkouts,
+  allExercises,
+  onChanged,
+}: DayWorkoutListProps) {
+  const router = useRouter();
+  const [isPickerVisible, setIsPickerVisible] = useState(false);
+
+  // Editing a day's workout always opens the same editor screen, so the navigation lives here
+  // rather than being threaded down as a prop.
+  function handleEditWorkout(workoutId: string) {
+    router.push(`/plan/workout/${workoutId}`);
+  }
+
+  // Assign an existing standalone workout to this day as a fully decoupled copy — editing or
+  // deleting it never touches the original. The exercises are deep-copied so the embedded copy
+  // shares no array references with the source; addWorkoutToSplit persists it as isStandalone: false.
+  async function handleAddStandalone(sourceWorkout: Workout) {
+    await addWorkoutToSplit(split.id, day, {
+      name: sourceWorkout.name,
+      exercises: sourceWorkout.exercises.map((workoutExercise) => ({
+        exerciseId: workoutExercise.exerciseId,
+        sets: workoutExercise.sets.map((set) => ({ reps: set.reps, load: set.load })),
+      })),
+    });
+    onChanged();
+  }
+
+  // Build a brand-new embedded workout for this day — the editor screen creates it and attaches
+  // it via the splitId/day query params, so we just navigate (focus reload handles the refresh).
+  function handleCreateNew() {
+    router.push(`/plan/workout/new?splitId=${split.id}&day=${day}`);
+  }
+
+  async function handleDeleteWorkout(workoutId: string) {
+    await updateSplit({
+      ...split,
+      days: { ...split.days, [day]: split.days[day].filter((id) => id !== workoutId) },
+    });
+    // The embedded copy is referenced only by this day, so removing the link also deletes it.
+    await deleteWorkout(workoutId);
+    onChanged();
+  }
+
+  function confirmRemove(workout: Workout) {
+    Alert.alert('Remove workout?', `Remove "${workout.name}" from this day?`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Remove', style: 'destructive', onPress: () => handleDeleteWorkout(workout.id) },
+    ]);
+  }
+
+  return (
+    <View>
+      {dayWorkouts.length === 0 ? (
+        <Text style={[typography.caption, styles.emptyHint]}>No workouts on this day yet.</Text>
+      ) : (
+        dayWorkouts.map((workout) => (
+          <View key={workout.id} style={layout.row}>
+            <View style={styles.cardSlot}>
+              <WorkoutCard
+                workout={workout}
+                allExercises={allExercises}
+                onPress={() => handleEditWorkout(workout.id)}
+              />
+            </View>
+            <Pressable
+              onPress={() => confirmRemove(workout)}
+              hitSlop={8}
+              style={({ pressed }) => [styles.removeButton, pressed && layout.pressedButton]}
+            >
+              <Ionicons name="close" size={18} color={colors.dark.error} />
+            </Pressable>
+          </View>
+        ))
+      )}
+
+      {/* The add button aligns to the workout-card column only — the empty spacer reserves the
+          remove (✕) column so adding never sits under the opposite-meaning delete action. */}
+      <View style={[layout.row, styles.addRow]}>
+        <Pressable
+          onPress={() => setIsPickerVisible(true)}
+          style={({ pressed }) => [styles.addButton, pressed && layout.pressedButton]}
+        >
+          <Ionicons name="add" size={18} color={colors.dark.primary} />
+          <Text style={styles.addLabel}>Add workout</Text>
+        </Pressable>
+        <View style={styles.removeColumn} />
+      </View>
+
+      <WorkoutPicker
+        visible={isPickerVisible}
+        standaloneWorkouts={standaloneWorkouts}
+        allExercises={allExercises}
+        onSelect={handleAddStandalone}
+        onCreateNew={handleCreateNew}
+        onClose={() => setIsPickerVisible(false)}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  cardSlot: {
+    flex: 1,
+  },
+  // Fixed-width remove column — 36 matches SetRow's remove column for app-wide consistency,
+  // and the add button reserves the same width (removeColumn) so the two line up.
+  removeButton: {
+    width: 36,
+    alignItems: 'center',
+    paddingVertical: spacing.s,
+  },
+  removeColumn: {
+    width: 36,
+  },
+  emptyHint: {
+    paddingVertical: spacing.s,
+  },
+  addRow: {
+    marginTop: spacing.xs,
+  },
+  // Compact dashed CTA — mirrors WorkoutEditor's "Add exercise" button at a smaller, nested scale.
+  // flex: 1 so it spans the workout-card column only, not the reserved remove column.
+  addButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    borderWidth: 1,
+    borderColor: colors.dark.primary,
+    borderStyle: 'dashed',
+    borderRadius: 10,
+    paddingVertical: spacing.s,
+    backgroundColor: colors.dark.primarySubtle,
+  },
+  addLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.dark.primary,
+  },
+});

@@ -1,116 +1,189 @@
 import DayCircle from '@/components/DayCircle';
-import WorkoutCard from '@/components/WorkoutCard';
+import DayWorkoutList from '@/components/DayWorkoutList';
+import NamePromptModal from '@/components/NamePromptModal';
 import { DAY_KEYS, DAY_LABELS, DAY_NAMES } from '@/constants/days';
+import {
+  clearActiveSplit,
+  deleteSplit,
+  deleteWorkoutsByIds,
+  setActiveSplit,
+  updateSplit,
+} from '@/storage';
 import { colors, layout, spacing, typography } from '@/styles';
 import type { DayKey, Exercise, Split, Workout } from '@/types';
-import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-
-// ─── Component ────────────────────────────────────────────────────────────────
+import { Ionicons } from '@expo/vector-icons';
+import { useMemo, useState } from 'react';
+import { Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
 interface SplitCardProps {
   split: Split;
   isActive: boolean;
-  workouts: Workout[];
+  allWorkouts: Workout[]; // every workout — used to resolve each day's embedded ids and the picker list
   allExercises: Exercise[];
-  onPress: () => void;
-  onWorkoutPress: (workout: Workout) => void;
+  onChanged: () => void; // ask the owning screen to reload after a storage mutation
 }
 
+// A split rendered inline on the Plan screen. Tapping a DayCircle reveals that day's workouts
+// (via DayWorkoutList) where they can be added/edited/removed. The card owns its split-level
+// mutations (rename, set active, delete) directly and asks the screen to refresh via onChanged.
 export default function SplitCard({
   split,
   isActive,
-  workouts,
+  allWorkouts,
   allExercises,
-  onPress,
-  onWorkoutPress,
+  onChanged,
 }: SplitCardProps) {
   const [selectedDay, setSelectedDay] = useState<DayKey | null>(null);
+  const [isRenameOpen, setIsRenameOpen] = useState(false);
+
+  // Resolve embedded day-workout ids to Workout objects in O(1) per lookup.
+  const workoutMap = useMemo(
+    () => new Map(allWorkouts.map((workout) => [workout.id, workout])),
+    [allWorkouts],
+  );
+  // Only standalone workouts can be assigned to a day (embedded copies belong to their own split).
+  const standaloneWorkouts = useMemo(
+    () => allWorkouts.filter((workout) => workout.isStandalone),
+    [allWorkouts],
+  );
+  const selectedDayWorkouts = useMemo(() => {
+    if (selectedDay === null) return [];
+    return split.days[selectedDay]
+      .map((workoutId) => workoutMap.get(workoutId))
+      .filter((workout): workout is Workout => workout !== undefined); // skip dangling ids
+  }, [selectedDay, split.days, workoutMap]);
 
   function handleDayPress(day: DayKey) {
     setSelectedDay((previousSelectedDay) => (previousSelectedDay === day ? null : day));
   }
 
-  const selectedWorkouts =
-    selectedDay !== null
-      ? split.days[selectedDay]
-          .map((id) => workouts.find((workout) => workout.id === id))
-          .filter((workout): workout is Workout => Boolean(workout))
-      : [];
+  async function handleRename(name: string) {
+    setIsRenameOpen(false);
+    await updateSplit({ ...split, name });
+    onChanged();
+  }
+
+  // Toggle: turning it on makes this the active split (replacing any other, since active is a
+  // single storage key); turning it off clears the active split so none is active.
+  async function handleToggleActive() {
+    if (isActive) {
+      await clearActiveSplit();
+    } else {
+      await setActiveSplit(split.id);
+    }
+    onChanged();
+  }
+
+  async function handleDeleteSplit() {
+    // Cascade: the embedded workout copies are referenced only by this split, so delete them
+    // first (avoids orphans) then remove the split itself.
+    const embeddedWorkoutIds = DAY_KEYS.flatMap((day) => split.days[day]);
+    await deleteWorkoutsByIds(embeddedWorkoutIds);
+    await deleteSplit(split.id);
+    onChanged();
+  }
+
+  function confirmDelete() {
+    Alert.alert('Delete split?', `Delete "${split.name}" and its workouts? This cannot be undone.`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: handleDeleteSplit },
+    ]);
+  }
 
   return (
     <View style={[layout.card, isActive && styles.activeCard]}>
-      {/* ── Header: name + badge — tapping navigates to split detail ── */}
-      <Pressable
-        onPress={onPress}
-        style={({ pressed }) => [layout.rowBetween, pressed && layout.pressedCard]}
-      >
-        <Text style={typography.subheading} numberOfLines={1}>
-          {split.name}
-        </Text>
-        {isActive && (
-          <View style={styles.activeBadge}>
-            <Text style={styles.activeBadgeText}>Active</Text>
-          </View>
-        )}
-      </Pressable>
+      {/* ── Header: name (tap to rename) + active toggle + delete ── */}
+      <View style={layout.rowBetween}>
+        <Pressable
+          onPress={() => setIsRenameOpen(true)}
+          hitSlop={4}
+          style={({ pressed }) => [styles.nameSlot, pressed && layout.pressedButton]}
+        >
+          <Text style={typography.subheading} numberOfLines={1}>
+            {split.name}
+          </Text>
+        </Pressable>
+
+        <View style={styles.headerActions}>
+          <Text style={styles.activeLabel}>Active</Text>
+          <Switch
+            value={isActive}
+            onValueChange={handleToggleActive}
+            trackColor={{ false: colors.dark.border, true: colors.dark.primaryMuted }}
+            thumbColor={colors.dark.text}
+            ios_backgroundColor={colors.dark.border}
+          />
+          <Pressable
+            onPress={confirmDelete}
+            hitSlop={8}
+            style={({ pressed }) => [pressed && layout.pressedButton]}
+          >
+            <Ionicons name="trash-outline" size={18} color={colors.dark.error} />
+          </Pressable>
+        </View>
+      </View>
 
       {/* ── Day circles ── */}
       <View style={styles.dayRow}>
-        {DAY_KEYS.map((day) => {
-          const hasWorkouts: boolean = split.days[day].length > 0;
-          const isSelected: boolean = selectedDay === day;
-          const circleState = isSelected ? 'selected' : hasWorkouts ? 'workout' : 'rest';
-
-          return (
-            <DayCircle
-              key={day}
-              label={DAY_LABELS[day]}
-              state={circleState}
-              onPress={() => handleDayPress(day)}
-            />
-          );
-        })}
+        {DAY_KEYS.map((day) => (
+          <DayCircle
+            key={day}
+            label={DAY_LABELS[day]}
+            isSelected={selectedDay === day}
+            isRest={split.days[day].length === 0}
+            onPress={() => handleDayPress(day)}
+          />
+        ))}
       </View>
 
-      {/* ── Expanded day workouts ── */}
-      {selectedDay !== null && selectedWorkouts.length > 0 && (
+      {/* ── Expanded selected day ── */}
+      {selectedDay !== null && (
         <View style={styles.expandedSection}>
-          <View style={styles.divider} />
+          <View style={[layout.divider, styles.dividerSpacing]} />
           <Text style={styles.expandedDayLabel}>{DAY_NAMES[selectedDay]}</Text>
-          {selectedWorkouts.map((workout) => (
-            <View key={workout.id} style={styles.expandedWorkout}>
-              <WorkoutCard
-                workout={workout}
-                allExercises={allExercises}
-                onPress={() => onWorkoutPress(workout)}
-              />
-            </View>
-          ))}
+          <DayWorkoutList
+            split={split}
+            day={selectedDay}
+            dayWorkouts={selectedDayWorkouts}
+            standaloneWorkouts={standaloneWorkouts}
+            allExercises={allExercises}
+            onChanged={onChanged}
+          />
         </View>
       )}
+
+      <NamePromptModal
+        visible={isRenameOpen}
+        title="Rename split"
+        initialValue={split.name}
+        confirmLabel="Save"
+        onConfirm={handleRename}
+        onClose={() => setIsRenameOpen(false)}
+      />
     </View>
   );
 }
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   activeCard: {
     borderLeftWidth: 3,
     borderLeftColor: colors.dark.primary,
   },
-  // ── Active badge ──
-  activeBadge: {
-    backgroundColor: colors.dark.primarySubtle,
-    borderRadius: 6,
-    paddingHorizontal: spacing.s,
-    paddingVertical: spacing.xs,
+
+  // ── Header ──
+  nameSlot: {
+    flex: 1,
+    marginRight: spacing.s,
   },
-  activeBadgeText: {
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.s,
+  },
+  activeLabel: {
     fontSize: 11,
     fontWeight: '600',
-    color: colors.dark.primary,
+    color: colors.dark.textSubtle,
     letterSpacing: 0.4,
   },
 
@@ -125,9 +198,7 @@ const styles = StyleSheet.create({
   expandedSection: {
     marginTop: spacing.m,
   },
-  divider: {
-    height: 1,
-    backgroundColor: colors.dark.border,
+  dividerSpacing: {
     marginBottom: spacing.m,
   },
   expandedDayLabel: {
@@ -136,8 +207,5 @@ const styles = StyleSheet.create({
     color: colors.dark.textSubtle,
     marginBottom: spacing.s,
     letterSpacing: 0.3,
-  },
-  expandedWorkout: {
-    marginBottom: spacing.s,
   },
 });

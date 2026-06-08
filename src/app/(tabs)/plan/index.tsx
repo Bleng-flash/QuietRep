@@ -3,12 +3,14 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import NamePromptModal from '@/components/NamePromptModal';
 import SectionHeader from '@/components/SectionHeader';
 import SplitCard from '@/components/SplitCard';
 import WorkoutCard from '@/components/WorkoutCard';
-import { getActiveSplitId, getAllExercises, getSplits, getWorkouts } from '@/storage';
+import { addSplit, getActiveSplitId, getAllExercises, getSplits, getWorkouts } from '@/storage';
 import { colors, layout, spacing, typography } from '@/styles';
 import type { Exercise, Split, Workout } from '@/types';
+import { createEmptyDays } from '@/utils/split';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function PlanScreen() {
@@ -19,26 +21,36 @@ export default function PlanScreen() {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [activeSplitId, setActiveSplitId] = useState<string | null>(null);
+  const [isNewSplitOpen, setIsNewSplitOpen] = useState(false);
   // Only standalone workouts are shown in the Workouts section.
   const standaloneWorkouts = workouts.filter((workout) => workout.isStandalone);
 
+  // Defined at component level (not inline in useFocusEffect) so SplitCards can call it as their
+  // onChanged refresh after inline mutations that don't navigate away.
+  const load = useCallback(async () => {
+    const [splits, workouts, exercises, activeSplitId] = await Promise.all([
+      getSplits(),
+      getWorkouts(),
+      getAllExercises(),
+      getActiveSplitId(),
+    ]);
+    setSplits(splits);
+    setWorkouts(workouts);
+    setExercises(exercises);
+    setActiveSplitId(activeSplitId);
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
-      async function load() {
-        const [splits, workouts, exercises, activeSplitId] = await Promise.all([
-          getSplits(),
-          getWorkouts(),
-          getAllExercises(),
-          getActiveSplitId(),
-        ]);
-        setSplits(splits);
-        setWorkouts(workouts);
-        setExercises(exercises);
-        setActiveSplitId(activeSplitId);
-      }
       load();
-    }, []),
+    }, [load]),
   );
+
+  async function handleCreateSplit(name: string) {
+    setIsNewSplitOpen(false);
+    await addSplit({ name, days: createEmptyDays() });
+    await load();
+  }
 
   return (
     <ScrollView
@@ -47,7 +59,11 @@ export default function PlanScreen() {
       showsVerticalScrollIndicator={false}
     >
       {/* ── Splits ── */}
-      <SectionHeader title="Splits" onButtonPress={() => {}} buttonLabel="New Split" />
+      <SectionHeader
+        title="Splits"
+        onButtonPress={() => setIsNewSplitOpen(true)}
+        buttonLabel="New Split"
+      />
 
       {splits.length === 0 ? (
         <EmptyState message="No splits yet. Create one to get started." />
@@ -62,10 +78,9 @@ export default function PlanScreen() {
             <SplitCard
               split={item}
               isActive={item.id === activeSplitId}
-              workouts={workouts}
+              allWorkouts={workouts}
               allExercises={exercises}
-              onPress={() => {}}
-              onWorkoutPress={(workout) => {}}
+              onChanged={load}
             />
           )}
           ItemSeparatorComponent={() => <View style={{ height: spacing.s }} />}
@@ -113,6 +128,15 @@ export default function PlanScreen() {
       </Pressable>
 
       <View style={{ height: spacing.xl }} />
+
+      <NamePromptModal
+        visible={isNewSplitOpen}
+        title="New split"
+        initialValue=""
+        confirmLabel="Create"
+        onConfirm={handleCreateSplit}
+        onClose={() => setIsNewSplitOpen(false)}
+      />
     </ScrollView>
   );
 }

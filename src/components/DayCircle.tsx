@@ -1,22 +1,26 @@
 import { colors } from '@/styles';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-type DayCircleState = 'rest' | 'workout' | 'selected';
-
 interface DayCircleProps {
   label: string;
-  state: DayCircleState;
+  isSelected: boolean; // user has tapped this day to reveal its workouts
+  isRest: boolean; // day holds zero workouts
   onPress: () => void;
 }
 
-export default function DayCircle({ label, state, onPress }: DayCircleProps) {
+export default function DayCircle({ label, isSelected, isRest, onPress }: DayCircleProps) {
+  // isSelected gets priority visually; otherwise a rest day is a muted outline and a day with
+  // workouts gets the subtle filled treatment.
+  const circleStyle = isSelected ? styles.selected : isRest ? styles.rest : styles.workout;
+  const labelStyle = isSelected
+    ? styles.selectedLabel
+    : isRest
+      ? styles.restLabel
+      : styles.workoutLabel;
+
   return (
-    <Pressable
-      onPress={onPress}
-      hitSlop={4}
-      style={[styles.circle, styles[state]]}
-    >
-      <Text style={[styles.label, styles[`${state}Label`]]}>{label}</Text>
+    <Pressable onPress={onPress} hitSlop={4} style={[styles.circle, circleStyle]}>
+      <Text style={[styles.label, labelStyle]}>{label}</Text>
     </Pressable>
   );
 }

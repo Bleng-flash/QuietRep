@@ -34,12 +34,12 @@ Now, we are in iteration 1. The table below details our progress within iteratio
 | 5 | Shared components — DayCircle, SectionHeader, WorkoutCard, SplitCard | Done |
 | 6 | Plan index screen | Done |
 | 7 | WorkoutEditor — create and edit workouts | Done |
-| 8 | SplitEditor — create and edit splits | Not started |
+| 8 | Split section — inline split create/edit/delete on the Plan screen | Done |
 | 9 | Exercise screens — new exercise, view all exercises | Done |
 
 ## Current State
 
-Steps 1–7 and 9 are complete. The following is fully functional:
+Steps 1–9 are complete — **iteration 1 is feature-complete**. The following is fully functional:
 
 - Plan index screen with Splits, Workouts, and Exercises sections
 - Full WorkoutEditor flow — create and edit workouts, add/remove/reorder exercises, configure sets and reps, exercise picker modal with live search
@@ -53,17 +53,21 @@ Steps 1–7 and 9 are complete. The following is fully functional:
 - `plan/exercise/index.tsx` — full exercise catalog grouped by muscle group via `SectionList`, with live search (collapses empty sections), delete button on user-created exercises (with confirmation Alert), and a "Create new exercise" footer CTA
 - `plan/exercise/new.tsx` — create exercise form with name `TextInput` and inline muscle group dropdown; trims name, validates both fields, calls `addExercise` (which enforces name uniqueness), navigates back on success
 
-**Known bugs:**
+**New in Step 8 (Split section — all inline on the Plan screen):**
 
-1. **"New Split" button in `plan/index.tsx` is a noop.** `SectionHeader` `onButtonPress={() => {}}` — blocked until Step 8 screens exist.
-2. **`SplitCard` interactions in `plan/index.tsx` are noops.** `onPress` and `onWorkoutPress` are both `() => {}` — blocked until Step 8.
-3. **`src/components/CardList.tsx` is an empty unused stub.** Never imported anywhere — should be deleted before Step 8.
+- `SplitCard` rewritten as a fully interactive inline surface: tap-to-rename name, "Set active"/"Active" toggle, delete (single confirm), a row of 7 `DayCircle`s, and an expandable selected-day section
+- `DayWorkoutList` — the expanded day section: lists that day's workouts (tap → edit, ✕ → remove), an "Add workout" button opening `WorkoutPicker`
+- `DayCircle` reworked to `{ label, isSelected, isRest, onPress }`
+- `NamePromptModal` — reusable cross-platform name-entry dialog (create + rename a split)
+- `EditorHeader` — shared `Cancel / Title / Save` bar extracted from `WorkoutEditor` and `plan/exercise/new.tsx` (both refactored onto it)
+- `addWorkoutToSplit(splitId, day, { name, exercises })` in `src/storage/splits.ts`; `createEmptyDays()` in `src/utils/split.ts`
+- The three former known bugs (New Split noop, SplitCard noops, CardList stub) are all resolved.
 
-## Next steps in current iteration
+## Next steps
 
-### Step 8 — SplitEditor (Next)
-
-Build the full split creation and editing flow — create/edit splits, assign workouts to days, active split selection, and cascade delete. Implementation details to be planned when ready.
+Iteration 1 is complete. Next is **Iteration 2: Start workout session** (FAB flow, full
+session view, in-session logging, mid-session modifications, finish + save to history, and the
+persistent in-progress banner). To be planned when ready.
 
 ---
 
@@ -113,13 +117,16 @@ Default and user-created exercises are stored under separate keys — `@quietrep
 All entity types (`Exercise`, `Workout`, `Split`) keep `id: string` as their primary key, even though AsyncStorage is the current backend. When the real backend arrives, every database entity will have a surrogate UUID PK — removing `id` now would need to be fully reversed. Relationships between entities always use ID references (`exerciseId: string` → `Exercise.id`, workout IDs in `Split.days`), never embedded objects or name-based references. Name uniqueness for exercises is enforced as a constraint in `addExercise` (mirroring a future UNIQUE DB constraint) alongside the ID — not as a replacement for it. This means the type definitions closely mirror what a REST API would return, making the transition minimal.
 
 **Cascade delete on split deletion**
-Embedded workouts are referenced only by their split. Deleting a split without its embedded workouts creates orphan records. Correct flow: call `deleteWorkoutsByIds(allEmbeddedWorkoutIds)` first, then `deleteSplit`. The `deleteWorkoutsByIds(ids: string[])` helper in workout storage handles batch deletion. Handled at the screen level (not inside the storage function) so the intent is explicit and visible.
+Embedded workouts are referenced only by their split. Deleting a split without its embedded workouts creates orphan records. Correct flow: call `deleteWorkoutsByIds(allEmbeddedWorkoutIds)` first, then `deleteSplit`. The `deleteWorkoutsByIds(ids: string[])` helper in workout storage handles batch deletion. Handled inside `SplitCard.handleDeleteSplit` — the component owns its own mutations (see "Inline split editing" below) so the cascade is co-located with the delete action that triggers it.
 
-**Deferred write — nothing reaches storage until split Save**
-When a user assigns a standalone workout to a day, SplitEditor does NOT call `addWorkout` immediately. Instead it stores the workout data as a `PendingDayWorkout` entry (`{ localKey, name, exercises }`) in local state. `addWorkout` is called for every pending entry only when the split's Save button is pressed, at which point embedded copies are created and their real ids are collected to build `finalDays`. Cancel requires no cleanup because nothing was ever written.
+**Inline split editing — immediate writes, no SplitEditor screen**
+Splits are edited inline on the Plan screen via `SplitCard`, not in a dedicated editor screen (fewer taps, more intuitive). Because there is no Cancel/Save screen, every action writes to storage immediately: creating a split (only after a name is confirmed in `NamePromptModal`, so no empty/abandoned splits are ever persisted), renaming, setting active, deleting, and adding/removing a day's workouts. A dedicated `SplitEditor` with a deferred-write buffer (a `PendingDayWorkout` type, an in-memory hand-off module) was designed and then deliberately rejected when the UX moved to inline editing — none of that machinery exists.
 
-**Embedded workout creation round-trip via in-memory module**
-When the user taps "Create new workout" in WorkoutPicker, SplitEditor records the target day in a `useRef` (`pendingEmbeddedDayRef`) and navigates to `plan/workout/new?embedded=true`. The `?embedded=true` query param tells that screen NOT to call `addWorkout`; instead it stores `{ name, exercises }` in a module-level in-memory variable (`src/storage/pendingNewWorkout.ts` — three functions: `set`, `get`, `clear`; no AsyncStorage). On return, SplitEditor's `useFocusEffect` reads the module variable, creates a `PendingDayWorkout` entry, clears the variable, and resets the ref. The workout is only saved to storage when the split is saved. `useRef` is used instead of `useState` for `pendingEmbeddedDayRef` so it can be read inside `useFocusEffect`'s empty-deps callback without stale closure issues.
+**Inline mutations refresh via a single `onChanged` callback**
+`SplitCard` and `DayWorkoutList` are "fat components" that own their own storage writes (rename, set active, cascade delete, `addWorkoutToSplit`, `deleteWorkout`) and take one `onChanged` callback — the Plan screen's `load` — which they call after a mutation that doesn't navigate away. This was chosen over passing a fistful of bespoke handler props because the day-level handlers need day context that lives in `DayWorkoutList`; threading them down from the screen through `SplitCard` would be the exact "prop through layers that don't use it" smell from the over-prop rule above. The Plan screen's `load` is lifted to a component-scope `useCallback` so it can serve as both the `useFocusEffect` loader and the `onChanged` prop. (This differs from the navigable editor screens, where the screen does the write on save — a different interaction model.)
+
+**Creating an embedded workout for a day — query-param round-trip via `addWorkoutToSplit`**
+"Create new workout" from a day's `WorkoutPicker` navigates to `plan/workout/new?splitId=<id>&day=<day>`. That screen detects the params and, on save, calls `addWorkoutToSplit(splitId, day, { name, exercises })` instead of creating a standalone — a single storage helper in `src/storage/splits.ts` creates the embedded copy (`isStandalone: false`, fresh id) and appends its id to that day. Returning to the Plan screen triggers its `useFocusEffect` reload, so this path needs no `onChanged`. Assigning an *existing* standalone workout to a day uses the same helper with a deep-copied `{ name, exercises }` (fully decoupled copy). `addWorkoutToSplit` takes `splitId` rather than a `Split` object on purpose: it re-reads the freshest stored split before appending (avoiding a stale-snapshot lost update), and the new-workout screen — which only holds the id — doesn't have to re-fetch.
 
 **Pre-joining normalized data — ResolvedX view model pattern**
 When a child component needs fields from two normalized entities (e.g., `WorkoutExercise` for sets data + `Exercise` for display data), do not pass two separate props and resolve the join inline in the render loop — that produces O(n²) `.find()` calls. Instead, pre-join in the parent:
