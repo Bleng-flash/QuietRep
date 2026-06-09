@@ -20,9 +20,5 @@ export default function NewWorkoutScreen() {
     router.back();
   }
 
-  function handleCancel() {
-    router.back();
-  }
-
-  return <WorkoutEditor onSave={handleSave} onCancel={handleCancel} />;
+  return <WorkoutEditor onSave={handleSave} />;
 }

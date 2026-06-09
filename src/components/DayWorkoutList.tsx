@@ -31,12 +31,6 @@ export default function DayWorkoutList({
   const router = useRouter();
   const [isPickerVisible, setIsPickerVisible] = useState(false);
 
-  // Editing a day's workout always opens the same editor screen, so the navigation lives here
-  // rather than being threaded down as a prop.
-  function handleEditWorkout(workoutId: string) {
-    router.push(`/plan/workout/${workoutId}`);
-  }
-
   // Assign an existing standalone workout to this day as a fully decoupled copy — editing or
   // deleting it never touches the original. The exercises are deep-copied so the embedded copy
   // shares no array references with the source; addWorkoutToSplit persists it as isStandalone: false.
@@ -85,7 +79,6 @@ export default function DayWorkoutList({
               <WorkoutCard
                 workout={workout}
                 allExercises={allExercises}
-                onPress={() => handleEditWorkout(workout.id)}
               />
             </View>
             <Pressable

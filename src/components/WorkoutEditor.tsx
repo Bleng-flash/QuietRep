@@ -11,7 +11,7 @@ import type {
   WorkoutExercise,
 } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import {
   Alert,
@@ -28,7 +28,6 @@ import { v4 as uuid } from 'uuid';
 interface WorkoutEditorProps {
   initialWorkout?: Workout;
   onSave: (name: string, exercises: WorkoutExercise[]) => Promise<void>;
-  onCancel: () => void;
   onDelete?: () => void;
 }
 
@@ -47,7 +46,6 @@ function toEditableExercises(exercises: WorkoutExercise[]): EditableWorkoutExerc
 export default function WorkoutEditor({
   initialWorkout,
   onSave,
-  onCancel,
   onDelete,
 }: WorkoutEditorProps) {
   const isEditMode = initialWorkout !== undefined;
@@ -182,7 +180,7 @@ export default function WorkoutEditor({
     >
       <EditorHeader
         title={isEditMode ? 'Edit Workout' : 'New Workout'}
-        onCancel={onCancel}
+        onCancel={() => router.back()}
         onSave={handleSave}
         isSaving={isSaving}
       />

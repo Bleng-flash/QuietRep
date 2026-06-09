@@ -44,7 +44,6 @@ export default function EditWorkoutScreen() {
     <WorkoutEditor
       initialWorkout={workout}
       onSave={handleSave}
-      onCancel={() => router.back()}
       onDelete={handleDelete}
     />
   );

@@ -104,7 +104,6 @@ export default function PlanScreen() {
             <WorkoutCard
               workout={item}
               allExercises={exercises}
-              onPress={() => router.push(`/plan/workout/${item.id}`)}
             />
           )}
           ItemSeparatorComponent={() => <View style={{ height: spacing.s }} />}
