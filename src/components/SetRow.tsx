@@ -25,7 +25,7 @@ export default function SetRow({ setIndex, setScheme, isOnly, onChange, onRemove
 
       <View style={styles.fieldGroup}>
         <TextInput
-          style={styles.input}
+          style={[typography.body, layout.inputField, styles.input]}
           keyboardType="number-pad"
           value={repsText}
           placeholder="—"
@@ -39,7 +39,7 @@ export default function SetRow({ setIndex, setScheme, isOnly, onChange, onRemove
 
       <View style={styles.fieldGroup}>
         <TextInput
-          style={styles.input}
+          style={[typography.body, layout.inputField, styles.input]}
           keyboardType="decimal-pad"
           value={loadText}
           placeholder="—"
@@ -83,16 +83,11 @@ const styles = StyleSheet.create({
     width: 36,
     alignItems: 'center',
   },
+  // Overrides for inputField: narrower padding to fit column layout, centered text
   input: {
     width: '100%',
-    backgroundColor: colors.dark.inputBackground,
-    borderWidth: 1,
-    borderColor: colors.dark.border,
-    borderRadius: 10,
     paddingHorizontal: spacing.s,
     paddingVertical: spacing.xs + 2,
-    color: colors.dark.text,
-    fontSize: 15,
     textAlign: 'center',
   },
 });

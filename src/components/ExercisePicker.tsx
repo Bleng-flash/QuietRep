@@ -1,4 +1,5 @@
-import { colors, layout, picker, spacing, typography } from '@/styles';
+import ListEmptyText from '@/components/ListEmptyText';
+import { colors, layout, picker, radius, spacing, typography } from '@/styles';
 import type { Exercise } from '@/types';
 import { matchesSearchQuery } from '@/utils/exercise';
 import { Ionicons } from '@expo/vector-icons';
@@ -90,11 +91,7 @@ export default function ExercisePicker({
             ),
             [handleSelect, alreadyAddedIds],
           )}
-          ListEmptyComponent={
-            <Text style={[typography.caption, { textAlign: 'center', marginTop: spacing.xl }]}>
-              No exercises found
-            </Text>
-          }
+          ListEmptyComponent={<ListEmptyText message="No exercises found" />}
           ListFooterComponent={
             <Pressable
               onPress={handleCreateNew}
@@ -155,6 +152,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.dark.primarySubtle,
     paddingHorizontal: spacing.s,
     paddingVertical: spacing.xs,
-    borderRadius: 6,
+    borderRadius: radius.s,
   },
 });

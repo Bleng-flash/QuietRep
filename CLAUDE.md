@@ -172,7 +172,7 @@ This is implemented as a pair of frontend-only view models — `EditableSet` and
 
 ### Styles
 
-- Always use global styles from `@/styles` first. Only create a local `StyleSheet` entry if no global token covers it
+- Always use global styles from `@/styles` first. Only create inline styles or a local `StyleSheet` entry if no global token covers it
 - Never hardcode color hex values, font sizes, spacing numbers, or layout patterns inline
 - Single import for all styles: `import { colors, layout, spacing, typography } from "@/styles"` — never import from individual style files like `@/styles/colors`
 - `StyleSheet.create` runs at module load time — never put runtime values like `useSafeAreaInsets` inside it. Apply those inline

@@ -1,5 +1,5 @@
 import WorkoutEditor from '@/components/WorkoutEditor';
-import { deleteWorkout, getWorkouts, updateWorkout } from '@/storage';
+import { deleteWorkout, getWorkoutById, updateWorkout } from '@/storage';
 import { colors, layout } from '@/styles';
 import type { Workout, WorkoutExercise } from '@/types';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -13,8 +13,11 @@ export default function EditWorkoutScreen() {
   useFocusEffect(
     useCallback(() => {
       async function loadWorkout() {
-        const allWorkouts = await getWorkouts();
-        setWorkout(allWorkouts.find((workout) => workout.id === workoutId));
+        const foundWorkout = await getWorkoutById(workoutId);
+        // getWorkoutById returns null for "not found"; component state uses undefined for "not yet
+        // loaded" — both render the same spinner. "Not found" is a degenerate path in practice
+        // since this screen is only reachable via a WorkoutCard for an existing workout.
+        setWorkout(foundWorkout ?? undefined);
       }
       loadWorkout();
     }, [workoutId])

@@ -1,4 +1,4 @@
-import { colors, layout, spacing, typography } from '@/styles';
+import { colors, layout, radius, spacing, typography } from '@/styles';
 import { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -58,7 +58,7 @@ export default function NamePromptModal({
             <Text style={[typography.subheading, styles.title]}>{title}</Text>
 
             <TextInput
-              style={styles.input}
+              style={[typography.body, layout.inputField]}
               value={nameText}
               onChangeText={setNameText}
               placeholder="Name"
@@ -105,23 +105,13 @@ const styles = StyleSheet.create({
   },
   dialog: {
     backgroundColor: colors.dark.surfaceRaised,
-    borderRadius: 14,
+    borderRadius: radius.xl,
     borderWidth: 1,
     borderColor: colors.dark.border,
     padding: spacing.l,
   },
   title: {
     marginBottom: spacing.m,
-  },
-  input: {
-    backgroundColor: colors.dark.inputBackground,
-    borderWidth: 1,
-    borderColor: colors.dark.border,
-    borderRadius: 10,
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.s + 2,
-    color: colors.dark.text,
-    fontSize: 15,
   },
   actions: {
     marginTop: spacing.l,

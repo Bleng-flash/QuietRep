@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { colors } from './colors';
+import { radius } from './radius';
 import { spacing } from './spacing';
 
 export const layout = StyleSheet.create({
@@ -28,7 +29,7 @@ export const layout = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.dark.surface,
-    borderRadius: 12,
+    borderRadius: radius.l,
     padding: spacing.m,
     borderWidth: 2,
     borderColor: colors.dark.border,
@@ -55,9 +56,34 @@ export const layout = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.dark.error,
     borderStyle: 'dashed',
-    borderRadius: 12,
+    borderRadius: radius.l,
     paddingVertical: spacing.m,
     backgroundColor: colors.dark.errorSubtle,
+  },
+  // Primary dashed additive-action button (parallels dangerButton in primary colour).
+  // Does not include margin or flex — callers add those. Compact callers may override
+  // gap / borderRadius / paddingVertical for smaller, nested contexts.
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.s,
+    borderWidth: 1,
+    borderColor: colors.dark.primary,
+    borderStyle: 'dashed',
+    borderRadius: radius.l,
+    paddingVertical: spacing.m,
+    backgroundColor: colors.dark.primarySubtle,
+  },
+  // Base surface style for TextInput fields. Compose with typography.body for the text style.
+  // Callers may add overrides (e.g. width, padding, textAlign) for specific input shapes.
+  inputField: {
+    backgroundColor: colors.dark.inputBackground,
+    borderWidth: 1,
+    borderColor: colors.dark.border,
+    borderRadius: radius.m,
+    paddingHorizontal: spacing.m,
+    paddingVertical: spacing.s + 2,
   },
   pressedButton: {
     opacity: 0.6,

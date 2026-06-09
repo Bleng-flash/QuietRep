@@ -1,7 +1,7 @@
 import WorkoutCard from '@/components/WorkoutCard';
 import WorkoutPicker from '@/components/WorkoutPicker';
 import { addWorkoutToSplit, deleteWorkout, updateSplit } from '@/storage';
-import { colors, layout, spacing, typography } from '@/styles';
+import { colors, layout, radius, spacing, typography } from '@/styles';
 import type { DayKey, Exercise, Split, Workout } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -97,7 +97,7 @@ export default function DayWorkoutList({
       <View style={[layout.row, styles.addRow]}>
         <Pressable
           onPress={() => setIsPickerVisible(true)}
-          style={({ pressed }) => [styles.addButton, pressed && layout.pressedButton]}
+          style={({ pressed }) => [layout.addButton, styles.compactAddButton, pressed && layout.pressedButton]}
         >
           <Ionicons name="add" size={18} color={colors.dark.primary} />
           <Text style={styles.addLabel}>Add workout</Text>
@@ -137,20 +137,13 @@ const styles = StyleSheet.create({
   addRow: {
     marginTop: spacing.xs,
   },
-  // Compact dashed CTA — mirrors WorkoutEditor's "Add exercise" button at a smaller, nested scale.
+  // Compact overrides on top of layout.addButton — smaller scale for nested day context.
   // flex: 1 so it spans the workout-card column only, not the reserved remove column.
-  addButton: {
+  compactAddButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     gap: spacing.xs,
-    borderWidth: 1,
-    borderColor: colors.dark.primary,
-    borderStyle: 'dashed',
-    borderRadius: 10,
+    borderRadius: radius.m,
     paddingVertical: spacing.s,
-    backgroundColor: colors.dark.primarySubtle,
   },
   addLabel: {
     fontSize: 14,

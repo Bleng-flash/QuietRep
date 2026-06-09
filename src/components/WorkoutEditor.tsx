@@ -211,10 +211,10 @@ export default function WorkoutEditor({
 
         <Pressable
           onPress={() => setIsPickerVisible(true)}
-          style={({ pressed }) => [styles.addExerciseButton, pressed && { opacity: 0.6 }]}
+          style={({ pressed }) => [layout.addButton, { marginBottom: spacing.m }, pressed && layout.pressedButton]}
         >
           <Ionicons name="add" size={20} color={colors.dark.primary} />
-          <Text style={styles.addExerciseLabel}>Add exercise</Text>
+          <Text style={typography.actionPrimary}>Add exercise</Text>
         </Pressable>
 
         {workoutExercises.length === 0 && (
@@ -260,24 +260,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.dark.border,
     paddingBottom: spacing.s,
-  },
-  addExerciseButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.s,
-    borderWidth: 1,
-    borderColor: colors.dark.primary,
-    borderStyle: 'dashed',
-    borderRadius: 12,
-    paddingVertical: spacing.m,
-    marginBottom: spacing.m,
-    backgroundColor: colors.dark.primarySubtle,
-  },
-  addExerciseLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.dark.primary,
   },
   emptyHint: {
     textAlign: 'center',

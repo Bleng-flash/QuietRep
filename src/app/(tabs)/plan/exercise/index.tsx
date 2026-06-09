@@ -1,7 +1,8 @@
+import ListEmptyText from '@/components/ListEmptyText';
 import SectionHeader from '@/components/SectionHeader';
 import { MUSCLE_GROUPS } from '@/constants/muscleGroups';
 import { deleteExercise, getAllExercises } from '@/storage';
-import { colors, layout, picker, spacing, typography } from '@/styles';
+import { colors, layout, picker, radius, spacing, typography } from '@/styles';
 import { Exercise } from '@/types';
 import { matchesSearchQuery } from '@/utils/exercise';
 import { Ionicons } from '@expo/vector-icons';
@@ -112,11 +113,7 @@ export default function ExerciseListScreen() {
             ),
             [handleDeleteExercise],
           )}
-          ListEmptyComponent={
-            <Text style={[typography.caption, { textAlign: 'center', marginTop: spacing.xl }]}>
-              No exercises found
-            </Text>
-          }
+          ListEmptyComponent={<ListEmptyText message="No exercises found" />}
           ListFooterComponent={
             <Pressable
               onPress={handleCreateNewExercise}
@@ -140,7 +137,7 @@ interface ExerciseEntryProps {
 
 const ExerciseEntry = memo(function ExerciseEntry({ exercise, onDelete }: ExerciseEntryProps) {
   return (
-    <View style={styles.exerciseEntry}>
+    <View style={[layout.row, styles.exerciseEntry]}>
       <View style={{ flex: 1, paddingVertical: spacing.xs }}>
         <Text style={typography.body}>{exercise.name}</Text>
       </View>
@@ -160,13 +157,11 @@ const ExerciseEntry = memo(function ExerciseEntry({ exercise, onDelete }: Exerci
 
 const styles = StyleSheet.create({
   exerciseEntry: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: colors.dark.surface,
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.m,
     borderBottomWidth: 1,
-    borderRadius: 4,
+    borderRadius: radius.xs,
     borderColor: colors.dark.borderSubtle,
   },
 });

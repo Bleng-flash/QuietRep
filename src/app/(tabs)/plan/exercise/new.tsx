@@ -1,7 +1,7 @@
 import EditorHeader from '@/components/EditorHeader';
 import { MUSCLE_GROUPS } from '@/constants/muscleGroups';
 import { addExercise } from '@/storage';
-import { colors, layout, spacing, typography } from '@/styles';
+import { colors, layout, radius, spacing, typography } from '@/styles';
 import { MuscleGroup } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -85,7 +85,7 @@ export default function NewExerciseScreen() {
           <View>
             <Text style={[typography.caption, { marginBottom: spacing.s }]}>Name</Text>
             <TextInput
-              style={styles.textInput}
+              style={[typography.body, layout.inputField]}
               value={exerciseName}
               onChangeText={setExerciseName}
               placeholder="e.g  Barbell Squat"
@@ -136,7 +136,7 @@ function MuscleGroupDropdown({ selected, onSelect, isOpen, onOpenChange }: Muscl
           Keyboard.dismiss();
           onOpenChange(!isOpen); // toggle
         }}
-        style={({ pressed }) => [styles.dropdownTrigger, pressed && layout.pressedButton]}
+        style={({ pressed }) => [layout.rowBetween, layout.inputField, pressed && layout.pressedButton]}
       >
         <Text style={[typography.body, !selected && { color: colors.dark.textDisabled }]}>
           {selected ?? 'Select muscle group…'}
@@ -155,6 +155,7 @@ function MuscleGroupDropdown({ selected, onSelect, isOpen, onOpenChange }: Muscl
               key={muscleGroup}
               onPress={() => handleSelect(muscleGroup)}
               style={({ pressed }) => [
+                layout.rowBetween,
                 styles.dropdownOption,
                 muscleGroup === selected && styles.dropdownOptionSelected,
                 pressed && layout.pressedButton,
@@ -180,39 +181,15 @@ function MuscleGroupDropdown({ selected, onSelect, isOpen, onOpenChange }: Muscl
 }
 
 const styles = StyleSheet.create({
-  textInput: {
-    backgroundColor: colors.dark.inputBackground,
-    borderWidth: 1,
-    borderColor: colors.dark.border,
-    borderRadius: 10,
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.s + 2,
-    color: colors.dark.text,
-    fontSize: 15,
-  },
-  dropdownTrigger: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.dark.inputBackground,
-    borderWidth: 1,
-    borderColor: colors.dark.border,
-    borderRadius: 10,
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.s + 2,
-  },
   dropdownList: {
     marginTop: spacing.xs,
     backgroundColor: colors.dark.surface,
     borderWidth: 1,
     borderColor: colors.dark.border,
-    borderRadius: 10,
+    borderRadius: radius.m,
     maxHeight: 260,
   },
   dropdownOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.m,
     borderBottomWidth: 1,

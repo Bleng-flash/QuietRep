@@ -1,3 +1,4 @@
+import ListEmptyText from '@/components/ListEmptyText';
 import { colors, layout, picker, spacing, typography } from '@/styles';
 import type { Exercise, Workout } from '@/types';
 import { buildWorkoutSubtitle } from '@/utils/workout';
@@ -88,11 +89,7 @@ export default function WorkoutPicker({
               </Text>
             </Pressable>
           )}
-          ListEmptyComponent={
-            <Text style={[typography.caption, { textAlign: 'center', marginTop: spacing.xl }]}>
-              No workouts found
-            </Text>
-          }
+          ListEmptyComponent={<ListEmptyText message="No workouts found" />}
           ListFooterComponent={
             <Pressable
               onPress={handleCreateNew}

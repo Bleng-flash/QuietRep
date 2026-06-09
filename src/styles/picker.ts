@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { colors } from './colors';
+import { radius } from './radius';
 import { spacing } from './spacing';
 
 // Shared chrome for pageSheet picker modals (ExercisePicker, WorkoutPicker, etc.)
@@ -20,7 +21,7 @@ export const picker = StyleSheet.create({
     backgroundColor: colors.dark.inputBackground,
     borderWidth: 1,
     borderColor: colors.dark.border,
-    borderRadius: 10,
+    borderRadius: radius.m,
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.s + 2,
     marginHorizontal: spacing.m,
