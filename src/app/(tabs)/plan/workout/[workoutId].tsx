@@ -2,22 +2,23 @@ import WorkoutEditor from '@/components/WorkoutEditor';
 import { deleteWorkout, getWorkouts, updateWorkout } from '@/storage';
 import { colors, layout } from '@/styles';
 import type { Workout, WorkoutExercise } from '@/types';
-import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 export default function EditWorkoutScreen() {
   const { workoutId } = useLocalSearchParams<{ workoutId: string }>();
   const [workout, setWorkout] = useState<Workout | undefined>(undefined);
 
-  // Stack screen — plain useEffect with [] is correct here.
-  useEffect(() => {
-    async function loadWorkout() {
-      const allWorkouts = await getWorkouts();
-      setWorkout(allWorkouts.find((workout) => workout.id === workoutId));
-    }
-    loadWorkout();
-  }, [workoutId]);
+  useFocusEffect(
+    useCallback(() => {
+      async function loadWorkout() {
+        const allWorkouts = await getWorkouts();
+        setWorkout(allWorkouts.find((workout) => workout.id === workoutId));
+      }
+      loadWorkout();
+    }, [workoutId])
+  );
 
   async function handleSave(name: string, exercises: WorkoutExercise[]) {
     if (!workout) return;

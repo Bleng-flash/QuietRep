@@ -85,8 +85,16 @@ Used identically in the Workouts section and inside expanded split day views. On
 **Tab bar is self-contained, but still draws from the `spacing` scale for safe-area padding**
 The custom tab bar does not use `layout`/`typography` style tokens — its floating FAB, slot sizing, and pressed states have unique geometry that doesn't map to general-purpose style objects. It does, however, use the numeric `spacing` scale for safe-area-aware padding: `paddingBottom: insets.bottom + spacing.s`, applied inline (not in `StyleSheet.create`, since `useSafeAreaInsets` is a runtime value), mirroring the `insets.top + spacing.s` convention used by every top bar in the app. `minHeight: 70` (not `height`) lets the bar grow to clear the device's home indicator / gesture bar without clipping its content.
 
-**Tab screens use useFocusEffect, stack screens use useEffect**
-Tab screens stay mounted when you switch tabs so plain `useEffect` with empty deps only runs once and will not reload data when you return. Stack screens unmount when popped so plain `useEffect` is correct there.
+**Always use `useFocusEffect` for data loading in navigation screens**
+Both tab screens and stack screens should use `useFocusEffect` for loading data, not `useEffect`. Tab screens stay mounted when switching tabs, so `useEffect` with empty deps only fires once and won't reload on return. Stack parent screens also stay mounted while a child is pushed on top, so the same problem applies when returning from a child — `useEffect` serves stale data silently.
+
+With AsyncStorage the cost of re-running a load on focus is negligible. When the real API layer arrives, introduce a stale-time / cache-first flag (e.g. via React Query's `staleTime` or a manual `lastFetchedAt` check) at the data-fetching layer — not by reverting individual screens to `useEffect`.
+
+Exceptions (both are documented with a comment in-file explaining why):
+- **Root layout (`src/app/_layout.tsx`)** — layouts have no navigation focus lifecycle; one-time startup work belongs in `useEffect`.
+- **Non-screen components** — components that use `useEffect` to react to prop changes (e.g. `NamePromptModal` reseeding its input when `visible` flips) are not navigation screens; `useFocusEffect` is meaningless there.
+
+Whenever `useEffect` is used instead of `useFocusEffect`, add a concise comment explaining why — unless the reason is self-evidently obvious from the surrounding code (e.g. a dep array that clearly has nothing to do with navigation).
 
 **Safe area insets applied at component level**
 Any component or screen that renders its own top bar must apply `useSafeAreaInsets` to push content below the camera cutout and status bar. Do not rely on the navigator to handle this when `headerShown: false`.

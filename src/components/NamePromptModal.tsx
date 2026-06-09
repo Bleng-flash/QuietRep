@@ -33,8 +33,9 @@ export default function NamePromptModal({
 }: NamePromptModalProps) {
   const [nameText, setNameText] = useState(initialValue);
 
-  // Re-seed the field every time the dialog opens — the modal stays mounted across opens,
-  // so a useState initializer alone would keep a stale value from a previous open.
+  // useEffect (not useFocusEffect) — this is a component, not a navigation screen.
+  // Re-seeds the field whenever the dialog opens or initialValue changes; reacting to
+  // prop changes has nothing to do with navigation focus.
   useEffect(() => {
     if (visible) setNameText(initialValue);
   }, [visible, initialValue]);

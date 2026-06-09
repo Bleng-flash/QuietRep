@@ -9,6 +9,8 @@ import { Stack } from 'expo-router';
 import { useEffect } from 'react';
 
 export default function RootLayout() {
+  // useEffect (not useFocusEffect) — root layouts have no navigation focus lifecycle,
+  // and this seed must run exactly once at app startup, not on every focus event.
   useEffect(() => {
     async function runSeed() {
       await seedDefaultExercises();
