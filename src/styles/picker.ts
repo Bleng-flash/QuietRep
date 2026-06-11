@@ -32,6 +32,13 @@ export const picker = StyleSheet.create({
     color: colors.dark.text,
     fontSize: 15,
   },
+  // Shared row chrome for picker list items — content layout is supplied by the caller
+  item: {
+    paddingHorizontal: spacing.m,
+    paddingVertical: spacing.m,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.dark.borderSubtle,
+  },
   // Footer row in the list for creating a new item
   createButton: {
     flexDirection: 'row',

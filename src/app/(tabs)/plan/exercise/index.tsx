@@ -4,7 +4,7 @@ import { MUSCLE_GROUPS } from '@/constants/muscleGroups';
 import { deleteExercise, getAllExercises } from '@/storage';
 import { colors, layout, picker, radius, spacing, typography } from '@/styles';
 import { Exercise } from '@/types';
-import { matchesSearchQuery } from '@/utils/exercise';
+import { matchesSearchQuery } from '@/utils/search';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { memo, useCallback, useMemo, useState } from 'react';

@@ -37,7 +37,7 @@ export default function EditWorkoutScreen() {
   // Show a spinner while the async load is in flight — workout is undefined until loadWorkout resolves
   if (!workout) {
     return (
-      <View style={[layout.centered, { backgroundColor: colors.dark.background }]}>
+      <View style={[layout.screen, layout.centered]}>
         <ActivityIndicator color={colors.dark.primary} />
       </View>
     );

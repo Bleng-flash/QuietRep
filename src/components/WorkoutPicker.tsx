@@ -1,10 +1,9 @@
-import ListEmptyText from '@/components/ListEmptyText';
-import { colors, layout, picker, spacing, typography } from '@/styles';
+import PickerModal from '@/components/PickerModal';
+import { spacing, typography } from '@/styles';
 import type { Exercise, Workout } from '@/types';
 import { buildWorkoutSubtitle } from '@/utils/workout';
-import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
-import { FlatList, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useCallback } from 'react';
+import { Text, View } from 'react-native';
 
 interface WorkoutPickerProps {
   visible: boolean;
@@ -23,94 +22,33 @@ export default function WorkoutPicker({
   onCreateNew,
   onClose,
 }: WorkoutPickerProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredWorkouts = standaloneWorkouts.filter((workout) =>
-    workout.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  const renderWorkoutContent = useCallback(
+    (workout: Workout) => (
+      <View style={{ gap: spacing.xs }}>
+        <Text style={typography.body} numberOfLines={1}>
+          {workout.name}
+        </Text>
+        <Text style={typography.caption} numberOfLines={1}>
+          {buildWorkoutSubtitle(workout, allExercises)}
+        </Text>
+      </View>
+    ),
+    [allExercises],
   );
-
-  function handleClose() {
-    setSearchQuery('');
-    onClose();
-  }
-
-  function handleSelect(workout: Workout) {
-    onSelect(workout);
-    handleClose();
-  }
-
-  function handleCreateNew() {
-    handleClose();
-    onCreateNew();
-  }
 
   return (
-    <Modal
+    <PickerModal
       visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={handleClose}
-    >
-      <View style={picker.container}>
-        <View style={[layout.rowBetween, picker.header]}>
-          <Text style={typography.heading}>Add Workout</Text>
-          <Pressable onPress={handleClose} hitSlop={8}>
-            <Ionicons name="close" size={24} color={colors.dark.textSubtle} />
-          </Pressable>
-        </View>
-
-        <View style={picker.searchBar}>
-          <Ionicons name="search" size={16} color={colors.dark.textSubtle} />
-          <TextInput
-            style={picker.searchInput}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholder="Search workouts…"
-            placeholderTextColor={colors.dark.textDisabled}
-            autoCorrect={false}
-            clearButtonMode="while-editing"
-          />
-        </View>
-
-        <FlatList
-          data={filteredWorkouts}
-          keyExtractor={(workout) => workout.id}
-          contentContainerStyle={{ paddingBottom: spacing.xxl }}
-          renderItem={({ item: workout }) => (
-            <Pressable
-              onPress={() => handleSelect(workout)}
-              style={({ pressed }) => [styles.workoutItem, pressed && layout.pressedCard]}
-            >
-              <Text style={typography.body} numberOfLines={1}>
-                {workout.name}
-              </Text>
-              <Text style={typography.caption} numberOfLines={1}>
-                {buildWorkoutSubtitle(workout, allExercises)}
-              </Text>
-            </Pressable>
-          )}
-          ListEmptyComponent={<ListEmptyText message="No workouts found" />}
-          ListFooterComponent={
-            <Pressable
-              onPress={handleCreateNew}
-              style={({ pressed }) => [picker.createButton, pressed && layout.pressedButton]}
-            >
-              <Ionicons name="add-circle-outline" size={18} color={colors.dark.primary} />
-              <Text style={picker.createLabel}>Create new workout</Text>
-            </Pressable>
-          }
-        />
-      </View>
-    </Modal>
+      title="Add Workout"
+      searchPlaceholder="Search workouts…"
+      emptyMessage="No workouts found"
+      createLabel="Create new workout"
+      items={standaloneWorkouts}
+      keyExtractor={(workout) => workout.id}
+      renderItemContent={renderWorkoutContent}
+      onSelect={onSelect}
+      onCreateNew={onCreateNew}
+      onClose={onClose}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  workoutItem: {
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.m,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.dark.borderSubtle,
-    gap: spacing.xs,
-  },
-});
