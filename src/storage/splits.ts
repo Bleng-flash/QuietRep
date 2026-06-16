@@ -33,6 +33,8 @@ export async function addWorkoutToSplit(
   splitId: string,
   day: DayKey,
   workoutData: Pick<Workout, 'name' | 'exercises'>,
+  // Pick<T, K> is a typescript utility that constructs a new type by slecting only the
+  // keys K from type T 
 ): Promise<void> {
   const embeddedWorkout = await addWorkout({ ...workoutData, isStandalone: false });
   const splits = await getSplits();

@@ -79,6 +79,7 @@ export default function PlanScreen() {
               split={item}
               isActive={item.id === activeSplitId}
               allWorkouts={workouts}
+              standaloneWorkouts={standaloneWorkouts}
               allExercises={exercises}
               onChanged={load}
             />

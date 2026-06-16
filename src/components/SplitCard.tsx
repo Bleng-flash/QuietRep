@@ -18,7 +18,8 @@ import { Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 interface SplitCardProps {
   split: Split;
   isActive: boolean;
-  allWorkouts: Workout[]; // every workout — used to resolve each day's embedded ids and the picker list
+  allWorkouts: Workout[]; // every workout — used to resolve each day's embedded ids
+  standaloneWorkouts: Workout[]; 
   allExercises: Exercise[];
   onChanged: () => void; // ask the owning screen to reload after a storage mutation
 }
@@ -30,6 +31,7 @@ export default function SplitCard({
   split,
   isActive,
   allWorkouts,
+  standaloneWorkouts,
   allExercises,
   onChanged,
 }: SplitCardProps) {
@@ -42,10 +44,6 @@ export default function SplitCard({
     [allWorkouts],
   );
   // Only standalone workouts can be assigned to a day (embedded copies belong to their own split).
-  const standaloneWorkouts = useMemo(
-    () => allWorkouts.filter((workout) => workout.isStandalone),
-    [allWorkouts],
-  );
   const selectedDayWorkouts = useMemo(() => {
     if (selectedDay === null) return [];
     return split.days[selectedDay]
