@@ -76,8 +76,8 @@ persistent in-progress banner). To be planned when ready.
 **Multiple workouts per day**
 `Split.days` is `Record<DayKey, string[]>` — an array of workout IDs per day. Empty array means rest day. Supports zero to many workouts per day.
 
-**Sets and reps belong to WorkoutExercise, not Exercise**
-An Exercise is just a name and muscle group. Sets, reps, and load live on WorkoutExercise (plan template) and on the live session (runtime). This means the same exercise can appear in multiple workouts with different schemes.
+**Sets and rep ranges belong to WorkoutExercise, not Exercise**
+An Exercise is just a name and muscle group. Sets and rep ranges (`minReps`, `maxReps`) live on WorkoutExercise as the **plan template**. Load is a *runtime* value — what you actually lift in a live session — and belongs exclusively on the live session (Iteration 2), not on the plan. This means the same exercise can appear in multiple workouts with different rep range schemes.
 
 **WorkoutCard is the single source of truth for workout appearance**
 Used identically in the Workouts section and inside expanded split day views. One component, consistent appearance everywhere.

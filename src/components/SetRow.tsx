@@ -16,37 +16,40 @@ export default function SetRow({ setIndex, setScheme, isOnly, onChange, onRemove
   /** Only when React mounts a component it runs useState once to set the initial value.
    * After that, on every re-render, the state just holds whatever was
    * last set via the setter function. */
-  const [repsText, setRepsText] = useState(setScheme.reps > 0 ? String(setScheme.reps) : '');
-  const [loadText, setLoadText] = useState(setScheme.load > 0 ? String(setScheme.load) : '');
+  const [minRepsText, setMinRepsText] = useState(
+    setScheme.minReps > 0 ? String(setScheme.minReps) : '',
+  );
+  const [maxRepsText, setMaxRepsText] = useState(
+    setScheme.maxReps > 0 ? String(setScheme.maxReps) : '',
+  );
 
   return (
     <View style={[layout.row, styles.row]}>
       <Text style={[typography.caption, styles.label]}>Set {setIndex + 1}</Text>
 
-      <View style={styles.fieldGroup}>
+      {/* Single "Rep Range" column: two positive-integer inputs joined by "to" */}
+      <View style={styles.rangeGroup}>
         <TextInput
           style={[typography.body, layout.inputField, styles.input]}
           keyboardType="number-pad"
-          value={repsText}
+          value={minRepsText}
           placeholder="—"
           placeholderTextColor={colors.dark.textDisabled}
           onChangeText={(text) => {
-            setRepsText(text);
-            onChange({ ...setScheme, reps: parseInt(text, 10) || 0 });
+            setMinRepsText(text);
+            onChange({ ...setScheme, minReps: parseInt(text, 10) || 0 });
           }}
         />
-      </View>
-
-      <View style={styles.fieldGroup}>
+        <Text style={[typography.caption, styles.rangeSeparator]}>to</Text>
         <TextInput
           style={[typography.body, layout.inputField, styles.input]}
-          keyboardType="decimal-pad"
-          value={loadText}
+          keyboardType="number-pad"
+          value={maxRepsText}
           placeholder="—"
           placeholderTextColor={colors.dark.textDisabled}
           onChangeText={(text) => {
-            setLoadText(text);
-            onChange({ ...setScheme, load: parseFloat(text) || 0 });
+            setMaxRepsText(text);
+            onChange({ ...setScheme, maxReps: parseInt(text, 10) || 0 });
           }}
         />
       </View>
@@ -73,19 +76,26 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.s,
   },
   label: {
-    width: 44,
+    width: 48,
   },
-  fieldGroup: {
+  // Single column holding both range inputs and the "to" separator, centered.
+  rangeGroup: {
     flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.s,
+  },
+  rangeSeparator: {
+    color: colors.dark.textSubtle,
   },
   removeButton: {
-    width: 36,
+    width: 32,
     alignItems: 'center',
   },
-  // Overrides for inputField: narrower padding to fit column layout, centered text
+  // Overrides for inputField: bounded width so both inputs + "to" fit on one line, centered text
   input: {
-    width: '100%',
+    width: 64,
     paddingHorizontal: spacing.s,
     paddingVertical: spacing.xs + 2,
     textAlign: 'center',

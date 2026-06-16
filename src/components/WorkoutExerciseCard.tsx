@@ -29,7 +29,7 @@ export default function WorkoutExerciseCard({
   const { exercise, sets } = resolvedWorkoutExercise;
 
   function handleSetChange(setIndex: number, updated: SetScheme) {
-    // SetRow emits a plain SetScheme ({ reps, load }) — spread currentSet first so the
+    // SetRow emits a plain SetScheme ({ minReps, maxReps }) — spread currentSet first so the
     // EditableSet's localKey survives the merge instead of being dropped.
     onSetsChange(
       sets.map((currentSet: EditableSet, index: number) =>
@@ -49,7 +49,7 @@ export default function WorkoutExerciseCard({
     // identity, so it must not share a key (and thus a SetRow instance) with any existing set.
     const newSet: EditableSet = lastSet
       ? { ...lastSet, localKey: uuid() }
-      : { reps: 0, load: 0, localKey: uuid() };
+      : { minReps: 0, maxReps: 0, localKey: uuid() };
     onSetsChange([...sets, newSet]);
   }
 
@@ -93,12 +93,10 @@ export default function WorkoutExerciseCard({
         </View>
       </View>
 
-      {/* Column labels */}
       <View style={[layout.row, { gap: spacing.s, marginBottom: spacing.xs }]}>
-        <View style={{ width: 44 }} />
-        <Text style={[typography.caption, { flex: 1, textAlign: 'center' }]}>Reps</Text>
-        <Text style={[typography.caption, { flex: 1, textAlign: 'center' }]}>Load (kg)</Text>
-        <View style={{ width: 36 }} />
+        <View style={{ width: 48 }} />
+        <Text style={[typography.caption, { flex: 1, textAlign: 'center' }]}>Rep Range</Text>
+        <View style={{ width: 32 }} />
       </View>
 
       {sets.map((setScheme, setIndex) => (

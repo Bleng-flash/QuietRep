@@ -39,7 +39,7 @@ export default function DayWorkoutList({
       name: sourceWorkout.name,
       exercises: sourceWorkout.exercises.map((workoutExercise) => ({
         exerciseId: workoutExercise.exerciseId,
-        sets: workoutExercise.sets.map((set) => ({ reps: set.reps, load: set.load })),
+        sets: workoutExercise.sets.map((set) => ({ minReps: set.minReps, maxReps: set.maxReps })),
       })),
     });
     onChanged();

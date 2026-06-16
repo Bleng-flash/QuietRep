@@ -99,7 +99,7 @@ export default function WorkoutEditor({
   function handleAddExercise(exercise: Exercise) {
     const newEntry: EditableWorkoutExercise = {
       exerciseId: exercise.id,
-      sets: [{ reps: 0, load: 0, localKey: uuid() }],
+      sets: [{ minReps: 0, maxReps: 0, localKey: uuid() }],
     };
     setWorkoutExercises((prev) => [...prev, newEntry]);
   }
@@ -158,13 +158,13 @@ export default function WorkoutEditor({
     }
     setIsSaving(true);
     try {
-      // Strip the editor-only localKey so storage receives plain SetScheme ({ reps, load }).
+      // Strip the editor-only localKey so storage receives plain SetScheme ({ minReps, maxReps }).
       // This is the single guard keeping localKey out of persisted data.
       const exercisesToSave: WorkoutExercise[] = workoutExercises.map((workoutExercise) => ({
         ...workoutExercise,
         sets: workoutExercise.sets.map((setScheme) => ({
-          reps: setScheme.reps,
-          load: setScheme.load,
+          minReps: setScheme.minReps,
+          maxReps: setScheme.maxReps,
         })),
       }));
       await onSave(workoutName.trim(), exercisesToSave);

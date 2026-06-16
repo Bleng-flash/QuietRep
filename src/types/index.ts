@@ -16,10 +16,12 @@ export type MuscleGroup =
 
 export type DayKey = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 
-/** An interface describing one set */
+/** A planned set: a rep range only. Load is intentionally absent — it is a runtime value
+ *  (what you actually lift), recorded on the live session, not something planned ahead.
+ *  A fixed target is expressed as minReps === maxReps. */
 export interface SetScheme {
-  reps: number;
-  load: number;
+  minReps: number;
+  maxReps: number;
 }
 
 /** An interface describing one exercise */
