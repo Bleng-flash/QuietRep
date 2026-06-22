@@ -7,23 +7,15 @@ import { v4 as uuid } from 'uuid';
 
 interface WorkoutExerciseCardProps {
   resolvedWorkoutExercise: ResolvedEditableWorkoutExercise;
-  isFirst: boolean;
-  isLast: boolean;
   onSetsChange: (sets: EditableSet[]) => void;
   onRemove: () => void;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
 }
 
 /** A card for displaying and editing an exercise within a workout. */
 export default function WorkoutExerciseCard({
   resolvedWorkoutExercise,
-  isFirst,
-  isLast,
   onSetsChange,
   onRemove,
-  onMoveUp,
-  onMoveDown,
 }: WorkoutExerciseCardProps) {
   // Destructure for convenient access in handlers and JSX below
   const { exercise, sets } = resolvedWorkoutExercise;
@@ -67,22 +59,6 @@ export default function WorkoutExerciseCard({
         </View>
 
         <View style={[layout.row, { gap: spacing.s }]}>
-          <Pressable
-            onPress={onMoveUp}
-            disabled={isFirst}
-            hitSlop={8}
-            style={({ pressed }) => [{ opacity: isFirst ? 0.25 : pressed ? 0.5 : 1 }]}
-          >
-            <Ionicons name="chevron-up" size={20} color={colors.dark.textSubtle} />
-          </Pressable>
-          <Pressable
-            onPress={onMoveDown}
-            disabled={isLast}
-            hitSlop={8}
-            style={({ pressed }) => [{ opacity: isLast ? 0.25 : pressed ? 0.5 : 1 }]}
-          >
-            <Ionicons name="chevron-down" size={20} color={colors.dark.textSubtle} />
-          </Pressable>
           <Pressable
             onPress={onRemove}
             hitSlop={8}

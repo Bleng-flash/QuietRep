@@ -1,7 +1,8 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ScrollViewContainer } from 'react-native-reorderable-list';
 
 import NamePromptModal from '@/components/shared/NamePromptModal';
 import SectionHeader from '@/components/shared/SectionHeader';
@@ -53,7 +54,7 @@ export default function PlanScreen() {
   }
 
   return (
-    <ScrollView
+    <ScrollViewContainer
       style={layout.screen}
       contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + spacing.s }]}
       showsVerticalScrollIndicator={false}
@@ -137,7 +138,7 @@ export default function PlanScreen() {
         onConfirm={handleCreateSplit}
         onClose={() => setIsNewSplitOpen(false)}
       />
-    </ScrollView>
+    </ScrollViewContainer>
   );
 }
 

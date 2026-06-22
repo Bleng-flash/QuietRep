@@ -1,5 +1,6 @@
 import EditorHeader from '@/components/shared/EditorHeader';
 import ExercisePicker from '@/components/shared/ExercisePicker';
+import DraggableCardList from '@/components/shared/DraggableCardList';
 import WorkoutExerciseCard from '@/components/plan/WorkoutExerciseCard';
 import { getAllExercises } from '@/storage';
 import { colors, layout, spacing, typography } from '@/styles';
@@ -18,11 +19,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
 } from 'react-native';
+import { ScrollViewContainer } from 'react-native-reorderable-list';
 import { v4 as uuid } from 'uuid';
 
 interface WorkoutEditorProps {
@@ -104,40 +105,27 @@ export default function WorkoutEditor({
     setWorkoutExercises((prev) => [...prev, newEntry]);
   }
 
-  function handleRemoveExercise(exerciseIndex: number) {
-    setWorkoutExercises((prev) => prev.filter((_, index) => index !== exerciseIndex));
+  function handleRemoveExercise(exerciseId: string) {
+    setWorkoutExercises((prev) =>
+      prev.filter((workoutExercise) => workoutExercise.exerciseId !== exerciseId),
+    );
   }
 
-  function handleSetsChange(exerciseIndex: number, updatedSets: EditableSet[]) {
+  function handleSetsChange(exerciseId: string, updatedSets: EditableSet[]) {
     setWorkoutExercises((prev) =>
-      prev.map((workoutExercise, index) =>
-        index === exerciseIndex ? { ...workoutExercise, sets: updatedSets } : workoutExercise,
+      prev.map((workoutExercise) =>
+        workoutExercise.exerciseId === exerciseId
+          ? { ...workoutExercise, sets: updatedSets }
+          : workoutExercise,
       ),
     );
   }
 
-  function handleMoveUp(exerciseIndex: number) {
-    if (exerciseIndex === 0) return;
-    setWorkoutExercises((prev) => {
-      const updated = [...prev];
-      [updated[exerciseIndex - 1], updated[exerciseIndex]] = [
-        updated[exerciseIndex],
-        updated[exerciseIndex - 1],
-      ];
-      return updated;
-    });
-  }
-
-  function handleMoveDown(exerciseIndex: number) {
-    if (exerciseIndex === workoutExercises.length - 1) return;
-    setWorkoutExercises((prev) => {
-      const updated = [...prev];
-      [updated[exerciseIndex], updated[exerciseIndex + 1]] = [
-        updated[exerciseIndex + 1],
-        updated[exerciseIndex],
-      ];
-      return updated;
-    });
+  function handleReorder(reordered: ResolvedEditableWorkoutExercise[]) {
+    // Strip the joined `exercise` field to get back to EditableWorkoutExercise shape.
+    setWorkoutExercises(
+      reordered.map(({ exercise: _exercise, ...rest }) => rest),
+    );
   }
 
   function handleDelete() {
@@ -185,7 +173,7 @@ export default function WorkoutEditor({
         isSaving={isSaving}
       />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+      <ScrollViewContainer contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <TextInput
           style={[typography.heading, styles.nameInput]}
           value={workoutName}
@@ -196,18 +184,22 @@ export default function WorkoutEditor({
           maxLength={60}
         />
 
-        {resolvedWorkoutExercises.map((resolvedWorkoutExercise, exerciseIndex) => (
-          <WorkoutExerciseCard
-            key={resolvedWorkoutExercise.exerciseId}
-            resolvedWorkoutExercise={resolvedWorkoutExercise}
-            isFirst={exerciseIndex === 0}
-            isLast={exerciseIndex === workoutExercises.length - 1}
-            onSetsChange={(updatedSets) => handleSetsChange(exerciseIndex, updatedSets)}
-            onRemove={() => handleRemoveExercise(exerciseIndex)}
-            onMoveUp={() => handleMoveUp(exerciseIndex)}
-            onMoveDown={() => handleMoveDown(exerciseIndex)}
-          />
-        ))}
+        <DraggableCardList
+          data={resolvedWorkoutExercises}
+          keyExtractor={(item) => item.exerciseId}
+          onReorder={handleReorder}
+          separatorHeight={spacing.m}
+          renderCard={(item, drag) => (
+            // WorkoutExerciseCard is View-rooted, so wrap in a Pressable to attach the drag trigger.
+            <Pressable onLongPress={drag} delayLongPress={200}>
+              <WorkoutExerciseCard
+                resolvedWorkoutExercise={item}
+                onSetsChange={(updatedSets) => handleSetsChange(item.exerciseId, updatedSets)}
+                onRemove={() => handleRemoveExercise(item.exerciseId)}
+              />
+            </Pressable>
+          )}
+        />
 
         <Pressable
           onPress={() => setIsPickerVisible(true)}
@@ -237,7 +229,7 @@ export default function WorkoutEditor({
             <Text style={typography.actionDanger}>Delete Workout</Text>
           </Pressable>
         )}
-      </ScrollView>
+      </ScrollViewContainer>
 
       <ExercisePicker
         visible={isPickerVisible}

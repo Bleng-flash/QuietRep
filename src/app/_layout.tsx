@@ -7,6 +7,7 @@ import 'react-native-get-random-values';
 import { seedDefaultExercises } from '@/storage';
 import { Stack } from 'expo-router';
 import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function RootLayout() {
   // useEffect (not useFocusEffect) — root layouts have no navigation focus lifecycle,
@@ -18,5 +19,9 @@ export default function RootLayout() {
     runSeed();
   }, []);
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack screenOptions={{ headerShown: false }} />
+    </GestureHandlerRootView>
+  );
 }

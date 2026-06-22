@@ -1,3 +1,4 @@
+import DraggableCardList from '@/components/shared/DraggableCardList';
 import WorkoutCard from '@/components/shared/WorkoutCard';
 import WorkoutPicker from '@/components/plan/WorkoutPicker';
 import { addWorkoutToSplit, deleteWorkout, updateSplit } from '@/storage';
@@ -68,28 +69,39 @@ export default function DayWorkoutList({
     ]);
   }
 
+  async function handleReorder(reordered: Workout[]) {
+    await updateSplit({
+      ...split,
+      days: { ...split.days, [day]: reordered.map((workout) => workout.id) },
+    });
+    onChanged();
+  }
+
   return (
     <View>
       {dayWorkouts.length === 0 ? (
         <Text style={[typography.caption, styles.emptyHint]}>No workouts on this day yet.</Text>
       ) : (
-        dayWorkouts.map((workout) => (
-          <View key={workout.id} style={layout.row}>
-            <View style={styles.cardSlot}>
-              <WorkoutCard
-                workout={workout}
-                allExercises={allExercises}
-              />
+        <DraggableCardList
+          data={dayWorkouts}
+          keyExtractor={(item) => item.id}
+          onReorder={handleReorder}
+          renderCard={(workout, drag) => (
+            <View style={layout.row}>
+              <View style={styles.cardSlot}>
+                {/* WorkoutCard is Pressable-rooted, so pass drag directly as onLongPress. */}
+                <WorkoutCard workout={workout} allExercises={allExercises} onLongPress={drag} />
+              </View>
+              <Pressable
+                onPress={() => confirmRemove(workout)}
+                hitSlop={8}
+                style={({ pressed }) => [styles.removeButton, pressed && layout.pressedButton]}
+              >
+                <Ionicons name="close" size={18} color={colors.dark.error} />
+              </Pressable>
             </View>
-            <Pressable
-              onPress={() => confirmRemove(workout)}
-              hitSlop={8}
-              style={({ pressed }) => [styles.removeButton, pressed && layout.pressedButton]}
-            >
-              <Ionicons name="close" size={18} color={colors.dark.error} />
-            </Pressable>
-          </View>
-        ))
+          )}
+        />
       )}
 
       {/* The add button aligns to the workout-card column only — the empty spacer reserves the
