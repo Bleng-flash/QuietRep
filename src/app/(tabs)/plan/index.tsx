@@ -3,10 +3,10 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import NamePromptModal from '@/components/NamePromptModal';
-import SectionHeader from '@/components/SectionHeader';
-import SplitCard from '@/components/SplitCard';
-import WorkoutCard from '@/components/WorkoutCard';
+import NamePromptModal from '@/components/shared/NamePromptModal';
+import SectionHeader from '@/components/shared/SectionHeader';
+import SplitCard from '@/components/plan/SplitCard';
+import WorkoutCard from '@/components/shared/WorkoutCard';
 import { addSplit, getActiveSplitId, getAllExercises, getSplits, getWorkouts } from '@/storage';
 import { colors, layout, spacing, typography } from '@/styles';
 import type { Exercise, Split, Workout } from '@/types';

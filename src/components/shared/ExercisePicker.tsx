@@ -1,4 +1,4 @@
-import PickerModal from '@/components/PickerModal';
+import PickerModal from '@/components/shared/PickerModal';
 import { colors, layout, radius, spacing, typography } from '@/styles';
 import type { Exercise } from '@/types';
 import { useRouter } from 'expo-router';

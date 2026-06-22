@@ -1,4 +1,4 @@
-import WorkoutEditor from '@/components/WorkoutEditor';
+import WorkoutEditor from '@/components/plan/WorkoutEditor';
 import { addWorkout, addWorkoutToSplit } from '@/storage';
 import type { DayKey, WorkoutExercise } from '@/types';
 import { router, useLocalSearchParams } from 'expo-router';

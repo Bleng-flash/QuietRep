@@ -1,5 +1,5 @@
-import WorkoutCard from '@/components/WorkoutCard';
-import WorkoutPicker from '@/components/WorkoutPicker';
+import WorkoutCard from '@/components/shared/WorkoutCard';
+import WorkoutPicker from '@/components/plan/WorkoutPicker';
 import { addWorkoutToSplit, deleteWorkout, updateSplit } from '@/storage';
 import { colors, layout, radius, spacing, typography } from '@/styles';
 import type { DayKey, Exercise, Split, Workout } from '@/types';

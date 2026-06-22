@@ -1,4 +1,4 @@
-import PickerModal from '@/components/PickerModal';
+import PickerModal from '@/components/shared/PickerModal';
 import { spacing, typography } from '@/styles';
 import type { Exercise, Workout } from '@/types';
 import { buildWorkoutSubtitle } from '@/utils/workout';

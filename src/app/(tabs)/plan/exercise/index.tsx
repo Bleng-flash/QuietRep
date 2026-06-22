@@ -1,5 +1,5 @@
-import ListEmptyText from '@/components/ListEmptyText';
-import SectionHeader from '@/components/SectionHeader';
+import ListEmptyText from '@/components/shared/ListEmptyText';
+import SectionHeader from '@/components/shared/SectionHeader';
 import { MUSCLE_GROUPS } from '@/constants/muscleGroups';
 import { deleteExercise, getAllExercises } from '@/storage';
 import { colors, layout, picker, radius, spacing, typography } from '@/styles';

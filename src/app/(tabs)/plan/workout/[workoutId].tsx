@@ -1,4 +1,4 @@
-import WorkoutEditor from '@/components/WorkoutEditor';
+import WorkoutEditor from '@/components/plan/WorkoutEditor';
 import { deleteWorkout, getWorkoutById, updateWorkout } from '@/storage';
 import { colors, layout } from '@/styles';
 import type { Workout, WorkoutExercise } from '@/types';

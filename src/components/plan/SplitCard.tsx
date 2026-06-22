@@ -1,6 +1,6 @@
-import DayCircle from '@/components/DayCircle';
-import DayWorkoutList from '@/components/DayWorkoutList';
-import NamePromptModal from '@/components/NamePromptModal';
+import DayCircle from '@/components/plan/DayCircle';
+import DayWorkoutList from '@/components/plan/DayWorkoutList';
+import NamePromptModal from '@/components/shared/NamePromptModal';
 import { DAY_KEYS, DAY_LABELS, DAY_NAMES } from '@/constants/days';
 import {
   clearActiveSplit,

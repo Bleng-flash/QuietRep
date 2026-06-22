@@ -1,4 +1,4 @@
-import ListEmptyText from '@/components/ListEmptyText';
+import ListEmptyText from '@/components/shared/ListEmptyText';
 import { colors, layout, picker, spacing, typography } from '@/styles';
 import { matchesSearchQuery } from '@/utils/search';
 import { Ionicons } from '@expo/vector-icons';
