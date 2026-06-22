@@ -1,10 +1,8 @@
-import { colors } from '@/styles';
-import { useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useCallback, type ReactNode } from 'react';
+import { View } from 'react-native';
 import {
   NestedReorderableList,
   reorderItems,
-  useIsActive,
   useReorderableDrag,
 } from 'react-native-reorderable-list';
 
@@ -16,28 +14,23 @@ interface DraggableCardListProps<ItemType> {
    * element should respond to a long press — the card's own root Pressable (for Pressable-rooted
    * cards) or a wrapping Pressable added by the caller (for View-rooted cards).
    */
-  renderCard: (item: ItemType, drag: () => void) => React.ReactNode;
+  renderCard: (item: ItemType, drag: () => void) => ReactNode;
   /** Called with the full reordered array after a drag drop. */
   onReorder: (reordered: ItemType[]) => void;
   separatorHeight?: number;
 }
 
-/** Internal per-item wrapper — provides the drag handle and active-state border highlight. */
-function DraggableCard({
+/** Internal per-item wrapper — retrieves the drag handle and passes it to the caller's renderCard. */
+function DraggableCard<ItemType>({
   renderCard,
   item,
 }: {
-  renderCard: (item: unknown, drag: () => void) => React.ReactNode;
-  item: unknown;
+  renderCard: (item: ItemType, drag: () => void) => ReactNode;
+  item: ItemType;
 }) {
   const drag = useReorderableDrag();
-  const isActive = useIsActive();
-
-  return (
-    <View style={isActive ? styles.cardLifted : undefined}>
-      {renderCard(item, drag)}
-    </View>
-  );
+  // The library's own cell animation handles the visual lift — no wrapper needed here.
+  return <>{renderCard(item, drag)}</>;
 }
 
 export default function DraggableCardList<ItemType>({
@@ -47,14 +40,11 @@ export default function DraggableCardList<ItemType>({
   onReorder,
   separatorHeight = 0,
 }: DraggableCardListProps<ItemType>) {
-  // Cast to unknown internally — the generic constraint is enforced at the call site.
-  const typedRenderCard = renderCard as (item: unknown, drag: () => void) => React.ReactNode;
-
   const renderItem = useCallback(
     ({ item }: { item: ItemType }) => (
-      <DraggableCard renderCard={typedRenderCard} item={item} />
+      <DraggableCard renderCard={renderCard} item={item} />
     ),
-    [typedRenderCard],
+    [renderCard],
   );
 
   const handleReorder = useCallback(
@@ -80,12 +70,3 @@ export default function DraggableCardList<ItemType>({
     />
   );
 }
-
-const styles = StyleSheet.create({
-  cardLifted: {
-    // Subtle border highlight to indicate the card is being dragged.
-    borderWidth: 1,
-    borderColor: colors.dark.primary,
-    borderRadius: 12,
-  },
-});
