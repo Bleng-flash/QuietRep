@@ -2,7 +2,7 @@
 
 ## What is QuietRep
 
-A dark-mode-only gym workout logger mobile app built with React Native and Expo (Expo Router, EAS). Users create a library of exercises, build workout templates, organise them into weekly splits, and log live workout sessions.
+A gym workout logger mobile app built with React Native and Expo (Expo Router, EAS). Users create a library of exercises, build workout templates, organise them into weekly splits, and log live workout sessions.
 
 ## Overall Iteration Plan
 
@@ -44,7 +44,7 @@ Steps 1–9 are complete — **iteration 1 is feature-complete**. The following 
 - Plan index screen with Splits, Workouts, and Exercises sections
 - Full WorkoutEditor flow — create and edit workouts, add/remove/reorder exercises, configure sets and reps, exercise picker modal with live search
 - All storage operations for exercises, workouts, splits, and active split
-- 97 default exercises seeded on first launch via `seedDefaultExercises` in `src/storage/exercises.ts`
+- All default exercises seeded on first launch via `seedDefaultExercises` in `src/storage/exercises.ts`
 - Safe area insets applied correctly throughout
 - `darkGreen` color theme added to `src/styles/colors.ts` alongside `dark` (purple)
 
@@ -151,9 +151,9 @@ The `| undefined` on the related entity is intentional — it covers dangling FK
 
 **Stable identity keys for stateful list rows — `localKey` pattern**
 
-When a list-item component holds local state derived from props (e.g., `SetRow`'s `repsText`/`loadText` buffers, seeded once at mount via `useState` and never re-synced — see `src/components/SetRow.tsx`), keying the list by array index breaks under insertion, removal, or reorder. React reuses component instances by *position*: removing item 0 shifts items 1..n into slots 0..n-1, but each reused instance keeps its stale local state, which now describes the wrong logical item. The underlying data is correct (verified by saving and reopening) — only the display is wrong, and a row appears to vanish from the wrong end of the list.
+When a list-item component holds local state derived from props (e.g., `SetRow`'s `minRepsText`/`maxRepsText` buffers, seeded once at mount via `useState` and never re-synced — see `src/components/SetRow.tsx`), keying the list by array index breaks under insertion, removal, or reorder. React reuses component instances by *position*: removing item 0 shifts items 1..n into slots 0..n-1, but each reused instance keeps its stale local state, which now describes the wrong logical item. The underlying data is correct (verified by saving and reopening) — only the display is wrong, and a row appears to vanish from the wrong end of the list.
 
-Fix: give each item a stable, client-generated `localKey` (via `uuid()`) and key the list by it instead of by array index, so each component instance stays bound to the same logical item across any reordering operation. `localKey` is a render-only identity — generated when editor state is seeded or created, and stripped before the data reaches storage, so persisted entities keep their canonical `{ reps, load }` shape.
+Fix: give each item a stable, client-generated `localKey` (via `uuid()`) and key the list by it instead of by array index, so each component instance stays bound to the same logical item across any reordering operation. `localKey` is a render-only identity — generated when editor state is seeded or created, and stripped before the data reaches storage, so persisted entities keep their canonical `{ minReps, maxReps }` shape.
 
 This is implemented as a pair of frontend-only view models — `EditableSet` and `ResolvedEditableWorkoutExercise` in `src/types/index.ts` — following the exact "frontend view model, no DB counterpart" framing as `ResolvedWorkoutExercise` above (do not add `localKey` directly to `SetScheme`; that would blur the "types mirror the backend shape" contract — see Types are designed for backend transition below). See `WorkoutEditor` → `WorkoutExerciseCard` → `SetRow` for the canonical example, and apply the same approach anywhere else a list of stateful rows can be reordered or have items removed (e.g., the live session view in Iteration 2).
 
@@ -199,8 +199,10 @@ This is implemented as a pair of frontend-only view models — `EditableSet` and
 
 - Use abstraction — split into child components, do not generate monolithic files
 - Each component in its own file
-- Follow the existing pattern: SectionHeader, WorkoutCard, SplitCard, SetRow, ExerciseCard, ExercisePicker are all good examples of the right level of abstraction \
-  (though we may have to organise the components directory into subdirectories in the future if it gets too large)
+- Follow the existing pattern: SectionHeader, WorkoutCard, SplitCard, SetRow, ExercisePicker are all good examples of the right level of abstraction
+- `src/components/` is split into two subdirectories:
+  - `plan/` — components owned by the Plan tab: DayCircle, DayWorkoutList, SplitCard, WorkoutEditor, WorkoutExerciseCard, WorkoutPicker
+  - `shared/` — cross-tab primitives and components expected to be reused across tabs: EditorHeader, ExercisePicker, ListEmptyText, NamePromptModal, PickerModal, SectionHeader, SetRow, TabBar, WorkoutCard
 
 ### Code generation
 
@@ -221,6 +223,8 @@ For any `FlatList` or `SectionList` rendering more than ~20 items, apply this me
 4. **`useMemo` on derived list data** — e.g. filtered/grouped arrays; avoids recomputing on renders unrelated to search or data changes
 5. **Id-based callback props** — type item handler props as `(id: string) => void` rather than `() => void`; this lets `renderItem` pass the stable handler directly instead of wrapping it in a per-item arrow (`() => handleDelete(item.id)`), which would be a new reference every render
 6. **Stabilise all deps of `renderItem`'s `useCallback` at the parent** — any value used inside `renderItem` (e.g. a `Set` for deduplication like `alreadyAddedIds`) must itself be `useMemo`-wrapped at the parent level; a plain `new Set(...)` creates a new reference every render, causing `renderItem` to recompute on every parent render regardless of whether the data changed
+7. **Pass primitive item props, not the whole entity object** — when storage reloads return a fresh array of new object references (after create/delete), `memo`'s shallow compare sees a new reference for every row and re-renders all of them. Pass only the primitive fields the row needs (e.g. `id: string`, `name: string`, `isDefault: boolean` instead of `exercise: Exercise`) so unchanged rows bail out via value equality, not reference equality. Only the changed row re-renders.
+8. **Set `windowSize` to cap the render tree** — the default `windowSize: 21` keeps 10 viewport-heights of content rendered above and below the visible area. For a ~100-item list this means the entire list stays in the render tree, requiring ~100 memo checks per update. `windowSize={5}` (2 viewport-heights of buffer each side) cuts this to ~20–30 items without causing blank cells during normal browse/search use.
 
 See `plan/exercise/index.tsx` for the canonical example of this pattern.
 

@@ -101,6 +101,7 @@ export default function ExerciseListScreen() {
         <SectionList
           sections={sections}
           keyExtractor={(item) => item.id}
+          windowSize={5}
           renderSectionHeader={useCallback(
             ({ section }: { section: { title: string; data: Exercise[] } }) => (
               <SectionHeader title={section.title} />
@@ -109,7 +110,12 @@ export default function ExerciseListScreen() {
           )}
           renderItem={useCallback(
             ({ item }: { item: Exercise }) => (
-              <ExerciseEntry exercise={item} onDelete={handleDeleteExercise} />
+              <ExerciseEntry
+                id={item.id}
+                name={item.name}
+                isDefault={item.isDefault}
+                onDelete={handleDeleteExercise}
+              />
             ),
             [handleDeleteExercise],
           )}
@@ -131,20 +137,24 @@ export default function ExerciseListScreen() {
 }
 
 interface ExerciseEntryProps {
-  exercise: Exercise;
+  id: string;
+  name: string;
+  isDefault: boolean;
   onDelete: (id: string) => void;
 }
 
-const ExerciseEntry = memo(function ExerciseEntry({ exercise, onDelete }: ExerciseEntryProps) {
+// Receives primitive props (not the whole Exercise object) so memo can bail out of re-render
+// for unchanged rows even when the parent reloads a fresh array of objects from storage.
+const ExerciseEntry = memo(function ExerciseEntry({ id, name, isDefault, onDelete }: ExerciseEntryProps) {
   return (
     <View style={[layout.row, styles.exerciseEntry]}>
       <View style={{ flex: 1, paddingVertical: spacing.xs }}>
-        <Text style={typography.body}>{exercise.name}</Text>
+        <Text style={typography.body}>{name}</Text>
       </View>
       {/* Trash button only shown for user-created exercises; default exercises are not deletable */}
-      {!exercise.isDefault && (
+      {!isDefault && (
         <Pressable
-          onPress={() => onDelete(exercise.id)}
+          onPress={() => onDelete(id)}
           hitSlop={8}
           style={({ pressed }) => pressed && layout.pressedButton}
         >
