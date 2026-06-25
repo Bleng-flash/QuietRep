@@ -1,13 +1,13 @@
 import SetRow from '@/components/shared/SetRow';
 import { colors, layout, spacing, typography } from '@/styles';
-import type { EditableSet, ResolvedEditableWorkoutExercise, SetScheme } from '@/types';
+import type { EditablePlannedSet, PlannedSet, ResolvedEditableWorkoutExercise } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { v4 as uuid } from 'uuid';
 
 interface WorkoutExerciseCardProps {
   resolvedWorkoutExercise: ResolvedEditableWorkoutExercise;
-  onSetsChange: (sets: EditableSet[]) => void;
+  onSetsChange: (sets: EditablePlannedSet[]) => void;
   onRemove: () => void;
 }
 
@@ -20,11 +20,11 @@ export default function WorkoutExerciseCard({
   // Destructure for convenient access in handlers and JSX below
   const { exercise, sets } = resolvedWorkoutExercise;
 
-  function handleSetChange(setIndex: number, updated: SetScheme) {
-    // SetRow emits a plain SetScheme ({ minReps, maxReps }) — spread currentSet first so the
-    // EditableSet's localKey survives the merge instead of being dropped.
+  function handleSetChange(setIndex: number, updated: PlannedSet) {
+    // SetRow emits a plain PlannedSet ({ minReps, maxReps }) — spread currentSet first so the
+    // EditablePlannedSet's localKey survives the merge instead of being dropped.
     onSetsChange(
-      sets.map((currentSet: EditableSet, index: number) =>
+      sets.map((currentSet: EditablePlannedSet, index: number) =>
         index === setIndex ? { ...currentSet, ...updated } : currentSet,
       ),
     );
@@ -32,14 +32,14 @@ export default function WorkoutExerciseCard({
 
   // In JavaScript/TypeScript, _ is a convention for a parameter you're required to declare but intentionally don't use
   function handleRemoveSet(setIndex: number) {
-    onSetsChange(sets.filter((_: EditableSet, index: number) => index !== setIndex));
+    onSetsChange(sets.filter((_: EditablePlannedSet, index: number) => index !== setIndex));
   }
 
   function handleAddSet() {
     const lastSet = sets[sets.length - 1];
     // Copy the previous set's values but mint a fresh localKey — the new set is a distinct
     // identity, so it must not share a key (and thus a SetRow instance) with any existing set.
-    const newSet: EditableSet = lastSet
+    const newSet: EditablePlannedSet = lastSet
       ? { ...lastSet, localKey: uuid() }
       : { minReps: 0, maxReps: 0, localKey: uuid() };
     onSetsChange([...sets, newSet]);
@@ -75,14 +75,14 @@ export default function WorkoutExerciseCard({
         <View style={{ width: 32 }} />
       </View>
 
-      {sets.map((setScheme, setIndex) => (
+      {sets.map((plannedSet, setIndex) => (
         <SetRow
           // Key by the set's stable localKey (not its array index) so each SetRow instance
           // stays bound to the same logical set across removals/reorders — this is what
           // prevents SetRow's local text-buffer state from sticking to the wrong set.
-          key={setScheme.localKey}
+          key={plannedSet.localKey}
           setIndex={setIndex}
-          setScheme={setScheme}
+          plannedSet={plannedSet}
           isOnly={sets.length === 1}
           onChange={(updated) => handleSetChange(setIndex, updated)}
           onRemove={() => handleRemoveSet(setIndex)}

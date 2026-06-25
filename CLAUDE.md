@@ -24,50 +24,40 @@ Iteration sequence for the frontend:
   Predefined exercise library. Animations and transitions. Empty state illustrations. Onboarding flow for first-time users. Any UX rough edges surfaced from using the app.
 
 \
-Now, we are in iteration 1. The table below details our progress within iteration 1.
+Iteration 1 is complete. Now, we are in **iteration 2**. The table below details our progress within iteration 2.
 | Step | Feature | Status |
 | ---- | ----------------------------------------------------------------------- | ----------- |
-| 1 | Project setup, global styles, color system, spacing, typography, layout | Done |
-| 2 | Data model and types | Done |
-| 3 | Storage layer (AsyncStorage) | Done |
-| 4 | Root layout, tab bar, default exercise seeding | Done |
-| 5 | Shared components — DayCircle, SectionHeader, WorkoutCard, SplitCard | Done |
-| 6 | Plan index screen | Done |
-| 7 | WorkoutEditor — create and edit workouts | Done |
-| 8 | Split section — inline split create/edit/delete on the Plan screen | Done |
-| 9 | Exercise screens — new exercise, view all exercises | Done |
+| 1 | Session types, storage (`sessions.ts`), and utils (`session.ts`) | Done |
+| 2 | Active-session context (`ActiveSessionContext`) | Planned |
+| 3 | Session screen + components (`WorkoutSession`, `SessionExerciseCard`, `LoggedSetRow`) | Planned |
+| 4 | FAB fan menu + three start-session entry points | Planned |
+| 5 | Cross-tab resume banner | Planned |
+| 6 | Polish — empty states, confirm dialogs, elapsed timer | Planned |
 
 ## Current State
 
-Steps 1–9 are complete — **iteration 1 is feature-complete**. The following is fully functional:
+Iteration 1 is complete and Iteration 2 Step 1 is done. The following is fully functional:
 
+**Iteration 1 (complete):**
 - Plan index screen with Splits, Workouts, and Exercises sections
 - Full WorkoutEditor flow — create and edit workouts, add/remove/reorder exercises, configure sets and reps, exercise picker modal with live search
 - All storage operations for exercises, workouts, splits, and active split
 - All default exercises seeded on first launch via `seedDefaultExercises` in `src/storage/exercises.ts`
 - Safe area insets applied correctly throughout
-- `darkGreen` color theme added to `src/styles/colors.ts` alongside `dark` (purple)
 
-**New in Step 9:**
 
-- `plan/exercise/index.tsx` — full exercise catalog grouped by muscle group via `SectionList`, with live search (collapses empty sections), delete button on user-created exercises (with confirmation Alert), and a "Create new exercise" footer CTA
-- `plan/exercise/new.tsx` — create exercise form with name `TextInput` and inline muscle group dropdown; trims name, validates both fields, calls `addExercise` (which enforces name uniqueness), navigates back on success
+**New in Iteration 2, Step 1:**
 
-**New in Step 8 (Split section — all inline on the Plan screen):**
-
-- `SplitCard` rewritten as a fully interactive inline surface: tap-to-rename name, "Set active"/"Active" toggle, delete (single confirm), a row of 7 `DayCircle`s, and an expandable selected-day section
-- `DayWorkoutList` — the expanded day section: lists that day's workouts (tap → edit, ✕ → remove), an "Add workout" button opening `WorkoutPicker`
-- `DayCircle` reworked to `{ label, isSelected, isRest, onPress }`
-- `NamePromptModal` — reusable cross-platform name-entry dialog (create + rename a split)
-- `EditorHeader` — shared `Cancel / Title / Save` bar extracted from `WorkoutEditor` and `plan/exercise/new.tsx` (both refactored onto it)
-- `addWorkoutToSplit(splitId, day, { name, exercises })` in `src/storage/splits.ts`; `createEmptyDays()` in `src/utils/split.ts`
-- The three former known bugs (New Split noop, SplitCard noops, CardList stub) are all resolved.
+- `SetScheme` renamed to `PlannedSet`; `EditableSet` renamed to `EditablePlannedSet` throughout
+- `EditableWorkoutExercise` promoted from a private type in `WorkoutEditor` to an exported type in `src/types/index.ts`; `ResolvedEditableWorkoutExercise` rewritten as a purely additive intersection on top of it
+- New canonical session types in `src/types/index.ts`: `LoggedSet`, `SessionExercise`, `WorkoutSession`
+- New session view-model types: `EditableLoggedSet` (adds `localKey` + optional `targetMinReps`/`targetMaxReps`), `EditableSessionExercise`, `ResolvedEditableSessionExercise`
+- `src/storage/sessions.ts` — `getSessions`, `getActiveSession`, `setActiveSession`, `clearActiveSession`, `finishSession` across two AsyncStorage keys (active buffer + history)
+- `src/utils/session.ts` — `getTodayKey`, `seedSessionExercises`, `stripToCanonicalExercises`, `toCanonicalSession`
 
 ## Next steps
 
-Iteration 1 is complete. Next is **Iteration 2: Start workout session** (FAB flow, full
-session view, in-session logging, mid-session modifications, finish + save to history, and the
-persistent in-progress banner). To be planned when ready.
+**Iteration 2 Step 2** is next: `ActiveSessionContext` — a React context that owns the live session state, hydrates from `getActiveSession()` on mount, and exposes `startSession` / `updateActiveSession` / `finishActiveSession` / `discardActiveSession`. Mounted at the root layout so both the session screen and the resume banner share the same live state.
 
 ---
 
@@ -155,7 +145,20 @@ When a list-item component holds local state derived from props (e.g., `SetRow`'
 
 Fix: give each item a stable, client-generated `localKey` (via `uuid()`) and key the list by it instead of by array index, so each component instance stays bound to the same logical item across any reordering operation. `localKey` is a render-only identity — generated when editor state is seeded or created, and stripped before the data reaches storage, so persisted entities keep their canonical `{ minReps, maxReps }` shape.
 
-This is implemented as a pair of frontend-only view models — `EditableSet` and `ResolvedEditableWorkoutExercise` in `src/types/index.ts` — following the exact "frontend view model, no DB counterpart" framing as `ResolvedWorkoutExercise` above (do not add `localKey` directly to `SetScheme`; that would blur the "types mirror the backend shape" contract — see Types are designed for backend transition below). See `WorkoutEditor` → `WorkoutExerciseCard` → `SetRow` for the canonical example, and apply the same approach anywhere else a list of stateful rows can be reordered or have items removed (e.g., the live session view in Iteration 2).
+This is implemented via frontend-only view models — `EditablePlannedSet`, `EditableWorkoutExercise`, and `ResolvedEditableWorkoutExercise` in `src/types/index.ts` — following the exact "frontend view model, no DB counterpart" framing as `ResolvedWorkoutExercise` above (do not add `localKey` directly to `PlannedSet`; that would blur the "types mirror the backend shape" contract — see Types are designed for backend transition below). See `WorkoutEditor` → `WorkoutExerciseCard` → `SetRow` for the canonical example. The session view (`EditableLoggedSet` → `EditableSessionExercise` → `ResolvedEditableSessionExercise`) follows the exact same pattern for Iteration 2.
+
+**PlannedSet vs LoggedSet — plan template vs runtime record**
+`PlannedSet` (`minReps`, `maxReps`) belongs to the plan layer and lives on `WorkoutExercise`. It is a rep-range target, set when building a workout template, never modified during a session. `LoggedSet` (`weight`, `reps`) belongs to the session layer and lives on `SessionExercise`. It is what the user actually lifted. The two must never be conflated: load is a runtime value and has no place in the plan schema.
+
+When a session is seeded from a plan, each `PlannedSet` becomes an `EditableLoggedSet` (blank `weight: 0, reps: 0`) carrying the planned range as optional `targetMinReps`/`targetMaxReps` hint fields for the session UI. These hint fields are frontend view-model only — stripped by `stripToCanonicalExercises` before any write to storage.
+
+**Session storage — two AsyncStorage keys**
+`@quietrep/activeSession` holds the single in-progress session buffer (a canonical `WorkoutSession` with `finishedAt: null`). `@quietrep/sessions` holds the array of completed sessions (newest-first), used by the Log tab in Iteration 3. The active buffer is always written with view-model fields stripped — only the context layer (`ActiveSessionContext`, Iteration 2 Step 2) performs that strip before calling `setActiveSession`. `finishSession` stamps `finishedAt`, prepends to history, and clears the active key atomically.
+
+**Additive type intersections — plan and session view-model chains**
+Both the plan-editor and session view-model type chains are built purely by adding fields, never by subtracting them (no `Omit` used to remove a field from a "bigger" type):
+- Plan: `PlannedSet` → `EditablePlannedSet` (adds `localKey`) → `EditableWorkoutExercise` (replaces `sets`) → `ResolvedEditableWorkoutExercise` (adds `exercise` join)
+- Session: `LoggedSet` → `EditableLoggedSet` (adds `localKey` + target hints) → `EditableSessionExercise` (replaces `sets`) → `ResolvedEditableSessionExercise` (adds `exercise` join)
 
 ## Code Rules — Must Follow in Every Generation
 
@@ -200,8 +203,9 @@ This is implemented as a pair of frontend-only view models — `EditableSet` and
 - Use abstraction — split into child components, do not generate monolithic files
 - Each component in its own file
 - Follow the existing pattern: SectionHeader, WorkoutCard, SplitCard, SetRow, ExercisePicker are all good examples of the right level of abstraction
-- `src/components/` is split into two subdirectories:
+- `src/components/` is split into three subdirectories:
   - `plan/` — components owned by the Plan tab: DayCircle, DayWorkoutList, SplitCard, WorkoutEditor, WorkoutExerciseCard, WorkoutPicker
+  - `session/` — components owned by the live session flow: WorkoutFabMenu, WorkoutSession, SessionExerciseCard, LoggedSetRow, ResumeSessionBanner
   - `shared/` — cross-tab primitives and components expected to be reused across tabs: EditorHeader, ExercisePicker, ListEmptyText, NamePromptModal, PickerModal, SectionHeader, SetRow, TabBar, WorkoutCard
 
 ### Code generation

@@ -1,4 +1,5 @@
 export * from './exercises';
+export * from './sessions';
 export * from './splits';
 export * from './workouts';
 

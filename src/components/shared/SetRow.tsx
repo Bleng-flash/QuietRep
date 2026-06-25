@@ -1,26 +1,26 @@
 import { colors, layout, spacing, typography } from '@/styles';
-import type { SetScheme } from '@/types';
+import type { PlannedSet } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 interface SetRowProps {
   setIndex: number;
-  setScheme: SetScheme;
+  plannedSet: PlannedSet;
   isOnly: boolean;
-  onChange: (updated: SetScheme) => void;
+  onChange: (updated: PlannedSet) => void;
   onRemove: () => void;
 }
 
-export default function SetRow({ setIndex, setScheme, isOnly, onChange, onRemove }: SetRowProps) {
+export default function SetRow({ setIndex, plannedSet, isOnly, onChange, onRemove }: SetRowProps) {
   /** Only when React mounts a component it runs useState once to set the initial value.
    * After that, on every re-render, the state just holds whatever was
    * last set via the setter function. */
   const [minRepsText, setMinRepsText] = useState(
-    setScheme.minReps > 0 ? String(setScheme.minReps) : '',
+    plannedSet.minReps > 0 ? String(plannedSet.minReps) : '',
   );
   const [maxRepsText, setMaxRepsText] = useState(
-    setScheme.maxReps > 0 ? String(setScheme.maxReps) : '',
+    plannedSet.maxReps > 0 ? String(plannedSet.maxReps) : '',
   );
 
   return (
@@ -37,7 +37,7 @@ export default function SetRow({ setIndex, setScheme, isOnly, onChange, onRemove
           placeholderTextColor={colors.dark.textDisabled}
           onChangeText={(text) => {
             setMinRepsText(text);
-            onChange({ ...setScheme, minReps: parseInt(text, 10) || 0 });
+            onChange({ ...plannedSet, minReps: parseInt(text, 10) || 0 });
           }}
         />
         <Text style={[typography.caption, styles.rangeSeparator]}>to</Text>
@@ -49,7 +49,7 @@ export default function SetRow({ setIndex, setScheme, isOnly, onChange, onRemove
           placeholderTextColor={colors.dark.textDisabled}
           onChangeText={(text) => {
             setMaxRepsText(text);
-            onChange({ ...setScheme, maxReps: parseInt(text, 10) || 0 });
+            onChange({ ...plannedSet, maxReps: parseInt(text, 10) || 0 });
           }}
         />
       </View>

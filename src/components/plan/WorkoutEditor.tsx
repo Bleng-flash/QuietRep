@@ -1,11 +1,12 @@
+import WorkoutExerciseCard from '@/components/plan/WorkoutExerciseCard';
+import DraggableCardList from '@/components/shared/DraggableCardList';
 import EditorHeader from '@/components/shared/EditorHeader';
 import ExercisePicker from '@/components/shared/ExercisePicker';
-import DraggableCardList from '@/components/shared/DraggableCardList';
-import WorkoutExerciseCard from '@/components/plan/WorkoutExerciseCard';
 import { getAllExercises } from '@/storage';
 import { colors, layout, spacing, typography } from '@/styles';
 import type {
-  EditableSet,
+  EditablePlannedSet,
+  EditableWorkoutExercise,
   Exercise,
   ResolvedEditableWorkoutExercise,
   Workout,
@@ -32,15 +33,11 @@ interface WorkoutEditorProps {
   onDelete?: () => void;
 }
 
-// The editor's working shape: each exercise's sets carry an editor-only localKey, but the
-// Exercise join hasn't happened yet — i.e. ResolvedEditableWorkoutExercise minus `exercise`.
-type EditableWorkoutExercise = Omit<ResolvedEditableWorkoutExercise, 'exercise'>;
-
 // Attach a fresh localKey to every set when seeding editor state from stored data.
 function toEditableExercises(exercises: WorkoutExercise[]): EditableWorkoutExercise[] {
   return exercises.map((workoutExercise) => ({
     ...workoutExercise,
-    sets: workoutExercise.sets.map((setScheme) => ({ ...setScheme, localKey: uuid() })),
+    sets: workoutExercise.sets.map((plannedSet) => ({ ...plannedSet, localKey: uuid() })),
   }));
 }
 
@@ -111,7 +108,7 @@ export default function WorkoutEditor({
     );
   }
 
-  function handleSetsChange(exerciseId: string, updatedSets: EditableSet[]) {
+  function handleSetsChange(exerciseId: string, updatedSets: EditablePlannedSet[]) {
     setWorkoutExercises((prev) =>
       prev.map((workoutExercise) =>
         workoutExercise.exerciseId === exerciseId
@@ -146,13 +143,13 @@ export default function WorkoutEditor({
     }
     setIsSaving(true);
     try {
-      // Strip the editor-only localKey so storage receives plain SetScheme ({ minReps, maxReps }).
+      // Strip the editor-only localKey so storage receives plain PlannedSet ({ minReps, maxReps }).
       // This is the single guard keeping localKey out of persisted data.
       const exercisesToSave: WorkoutExercise[] = workoutExercises.map((workoutExercise) => ({
         ...workoutExercise,
-        sets: workoutExercise.sets.map((setScheme) => ({
-          minReps: setScheme.minReps,
-          maxReps: setScheme.maxReps,
+        sets: workoutExercise.sets.map((plannedSet) => ({
+          minReps: plannedSet.minReps,
+          maxReps: plannedSet.maxReps,
         })),
       }));
       await onSave(workoutName.trim(), exercisesToSave);
