@@ -1,5 +1,5 @@
 export const colors = {
-  dark: {
+  darkPurple: {
     // Background
     background: '#0e0d12',
     backgroundSubtle: '#131219',
@@ -40,28 +40,28 @@ export const colors = {
     sliderTrack: '#1e1c28',
     inputBackground: '#131219',
   },
-  darkGreen: {
+  dark: {
     // Background
     background: '#0d1210',
     backgroundSubtle: '#111915',
 
     // Surface
-    surface: '#161f1a',
-    surfaceRaised: '#1c2820',
+    surface: '#161e1d',
+    surfaceRaised: '#1c2828',
 
     // Border
     border: '#263229',
     borderSubtle: '#1c2620',
 
     // Text
-    text: '#ddeae3',
-    textSubtle: '#6d8b7a',
-    textDisabled: '#2e4238',
+    text: '#e0e4e8',
+    textSubtle: '#7a8088',
+    textDisabled: '#323840',
     textInverse: '#0d1210',
 
-    // Primary — muted sage green; calm and stoic, not vibrant
-    primary: '#6aaa87',
-    primaryMuted: '#4f8669',
+    // Primary
+    primary: '#32af6e',
+    primaryMuted: '#4b9b70',
     primarySubtle: '#0c1e15',
 
     // Semantic

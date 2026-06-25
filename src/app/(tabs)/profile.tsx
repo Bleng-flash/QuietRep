@@ -27,6 +27,9 @@ export default function ProfileScreen() {
       <Text style={{ color: colors.dark.success, fontSize: 28 }}>success</Text>
       <Text style={{ color: colors.dark.successSubtle, fontSize: 28 }}>successsubtle</Text>
 
+      <Text style={{ color: colors.dark.info, fontSize: 28 }}>info</Text>
+      <Text style={{ color: colors.dark.infoSubtle, fontSize: 28 }}>info subtle</Text>
+
       <Text style={{ color: colors.dark.overlay, fontSize: 28 }}> Overlay </Text>
     </View>
   );
