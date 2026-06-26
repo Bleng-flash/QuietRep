@@ -4,6 +4,7 @@
 // uuid — hence it must be the absolute first import in the app entry point.
 import 'react-native-get-random-values';
 
+import { ActiveSessionProvider } from '@/context/ActiveSessionContext';
 import { seedDefaultExercises } from '@/storage';
 import { Stack } from 'expo-router';
 import { useEffect } from 'react';
@@ -21,7 +22,9 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Stack screenOptions={{ headerShown: false }} />
+      <ActiveSessionProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </ActiveSessionProvider>
     </GestureHandlerRootView>
   );
 }

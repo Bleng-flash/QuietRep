@@ -58,6 +58,16 @@ export function stripToCanonicalExercises(
   }));
 }
 
+/** Re-attaches fresh localKeys to persisted session exercises so they can be used as editable
+ *  view models. Called when hydrating from storage after an app restart mid-session.
+ *  No targetMinReps/Max — those are plan-seeding hints and are never persisted to storage. */
+export function hydrateSessionExercises(exercises: SessionExercise[]): EditableSessionExercise[] {
+  return exercises.map((sessionExercise) => ({
+    exerciseId: sessionExercise.exerciseId,
+    sets: sessionExercise.sets.map((loggedSet) => ({ ...loggedSet, localKey: uuid() })),
+  }));
+}
+
 /** Assembles a canonical WorkoutSession from the context's working state for storage writes.
  *  finishedAt is always null here — storage's finishSession() stamps it on the Finish action. */
 export function toCanonicalSession(

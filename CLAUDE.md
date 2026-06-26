@@ -28,7 +28,7 @@ Iteration 1 is complete. Now, we are in **iteration 2**. The table below details
 | Step | Feature | Status |
 | ---- | ----------------------------------------------------------------------- | ----------- |
 | 1 | Session types, storage (`sessions.ts`), and utils (`session.ts`) | Done |
-| 2 | Active-session context (`ActiveSessionContext`) | Planned |
+| 2 | Active-session context (`ActiveSessionContext`) | Done |
 | 3 | Session screen + components (`WorkoutSession`, `SessionExerciseCard`, `LoggedSetRow`) | Planned |
 | 4 | FAB fan menu + three start-session entry points | Planned |
 | 5 | Cross-tab resume banner | Planned |
@@ -36,7 +36,7 @@ Iteration 1 is complete. Now, we are in **iteration 2**. The table below details
 
 ## Current State
 
-Iteration 1 is complete and Iteration 2 Step 1 is done. The following is fully functional:
+Iteration 1 is complete and Iteration 2 Steps 1 and 2 are done. The following is fully functional:
 
 **Iteration 1 (complete):**
 - Plan index screen with Splits, Workouts, and Exercises sections
@@ -44,7 +44,6 @@ Iteration 1 is complete and Iteration 2 Step 1 is done. The following is fully f
 - All storage operations for exercises, workouts, splits, and active split
 - All default exercises seeded on first launch via `seedDefaultExercises` in `src/storage/exercises.ts`
 - Safe area insets applied correctly throughout
-
 
 **New in Iteration 2, Step 1:**
 
@@ -55,9 +54,17 @@ Iteration 1 is complete and Iteration 2 Step 1 is done. The following is fully f
 - `src/storage/sessions.ts` — `getSessions`, `getActiveSession`, `setActiveSession`, `clearActiveSession`, `finishSession` across two AsyncStorage keys (active buffer + history)
 - `src/utils/session.ts` — `getTodayKey`, `seedSessionExercises`, `stripToCanonicalExercises`, `toCanonicalSession`
 
+**New in Iteration 2, Step 2:**
+
+- `src/context/ActiveSessionContext.tsx` — `ActiveSessionProvider` (mounts at root, hydrates from `getActiveSession()` on cold launch) and `useActiveSession()` hook
+- `SessionBuffer` — the in-memory working shape (`id`, `name`, `startedAt`, `exercises: EditableSessionExercise[]`), exported from the context file; never written to storage directly
+- Four actions on the context: `startSession` (async, awaited before navigation), `updateActiveSession` (debounced 500ms persist via `latestSessionRef`), `finishActiveSession` (cancels debounce, stamps `finishedAt`, writes to history), `discardActiveSession` (cancels debounce, clears active buffer)
+- `hydrateSessionExercises` added to `src/utils/session.ts` — re-attaches fresh `localKey`s to stored `SessionExercise[]` on cold restart
+- `ActiveSessionProvider` wraps `<Stack>` in `src/app/_layout.tsx`
+
 ## Next steps
 
-**Iteration 2 Step 2** is next: `ActiveSessionContext` — a React context that owns the live session state, hydrates from `getActiveSession()` on mount, and exposes `startSession` / `updateActiveSession` / `finishActiveSession` / `discardActiveSession`. Mounted at the root layout so both the session screen and the resume banner share the same live state.
+**Iteration 2 Step 3** is next: session screen + components — `LoggedSetRow`, `SessionExerciseCard`, `WorkoutSession` (fat component mirroring `WorkoutEditor`), and the thin `src/app/session.tsx` route consuming `useActiveSession()`.
 
 ---
 
@@ -154,6 +161,15 @@ When a session is seeded from a plan, each `PlannedSet` becomes an `EditableLogg
 
 **Session storage — two AsyncStorage keys**
 `@quietrep/activeSession` holds the single in-progress session buffer (a canonical `WorkoutSession` with `finishedAt: null`). `@quietrep/sessions` holds the array of completed sessions (newest-first), used by the Log tab in Iteration 3. The active buffer is always written with view-model fields stripped — only the context layer (`ActiveSessionContext`, Iteration 2 Step 2) performs that strip before calling `setActiveSession`. `finishSession` stamps `finishedAt`, prepends to history, and clears the active key atomically.
+
+**ActiveSessionContext — React Context as subscription layer over AsyncStorage**
+AsyncStorage has no subscriptions: when one component writes, nothing else is notified. `ActiveSessionContext` solves this by holding the live session in React state — updating the provider's state re-renders all `useActiveSession()` consumers (session screen, resume banner) automatically. No component ever reads `@quietrep/activeSession` from AsyncStorage directly; all reads and mutations go through the four context actions.
+
+`SessionBuffer` (the in-memory working shape) is defined and exported from the context file, not from `src/types/index.ts`. It is a context-state shape (a UI concern), not a data-model type — it belongs with the context that owns it. Components that need to reference it import from `@/context/ActiveSessionContext`.
+
+`updateActiveSession` uses a `latestSessionRef` (kept in sync with state via a `useEffect`) so the 500ms debounced timeout closure always writes the freshest session. `debounceTimer` is a `useRef` (not state) because changing a timer ID must not trigger re-renders.
+
+Backend transition: the four-action API surface (`startSession` / `updateActiveSession` / `finishActiveSession` / `discardActiveSession`) is the stable contract for all consumers. When the real backend arrives, only the internals of `ActiveSessionProvider` change (storage calls → API calls); the session screen, resume banner, and FAB menu change nothing.
 
 **Additive type intersections — plan and session view-model chains**
 Both the plan-editor and session view-model type chains are built purely by adding fields, never by subtracting them (no `Omit` used to remove a field from a "bigger" type):
