@@ -41,11 +41,7 @@ function toEditableExercises(exercises: WorkoutExercise[]): EditableWorkoutExerc
   }));
 }
 
-export default function WorkoutEditor({
-  initialWorkout,
-  onSave,
-  onDelete,
-}: WorkoutEditorProps) {
+export default function WorkoutEditor({ initialWorkout, onSave, onDelete }: WorkoutEditorProps) {
   const isEditMode = initialWorkout !== undefined;
 
   const [workoutName, setWorkoutName] = useState(initialWorkout?.name ?? '');
@@ -120,9 +116,7 @@ export default function WorkoutEditor({
 
   function handleReorder(reordered: ResolvedEditableWorkoutExercise[]) {
     // Strip the joined `exercise` field to get back to EditableWorkoutExercise shape.
-    setWorkoutExercises(
-      reordered.map(({ exercise: _exercise, ...rest }) => rest),
-    );
+    setWorkoutExercises(reordered.map(({ exercise: _exercise, ...rest }) => rest));
   }
 
   function handleDelete() {
@@ -170,7 +164,10 @@ export default function WorkoutEditor({
         isSaving={isSaving}
       />
 
-      <ScrollViewContainer contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+      <ScrollViewContainer
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
         <TextInput
           style={[typography.heading, styles.nameInput]}
           value={workoutName}
@@ -200,7 +197,11 @@ export default function WorkoutEditor({
 
         <Pressable
           onPress={() => setIsPickerVisible(true)}
-          style={({ pressed }) => [layout.addButton, { marginBottom: spacing.m }, pressed && layout.pressedButton]}
+          style={({ pressed }) => [
+            layout.addButton,
+            { marginBottom: spacing.m },
+            pressed && layout.pressedButton,
+          ]}
         >
           <Ionicons name="add" size={20} color={colors.dark.primary} />
           <Text style={typography.actionPrimary}>Add exercise</Text>
@@ -219,7 +220,7 @@ export default function WorkoutEditor({
             style={({ pressed }) => [
               layout.dangerButton,
               { marginTop: spacing.l },
-              pressed && { opacity: 0.7 },
+              pressed && layout.pressedButton,
             ]}
           >
             <Ionicons name="trash-outline" size={18} color={colors.dark.error} />

@@ -58,7 +58,7 @@ export default function SessionExerciseCard({
         <Pressable
           onPress={onRemove}
           hitSlop={8}
-          style={({ pressed }) => [pressed && { opacity: 0.5 }]}
+          style={({ pressed }) => [pressed && layout.pressedButton]}
         >
           <Ionicons name="trash-outline" size={20} color={colors.dark.error} />
         </Pressable>
