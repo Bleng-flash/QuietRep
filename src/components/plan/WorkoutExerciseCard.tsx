@@ -1,4 +1,4 @@
-import SetRow from '@/components/shared/SetRow';
+import SetRow from '@/components/plan/SetRow';
 import { colors, layout, spacing, typography } from '@/styles';
 import type { EditablePlannedSet, PlannedSet, ResolvedEditableWorkoutExercise } from '@/types';
 import { Ionicons } from '@expo/vector-icons';

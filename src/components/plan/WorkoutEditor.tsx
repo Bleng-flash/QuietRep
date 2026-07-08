@@ -1,6 +1,6 @@
+import EditorHeader from '@/components/plan/EditorHeader';
 import WorkoutExerciseCard from '@/components/plan/WorkoutExerciseCard';
 import DraggableCardList from '@/components/shared/DraggableCardList';
-import EditorHeader from '@/components/shared/EditorHeader';
 import ExercisePicker from '@/components/shared/ExercisePicker';
 import { getAllExercises } from '@/storage';
 import { colors, layout, spacing, typography } from '@/styles';
