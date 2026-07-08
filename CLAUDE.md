@@ -29,14 +29,14 @@ Iteration 1 is complete. Now, we are in **iteration 2**. The table below details
 | ---- | ----------------------------------------------------------------------- | ----------- |
 | 1 | Session types, storage (`sessions.ts`), and utils (`session.ts`) | Done |
 | 2 | Active-session context (`ActiveSessionContext`) | Done |
-| 3 | Session screen + components (`WorkoutSession`, `SessionExerciseCard`, `LoggedSetRow`) | Planned |
-| 4 | FAB fan menu + three start-session entry points | Planned |
+| 3 | Session screen + components (`WorkoutSession`, `SessionExerciseCard`, `LoggedSetRow`) | Done |
+| 4 | FAB bottom-sheet menu + three start-session entry points | Done |
 | 5 | Cross-tab resume banner | Planned |
 | 6 | Polish — empty states, confirm dialogs, elapsed timer | Planned |
 
 ## Current State
 
-Iteration 1 is complete and Iteration 2 Steps 1 and 2 are done. The following is fully functional:
+Iteration 1 is complete and Iteration 2 Steps 1-4 are done. The following is fully functional:
 
 **Iteration 1 (complete):**
 - Plan index screen with Splits, Workouts, and Exercises sections
@@ -62,9 +62,25 @@ Iteration 1 is complete and Iteration 2 Steps 1 and 2 are done. The following is
 - `hydrateSessionExercises` added to `src/utils/session.ts` — re-attaches fresh `localKey`s to stored `SessionExercise[]` on cold restart
 - `ActiveSessionProvider` wraps `<Stack>` in `src/app/_layout.tsx`
 
+**New in Iteration 2, Step 3:**
+
+- `src/components/session/LoggedSetRow.tsx` — mirrors `SetRow` for weight/reps logging; local `weightText`/`repsText` buffers; `buildRepsPlaceholder` uses `targetMinReps`/`targetMaxReps` as input placeholder hint; `onChange` emits `LoggedSet` (caller spreads to preserve `localKey`)
+- `src/components/session/SessionExerciseCard.tsx` — mirrors `WorkoutExerciseCard`; `handleSetChange` spreads `currentSet` first so `localKey` + target hints survive; `handleAddSet` copies last set's weight/reps with fresh `localKey`, no target hints; column headers "Load (kg)" / "Reps"; sets keyed by `set.localKey`
+- `src/components/session/SessionHeader.tsx` — session-specific top bar ("Discard" / editable centered title / "Finish"); `useSafeAreaInsets` applied inline; spinner when `isFinishing`
+- `src/components/session/WorkoutSession.tsx` — fat component consuming `useActiveSession()`; `useFocusEffect` → `getAllExercises()`; `exerciseMap` + `resolvedSessionExercises` + `alreadyAddedIds` via `useMemo`; all mutations via `updateActiveSession`; discard confirm alert; `DraggableCardList` + `ExercisePicker` overlay
+- `src/app/session.tsx` — thin screen; renders null if `activeSession` is null (covers the brief mount window before context commits), otherwise renders `WorkoutSession`; back-navigation is owned by `WorkoutSession` via explicit `router.back()` in finish/discard handlers
+
+**New in Iteration 2, Step 4:**
+
+- `src/components/session/WorkoutFabMenu.tsx` — single `Modal` (transparent, slide) with swappable `SheetView` content (`'menu' | 'pickToday' | 'pickWorkout'`); loads data on `visible` via `useEffect`; three entry points: today's workout (subtitle reflects active split / rest day / N workouts; disabled when none), from a workout (searchable standalone list via `matchesSearchQuery`), empty session ("Quick Workout"); if `activeSession` exists shows "Resume {name}" row instead; internal components `SheetOptionRow`, `WorkoutOptionRow`, `SheetBackHeader`
+- `src/components/shared/TabBar.tsx` — extended with `onFabPress: () => void` prop; FAB calls it instead of navigating; center slot still renders the empty gap
+- `src/app/(tabs)/_layout.tsx` — owns `isFabMenuOpen` state; injects `onFabPress`; renders `WorkoutFabMenu` as sibling of `<Tabs>`
+- `src/components/session/SessionHeader.tsx` — updated: title is now an editable `TextInput` (local-state + callback pattern); `onNameChange: (name: string) => void` prop added
+- `src/components/session/WorkoutSession.tsx` — updated: wires `onNameChange` to `updateActiveSession`; `handleFinish` guards against empty name before writing to history
+
 ## Next steps
 
-**Iteration 2 Step 3** is next: session screen + components — `LoggedSetRow`, `SessionExerciseCard`, `WorkoutSession` (fat component mirroring `WorkoutEditor`), and the thin `src/app/session.tsx` route consuming `useActiveSession()`.
+**Iteration 2 Step 5** is next: cross-tab resume banner (`ResumeSessionBanner` in `src/components/session/`) — a persistent in-progress strip visible across all tabs whenever `activeSession !== null`, letting users tap back into their live session from any tab.
 
 ---
 

@@ -22,7 +22,13 @@ const TABS = [
   },
 ];
 
-export default function TabBar({ state, navigation }: BottomTabBarProps) {
+interface TabBarProps extends BottomTabBarProps {
+  // Called when the center dumbbell FAB is pressed — opens the workout-start menu.
+  // Injected by (tabs)/_layout.tsx, which owns the menu's open state.
+  onFabPress: () => void;
+}
+
+export default function TabBar({ state, navigation, onFabPress }: TabBarProps) {
   const insets = useSafeAreaInsets();
 
   return (
@@ -65,7 +71,7 @@ export default function TabBar({ state, navigation }: BottomTabBarProps) {
       {/* --- Workout button: floats above the bar --- */}
       <Pressable
         style={({ pressed }) => [styles.workoutButton, pressed && styles.workoutButtonPressed]}
-        onPress={() => navigation.navigate('workout')}
+        onPress={onFabPress}
       >
         <MaterialCommunityIcons name="dumbbell" size={36} color={colors.dark.textInverse} />
       </Pressable>

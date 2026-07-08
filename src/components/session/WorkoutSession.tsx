@@ -56,7 +56,10 @@ export default function WorkoutSession() {
   // Stable Set — only recomputes when session exercises change, so ExercisePicker's
   // renderItem useCallback dep doesn't fire on every WorkoutSession re-render.
   const alreadyAddedIds = useMemo(
-    () => new Set((activeSession?.exercises ?? []).map((sessionExercise) => sessionExercise.exerciseId)),
+    () =>
+      new Set(
+        (activeSession?.exercises ?? []).map((sessionExercise) => sessionExercise.exerciseId),
+      ),
     [activeSession?.exercises],
   );
 
@@ -72,7 +75,9 @@ export default function WorkoutSession() {
   function handleRemoveExercise(exerciseId: string) {
     updateActiveSession((prev) => ({
       ...prev,
-      exercises: prev.exercises.filter((sessionExercise) => sessionExercise.exerciseId !== exerciseId),
+      exercises: prev.exercises.filter(
+        (sessionExercise) => sessionExercise.exerciseId !== exerciseId,
+      ),
     }));
   }
 
@@ -87,7 +92,7 @@ export default function WorkoutSession() {
     }));
   }
 
-  function handleReorder(reordered: ResolvedEditableSessionExercise[]) {
+  function handleReorderExercises(reordered: ResolvedEditableSessionExercise[]) {
     // Strip the joined `exercise` field to get back to EditableSessionExercise shape.
     updateActiveSession((prev) => ({
       ...prev,
@@ -96,6 +101,12 @@ export default function WorkoutSession() {
   }
 
   async function handleFinish() {
+    // Guard against an empty name reaching history (the user can clear the editable title).
+    // Mirrors WorkoutEditor.handleSave; the default "Quick Workout" means this rarely fires.
+    if (!activeSession?.name.trim()) {
+      Alert.alert('Name required', 'Please give this session a name before finishing.');
+      return;
+    }
     setIsFinishing(true);
     try {
       await finishActiveSession();
@@ -126,6 +137,7 @@ export default function WorkoutSession() {
     >
       <SessionHeader
         name={activeSession?.name ?? ''}
+        onNameChange={(name) => updateActiveSession((prev) => ({ ...prev, name }))}
         onDiscard={handleDiscard}
         onFinish={handleFinish}
         isFinishing={isFinishing}
@@ -138,7 +150,7 @@ export default function WorkoutSession() {
         <DraggableCardList
           data={resolvedSessionExercises}
           keyExtractor={(item) => item.exerciseId}
-          onReorder={handleReorder}
+          onReorder={handleReorderExercises}
           separatorHeight={spacing.m}
           renderCard={(item, drag) => (
             <Pressable onLongPress={drag} delayLongPress={200}>

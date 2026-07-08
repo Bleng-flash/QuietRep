@@ -40,12 +40,24 @@ export function ActiveSessionProvider({ children }: { children: ReactNode }) {
   // the name setActiveSession is already used in src/storage/sessions.ts
   const [activeSession, setSessionBuffer] = useState<SessionBuffer | null>(null);
 
-  // Ref always mirrors the latest state — used by the debounced persist callback so it
-  // always writes the freshest version even if the timeout was scheduled a render ago.
+  // Stale-closure guard for the debounced persist callback.
+  // React renders are snapshots: every render produces a new updateActiveSession function
+  // that closes over that render's frozen activeSession value. If the setTimeout callback
+  // closed over activeSession directly, it would capture the value from whichever render
+  // created that particular timer — not any later updates.
+  // A ref is a stable container — the same object reference every render, only .current
+  // changes. The closure captures the container, not the value inside it. The useEffect
+  // below updates .current after every commit.
   const latestSessionRef = useRef<SessionBuffer | null>(null);
+
   // ReturnType<typeof setTimeout> derives the timer ID type from setTimeout itself (a global) — no import needed
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Must be a useEffect, not an inline assignment inside updateActiveSession.
+  // setSessionBuffer uses the updater form — React applies it to the latest committed state
+  // internally, but that committed value is not available synchronously in the function body.
+  // The effect runs after the commit, so .current is always exactly in sync with what React
+  // considers current state.
   useEffect(() => {
     latestSessionRef.current = activeSession;
   }, [activeSession]);
