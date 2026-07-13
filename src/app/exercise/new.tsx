@@ -53,7 +53,9 @@ export default function NewExerciseScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
+      // Own the dark background via layout.screen (like the session screen). 
+      // Since it's a root-stack route, it must set its own.
+      style={layout.screen}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <EditorHeader

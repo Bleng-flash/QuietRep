@@ -46,7 +46,9 @@ export default function ExerciseListScreen() {
   );
 
   function handleCreateNewExercise(): void {
-    router.push('/plan/exercise/new');
+    // Root-stack route (see the ExercisePicker note) — New Exercise now lives at the root so it's
+    // reachable from both the Plan tab and the live session without a cross-navigator push.
+    router.push('/exercise/new');
   }
 
   const handleDeleteExercise = useCallback(function handleDeleteExercise(id: string): void {

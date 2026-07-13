@@ -28,7 +28,10 @@ export default function ExercisePicker({
   );
 
   const handleCreateNewExercise = useCallback(() => {
-    router.push('/plan/exercise/new');
+    // Root-stack route so this works identically wherever the picker is used: 
+    // from the Plan tab AND from the root-level live session. 
+    // A tabs-nested route would orphan New Exercise on the Plan stack when pushed from the session (cross-navigator push).
+    router.push('/exercise/new');
   }, [router]);
 
   const renderExerciseContent = useCallback(
