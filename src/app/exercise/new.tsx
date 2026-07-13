@@ -92,6 +92,9 @@ export default function NewExerciseScreen() {
               placeholderTextColor={colors.dark.textDisabled}
               autoCorrect={false}
               autoFocus
+              // Cap the name (matches NamePromptModal / SessionHeader) so it stays sane wherever
+              // it flows — cards, pickers, and the remove-exercise confirm alert title.
+              maxLength={60}
               // Refocusing Name is claimed by the TextInput itself (same responder-priority
               // reasoning as above), so it needs its own handler to mirror the click-away close
               onFocus={() => setIsMuscleGroupDropdownOpen(false)}

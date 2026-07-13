@@ -1,3 +1,4 @@
+import ElapsedTimer from '@/components/session/ElapsedTimer';
 import { useActiveSession } from '@/context/ActiveSessionContext';
 import { colors, layout, spacing, typography } from '@/styles';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,9 +28,7 @@ export default function ResumeSessionBanner() {
           <Text style={typography.subheading} numberOfLines={1}>
             {activeSession.name}
           </Text>
-          <Text style={typography.caption} numberOfLines={1}>
-            In progress
-          </Text>
+          <ElapsedTimer startedAt={activeSession.startedAt} />
         </View>
       </View>
     </Pressable>

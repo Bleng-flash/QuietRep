@@ -2,6 +2,7 @@ import SessionExerciseCard from '@/components/session/SessionExerciseCard';
 import SessionHeader from '@/components/session/SessionHeader';
 import DraggableCardList from '@/components/shared/DraggableCardList';
 import ExercisePicker from '@/components/shared/ExercisePicker';
+import ListEmptyText from '@/components/shared/ListEmptyText';
 import { useActiveSession } from '@/context/ActiveSessionContext';
 import { getAllExercises } from '@/storage';
 import { colors, layout, spacing, typography } from '@/styles';
@@ -72,13 +73,31 @@ export default function WorkoutSession() {
     updateActiveSession((prev) => ({ ...prev, exercises: [...prev.exercises, newEntry] }));
   }
 
-  function handleRemoveExercise(exerciseId: string) {
+  function removeExercise(exerciseId: string) {
     updateActiveSession((prev) => ({
       ...prev,
       exercises: prev.exercises.filter(
         (sessionExercise) => sessionExercise.exerciseId !== exerciseId,
       ),
     }));
+  }
+
+  function handleRemoveExercise(exerciseId: string) {
+    const targetExercise = resolvedSessionExercises.find(
+      (sessionExercise) => sessionExercise.exerciseId === exerciseId,
+    );
+    // Only confirm when there's logged data to lose — removing a freshly-added blank exercise
+    // shouldn't nag. A set counts as "logged" once any weight or reps have been entered.
+    const hasLoggedData = targetExercise?.sets.some((set) => set.weight > 0 || set.reps > 0);
+    if (!hasLoggedData) {
+      removeExercise(exerciseId);
+      return;
+    }
+    const exerciseName = targetExercise?.exercise?.name ?? 'this exercise';
+    Alert.alert(`Remove ${exerciseName}?`, 'Its logged sets will be lost.', [
+      { text: 'Keep it', style: 'cancel' },
+      { text: 'Remove', style: 'destructive', onPress: () => removeExercise(exerciseId) },
+    ]);
   }
 
   function handleSetsChange(exerciseId: string, updatedSets: EditableLoggedSet[]) {
@@ -143,6 +162,7 @@ export default function WorkoutSession() {
     >
       <SessionHeader
         name={activeSession?.name ?? ''}
+        startedAt={activeSession?.startedAt ?? new Date().toISOString()}
         onNameChange={(name) => updateActiveSession((prev) => ({ ...prev, name }))}
         onMinimise={handleMinimise}
         onFinish={handleFinish}
@@ -153,21 +173,25 @@ export default function WorkoutSession() {
         contentContainerStyle={{ padding: spacing.m, paddingBottom: spacing.xxl }}
         keyboardShouldPersistTaps="handled"
       >
-        <DraggableCardList
-          data={resolvedSessionExercises}
-          keyExtractor={(item) => item.exerciseId}
-          onReorder={handleReorderExercises}
-          separatorHeight={spacing.m}
-          renderCard={(item, drag) => (
-            <Pressable onLongPress={drag} delayLongPress={200}>
-              <SessionExerciseCard
-                resolvedSessionExercise={item}
-                onSetsChange={(updatedSets) => handleSetsChange(item.exerciseId, updatedSets)}
-                onRemove={() => handleRemoveExercise(item.exerciseId)}
-              />
-            </Pressable>
-          )}
-        />
+        {resolvedSessionExercises.length === 0 ? (
+          <ListEmptyText message="No exercises yet. Add one to start logging." />
+        ) : (
+          <DraggableCardList
+            data={resolvedSessionExercises}
+            keyExtractor={(item) => item.exerciseId}
+            onReorder={handleReorderExercises}
+            separatorHeight={spacing.m}
+            renderCard={(item, drag) => (
+              <Pressable onLongPress={drag} delayLongPress={200}>
+                <SessionExerciseCard
+                  resolvedSessionExercise={item}
+                  onSetsChange={(updatedSets) => handleSetsChange(item.exerciseId, updatedSets)}
+                  onRemove={() => handleRemoveExercise(item.exerciseId)}
+                />
+              </Pressable>
+            )}
+          />
+        )}
 
         <Pressable
           onPress={() => setIsPickerVisible(true)}

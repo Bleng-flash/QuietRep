@@ -68,6 +68,38 @@ export function hydrateSessionExercises(exercises: SessionExercise[]): EditableS
   }));
 }
 
+/** Upper bound for the elapsed-time display: 99:59:59. A session that somehow runs longer
+ *  (e.g. left going by accident) freezes the timer here rather than widening to three-digit hours. */
+const MAX_ELAPSED_SECONDS = 99 * 3600 + 59 * 60 + 59;
+
+/** Formats the elapsed time between startedAt and `now` (ms epoch) as a clock string.
+ *  Under an hour it reads mm:ss; from one hour it adds unpadded hours (h:mm:ss for 1-9,
+ *  hh:mm:ss for 10-99). Math.max(0, …) guards against clock skew so the timer never shows a
+ *  negative value, and the total is capped at MAX_ELAPSED_SECONDS so it never exceeds 99:59:59.
+ *
+ *  No lag/drift accumulation: elapsed is always recomputed as (now - startedAt), not incremented
+ *  by the caller's tick. The ElapsedTimer's setInterval only nudges `now` forward to trigger a
+ *  re-render — a late, dropped, or coalesced tick (background tab, JS thread busy) at most delays
+ *  when the display updates, never the value it lands on. So the clock stays anchored to real time
+ *  and self-corrects on the next tick, rather than slowly falling behind like a counter would. */
+export function formatElapsed(startedAtIso: string, now: number): string {
+  const elapsedMs = Math.max(0, now - new Date(startedAtIso).getTime());
+  const totalSeconds = Math.min(MAX_ELAPSED_SECONDS, Math.floor(elapsedMs / 1000));
+
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  const paddedMinutes = String(minutes).padStart(2, '0');
+  const paddedSeconds = String(seconds).padStart(2, '0');
+
+  if (hours > 0) {
+    // Hours are not zero-padded, so 1-9 reads h:mm:ss and 10-99 grows to hh:mm:ss naturally.
+    return `${hours}:${paddedMinutes}:${paddedSeconds}`;
+  }
+  return `${paddedMinutes}:${paddedSeconds}`;
+}
+
 /** Assembles a canonical WorkoutSession from the context's working state for storage writes.
  *  finishedAt is always null here — storage's finishSession() stamps it on the Finish action. */
 export function toCanonicalSession(

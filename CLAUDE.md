@@ -24,7 +24,7 @@ Iteration sequence for the frontend:
   Predefined exercise library. Animations and transitions. Empty state illustrations. Onboarding flow for first-time users. Any UX rough edges surfaced from using the app.
 
 \
-Iteration 1 is complete. Now, we are in **iteration 2**. The table below details our progress within iteration 2.
+Iteration 1 is complete, and **iteration 2 is now complete** (all six steps done). The table below details the progress within iteration 2.
 | Step | Feature | Status |
 | ---- | ----------------------------------------------------------------------- | ----------- |
 | 1 | Session types, storage (`sessions.ts`), and utils (`session.ts`) | Done |
@@ -32,11 +32,11 @@ Iteration 1 is complete. Now, we are in **iteration 2**. The table below details
 | 3 | Session screen + components (`WorkoutSession`, `SessionExerciseCard`, `LoggedSetRow`) | Done |
 | 4 | FAB bottom-sheet menu + three start-session entry points | Done |
 | 5 | Cross-tab resume banner | Done |
-| 6 | Polish — empty states, confirm dialogs, elapsed timer | Planned |
+| 6 | Polish — empty states, confirm dialogs, elapsed timer | Done |
 
 ## Current State
 
-Iteration 1 is complete and Iteration 2 Steps 1-5 are done. The following is fully functional:
+Iteration 1 is complete and Iteration 2 is complete (Steps 1-6 done). The following is fully functional:
 
 **Iteration 1 (complete):**
 - Plan index screen with Splits, Workouts, and Exercises sections
@@ -80,14 +80,21 @@ Iteration 1 is complete and Iteration 2 Steps 1-5 are done. The following is ful
 
 **New in Iteration 2, Step 5:**
 
-- `src/components/session/ResumeSessionBanner.tsx` — persistent "now-playing"-style strip; pure consumer of `useActiveSession()` (no storage of its own); renders `null` when `activeSession` is null so it occupies zero space; left group (accent `barbell` icon + name + static "In progress" caption, left-aligned to clear the protruding FAB) and right `chevron-forward`; taps run `router.push('/session')`
+- `src/components/session/ResumeSessionBanner.tsx` — persistent "now-playing"-style strip; pure consumer of `useActiveSession()` (no storage of its own); renders `null` when `activeSession` is null so it occupies zero space; left group (accent `barbell` icon + name + live elapsed timer as the caption, added in Step 6), left-aligned to clear the protruding FAB; taps run `router.push('/session')`.
 - `src/app/(tabs)/_layout.tsx` — updated: the `tabBar` render callback now wraps `<ResumeSessionBanner />` above `<TabBar />` in a single `View`, so the two dock as one unit and React Navigation measures their combined height (screen content stays clear of both). `WorkoutFabMenu` and `TabBar.tsx` are unchanged — the banner is a peer of `TabBar`, not a child
-- The static "In progress" hint is intentional: the live ticking elapsed timer is a Step 6 item
 - `src/components/session/SessionHeader.tsx` + `WorkoutSession.tsx` — updated: the header's left slot is now a **minimise** button (MaterialIcons `close-fullscreen`, `onMinimise` → `router.back()` with `ActiveSessionContext` left intact, so the session keeps running and the banner appears); Discard relocated from the header to a dashed `layout.dangerButton` at the bottom of the session content. Minimise is what makes the resume banner reachable at all — without it the session screen was a dead end (Discard/Finish both end the session). Android hardware-back and iOS swipe-back already pop the stack without ending the session, so they now read as "minimise" too and need no special handling
+
+**New in Iteration 2, Step 6 (polish — Iteration 2 complete):**
+
+- `src/utils/session.ts` — `formatElapsed(startedAtIso, now)`: pure clock formatter; `mm:ss` under an hour, then unpadded hours for over an hour (`h:mm:ss` for 1-9, `hh:mm:ss` for 10-99). `Math.max(0, …)` guards clock skew (never negative); total seconds clamped to `MAX_ELAPSED_SECONDS` (99:59:59) so the display freezes there rather than widening to three-digit hours
+- `src/components/session/ElapsedTimer.tsx` — tiny ticking leaf: owns a `now` state + 1s `setInterval` (`useEffect`, torn down on unmount), renders `formatElapsed`. Deliberately its own component so the once-per-second re-render is isolated to this leaf — the header's name `TextInput` and the session's exercise cards do not re-render every tick. Props: `startedAt`, optional `textStyle` (default `typography.caption`); used by both `SessionHeader` and `ResumeSessionBanner`
+- `src/components/session/SessionHeader.tsx` — updated: takes a `startedAt` prop; the centre slot is now a column (editable title `TextInput` on top, `<ElapsedTimer />` as a subtitle below). Stale header comment corrected (Discard lives in the footer, not the header)
+- `src/components/session/WorkoutSession.tsx` — updated: passes `startedAt` to the header; renders `<ListEmptyText>` when `resolvedSessionExercises` is empty (Quick/Empty session or all exercises removed) instead of a bare "Add exercise" button; `handleRemoveExercise` now confirms via `Alert` **only when the exercise has logged data** (`weight > 0 || reps > 0`) — a blank just-added exercise is removed without nagging. The actual removal is factored into a private `removeExercise` helper called by both paths
+- Finish stays an instant single tap (no confirm — positive action, no un-finish) and remove-*set* stays confirm-free (low-stakes, frequent, last-set already guarded)
 
 ## Next steps
 
-**Iteration 2 Step 6** is next: polish — empty states, confirm dialogs, and the live elapsed timer (including surfacing it in the resume banner).
+**Iteration 3 (Log tab)** is next: the Past Workouts list from saved session history, the session detail view, and PR detection + the PRs section calculated from the history built up in Iteration 2.
 
 ---
 
