@@ -194,6 +194,9 @@ AsyncStorage has no subscriptions: when one component writes, nothing else is no
 
 Backend transition: the four-action API surface (`startSession` / `updateActiveSession` / `finishActiveSession` / `discardActiveSession`) is the stable contract for all consumers. When the real backend arrives, only the internals of `ActiveSessionProvider` change (storage calls → API calls); the session screen, resume banner, and FAB menu change nothing.
 
+**Session survives app close + reopen — already achieved**
+A live session persists across a full app kill and relaunch; this is done, not pending. The mechanism: every mutation debounce-persists the active buffer to `@quietrep/activeSession`, and on cold launch `ActiveSessionProvider` hydrates from `getActiveSession()` in a mount-once `useEffect`, running the stored exercises through `hydrateSessionExercises` to re-attach fresh `localKey`s (which are stripped before every write). So relaunching mid-session restores the buffer into context, and because every consumer subscribes via `useActiveSession()`, the resume banner reappears automatically across the tabs. Note the last <500ms of edits before a hard kill can be lost to the debounce window — an accepted trade-off for not hammering storage on every keystroke; `startSession` deliberately awaits its first persist so a session started and immediately killed is still recoverable.
+
 **Additive type intersections — plan and session view-model chains**
 Both the plan-editor and session view-model type chains are built purely by adding fields, never by subtracting them (no `Omit` used to remove a field from a "bigger" type):
 - Plan: `PlannedSet` → `EditablePlannedSet` (adds `localKey`) → `EditableWorkoutExercise` (replaces `sets`) → `ResolvedEditableWorkoutExercise` (adds `exercise` join)
