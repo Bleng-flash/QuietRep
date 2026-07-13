@@ -1,4 +1,5 @@
 import { colors, layout, spacing, typography } from '@/styles';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -6,17 +7,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 interface SessionHeaderProps {
   name: string;
   onNameChange: (name: string) => void;
-  onDiscard: () => void;
+  onMinimise: () => void;
   onFinish: () => void;
   isFinishing: boolean;
 }
 
-// Session-specific top bar. Not reusing EditorHeader because the actions differ:
-// "Discard" (destructive) and "Finish" (primary) vs. "Cancel" and "Save".
+// Session-specific top bar.
+// "minimise" (leaves the session live) 
+// "Finish" (primary) and "Discard session" finishes the active session.
 export default function SessionHeader({
   name,
   onNameChange,
-  onDiscard,
+  onMinimise,
   onFinish,
   isFinishing,
 }: SessionHeaderProps) {
@@ -28,12 +30,13 @@ export default function SessionHeader({
 
   return (
     <View style={[layout.rowBetween, layout.topBar, { paddingTop: insets.top + spacing.s }]}>
+      {/* Minimise: pops back to the tabs while the session keeps running (banner picks it up).*/}
       <Pressable
-        onPress={onDiscard}
+        onPress={onMinimise}
         hitSlop={8}
         style={({ pressed }) => [pressed && layout.pressedButton]}
       >
-        <Text style={typography.actionDanger}>Discard</Text>
+        <MaterialIcons name="close-fullscreen" size={24} color={colors.dark.textSubtle} />
       </Pressable>
 
       {/* Tap-to-rename title: a borderless centered input that reads as an editable heading. */}

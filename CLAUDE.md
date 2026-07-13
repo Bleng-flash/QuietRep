@@ -31,12 +31,12 @@ Iteration 1 is complete. Now, we are in **iteration 2**. The table below details
 | 2 | Active-session context (`ActiveSessionContext`) | Done |
 | 3 | Session screen + components (`WorkoutSession`, `SessionExerciseCard`, `LoggedSetRow`) | Done |
 | 4 | FAB bottom-sheet menu + three start-session entry points | Done |
-| 5 | Cross-tab resume banner | Planned |
+| 5 | Cross-tab resume banner | Done |
 | 6 | Polish — empty states, confirm dialogs, elapsed timer | Planned |
 
 ## Current State
 
-Iteration 1 is complete and Iteration 2 Steps 1-4 are done. The following is fully functional:
+Iteration 1 is complete and Iteration 2 Steps 1-5 are done. The following is fully functional:
 
 **Iteration 1 (complete):**
 - Plan index screen with Splits, Workouts, and Exercises sections
@@ -66,7 +66,7 @@ Iteration 1 is complete and Iteration 2 Steps 1-4 are done. The following is ful
 
 - `src/components/session/LoggedSetRow.tsx` — mirrors `SetRow` for weight/reps logging; local `weightText`/`repsText` buffers; `buildRepsPlaceholder` uses `targetMinReps`/`targetMaxReps` as input placeholder hint; `onChange` emits `LoggedSet` (caller spreads to preserve `localKey`)
 - `src/components/session/SessionExerciseCard.tsx` — mirrors `WorkoutExerciseCard`; `handleSetChange` spreads `currentSet` first so `localKey` + target hints survive; `handleAddSet` copies last set's weight/reps with fresh `localKey`, no target hints; column headers "Load (kg)" / "Reps"; sets keyed by `set.localKey`
-- `src/components/session/SessionHeader.tsx` — session-specific top bar ("Discard" / editable centered title / "Finish"); `useSafeAreaInsets` applied inline; spinner when `isFinishing`
+- `src/components/session/SessionHeader.tsx` — session-specific top bar ("Discard" / editable centered title / "Finish"); `useSafeAreaInsets` applied inline; spinner when `isFinishing` (superseded by Step 5: left slot is now a **minimise** button and Discard moved to a footer danger button)
 - `src/components/session/WorkoutSession.tsx` — fat component consuming `useActiveSession()`; `useFocusEffect` → `getAllExercises()`; `exerciseMap` + `resolvedSessionExercises` + `alreadyAddedIds` via `useMemo`; all mutations via `updateActiveSession`; discard confirm alert; `DraggableCardList` + `ExercisePicker` overlay
 - `src/app/session.tsx` — thin screen; renders null if `activeSession` is null (covers the brief mount window before context commits), otherwise renders `WorkoutSession`; back-navigation is owned by `WorkoutSession` via explicit `router.back()` in finish/discard handlers
 
@@ -78,9 +78,16 @@ Iteration 1 is complete and Iteration 2 Steps 1-4 are done. The following is ful
 - `src/components/session/SessionHeader.tsx` — updated: title is now an editable `TextInput` (local-state + callback pattern); `onNameChange: (name: string) => void` prop added
 - `src/components/session/WorkoutSession.tsx` — updated: wires `onNameChange` to `updateActiveSession`; `handleFinish` guards against empty name before writing to history
 
+**New in Iteration 2, Step 5:**
+
+- `src/components/session/ResumeSessionBanner.tsx` — persistent "now-playing"-style strip; pure consumer of `useActiveSession()` (no storage of its own); renders `null` when `activeSession` is null so it occupies zero space; left group (accent `barbell` icon + name + static "In progress" caption, left-aligned to clear the protruding FAB) and right `chevron-forward`; taps run `router.push('/session')`
+- `src/app/(tabs)/_layout.tsx` — updated: the `tabBar` render callback now wraps `<ResumeSessionBanner />` above `<TabBar />` in a single `View`, so the two dock as one unit and React Navigation measures their combined height (screen content stays clear of both). `WorkoutFabMenu` and `TabBar.tsx` are unchanged — the banner is a peer of `TabBar`, not a child
+- The static "In progress" hint is intentional: the live ticking elapsed timer is a Step 6 item
+- `src/components/session/SessionHeader.tsx` + `WorkoutSession.tsx` — updated: the header's left slot is now a **minimise** button (MaterialIcons `close-fullscreen`, `onMinimise` → `router.back()` with `ActiveSessionContext` left intact, so the session keeps running and the banner appears); Discard relocated from the header to a dashed `layout.dangerButton` at the bottom of the session content. Minimise is what makes the resume banner reachable at all — without it the session screen was a dead end (Discard/Finish both end the session). Android hardware-back and iOS swipe-back already pop the stack without ending the session, so they now read as "minimise" too and need no special handling
+
 ## Next steps
 
-**Iteration 2 Step 5** is next: cross-tab resume banner (`ResumeSessionBanner` in `src/components/session/`) — a persistent in-progress strip visible across all tabs whenever `activeSession !== null`, letting users tap back into their live session from any tab.
+**Iteration 2 Step 6** is next: polish — empty states, confirm dialogs, and the live elapsed timer (including surfacing it in the resume banner).
 
 ---
 
@@ -164,7 +171,7 @@ The `| undefined` on the related entity is intentional — it covers dangling FK
 
 **Stable identity keys for stateful list rows — `localKey` pattern**
 
-When a list-item component holds local state derived from props (e.g., `SetRow`'s `minRepsText`/`maxRepsText` buffers, seeded once at mount via `useState` and never re-synced — see `src/components/SetRow.tsx`), keying the list by array index breaks under insertion, removal, or reorder. React reuses component instances by *position*: removing item 0 shifts items 1..n into slots 0..n-1, but each reused instance keeps its stale local state, which now describes the wrong logical item. The underlying data is correct (verified by saving and reopening) — only the display is wrong, and a row appears to vanish from the wrong end of the list.
+When a list-item component holds local state derived from props (e.g., `SetRow`'s `minRepsText`/`maxRepsText` buffers, seeded once at mount via `useState` and never re-synced — see `src/components/plan/SetRow.tsx`), keying the list by array index breaks under insertion, removal, or reorder. React reuses component instances by *position*: removing item 0 shifts items 1..n into slots 0..n-1, but each reused instance keeps its stale local state, which now describes the wrong logical item. The underlying data is correct (verified by saving and reopening) — only the display is wrong, and a row appears to vanish from the wrong end of the list.
 
 Fix: give each item a stable, client-generated `localKey` (via `uuid()`) and key the list by it instead of by array index, so each component instance stays bound to the same logical item across any reordering operation. `localKey` is a render-only identity — generated when editor state is seeded or created, and stripped before the data reaches storage, so persisted entities keep their canonical `{ minReps, maxReps }` shape.
 
@@ -236,9 +243,9 @@ Both the plan-editor and session view-model type chains are built purely by addi
 - Each component in its own file
 - Follow the existing pattern: SectionHeader, WorkoutCard, SplitCard, SetRow, ExercisePicker are all good examples of the right level of abstraction
 - `src/components/` is split into three subdirectories:
-  - `plan/` — components owned by the Plan tab: DayCircle, DayWorkoutList, SplitCard, WorkoutEditor, WorkoutExerciseCard, WorkoutPicker
+  - `plan/` — components owned by the Plan tab: DayCircle, DayWorkoutList, EditorHeader, SetRow, SplitCard, WorkoutEditor, WorkoutExerciseCard, WorkoutPicker
   - `session/` — components owned by the live session flow: WorkoutFabMenu, WorkoutSession, SessionExerciseCard, LoggedSetRow, ResumeSessionBanner
-  - `shared/` — cross-tab primitives and components expected to be reused across tabs: EditorHeader, ExercisePicker, ListEmptyText, NamePromptModal, PickerModal, SectionHeader, SetRow, TabBar, WorkoutCard
+  - `shared/` — cross-tab primitives and components expected to be reused across tabs: ExercisePicker, ListEmptyText, NamePromptModal, PickerModal, SectionHeader, TabBar, WorkoutCard
 
 ### Code generation
 

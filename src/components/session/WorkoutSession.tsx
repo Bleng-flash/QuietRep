@@ -116,6 +116,12 @@ export default function WorkoutSession() {
     }
   }
 
+  // Minimise leaves the session live — pure navigation, no context call. Only Finish/Discard
+  // end the session; router.back() just pops /session off the stack so the resume banner shows.
+  function handleMinimise() {
+    router.back();
+  }
+
   function handleDiscard() {
     Alert.alert('Discard session?', 'All logged sets will be lost.', [
       { text: 'Keep going', style: 'cancel' },
@@ -138,7 +144,7 @@ export default function WorkoutSession() {
       <SessionHeader
         name={activeSession?.name ?? ''}
         onNameChange={(name) => updateActiveSession((prev) => ({ ...prev, name }))}
-        onDiscard={handleDiscard}
+        onMinimise={handleMinimise}
         onFinish={handleFinish}
         isFinishing={isFinishing}
       />
@@ -173,6 +179,20 @@ export default function WorkoutSession() {
         >
           <Ionicons name="add" size={20} color={colors.dark.primary} />
           <Text style={typography.actionPrimary}>Add exercise</Text>
+        </Pressable>
+
+        {/* Discard lives here (not the header) so the destructive action is de-emphasised;
+            minimise takes the header's prominent corner instead. */}
+        <Pressable
+          onPress={handleDiscard}
+          style={({ pressed }) => [
+            layout.dangerButton,
+            { marginTop: spacing.m },
+            pressed && layout.pressedButton,
+          ]}
+        >
+          <Ionicons name="trash-outline" size={20} color={colors.dark.error} />
+          <Text style={typography.actionDanger}>Discard session</Text>
         </Pressable>
       </ScrollViewContainer>
 
