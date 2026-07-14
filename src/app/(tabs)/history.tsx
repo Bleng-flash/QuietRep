@@ -1,7 +1,7 @@
 import { colors } from '@/styles';
 import { Text, View } from 'react-native';
 
-export default function LogScreen() {
+export default function HistoryScreen() {
   return (
     <View
       style={{
@@ -11,7 +11,7 @@ export default function LogScreen() {
         backgroundColor: colors.dark.background,
       }}
     >
-      <Text style={{ color: colors.dark.text, fontSize: 32 }}>log screen.</Text>
+      <Text style={{ color: colors.dark.text, fontSize: 32 }}>history screen.</Text>
     </View>
   );
 }

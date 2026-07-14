@@ -14,7 +14,7 @@ Iteration sequence for the frontend:
   Get the storage schema right first. Define and implement the local storage layer for exercises, workouts, and splits. Build the full Plan tab — all three sections (Exercises, Workouts, Splits) with create, edit, delete, and active split selection. No home screen context, no session, no log yet — just the ability to build out your gym plan in full.
 - Iteration 2: Start workout session \
   Build the FAB flow and full session view. Bottom sheet entry point, the three start options, the in-session exercise/set/rep logging, mid-session modifications (reorder, swap, add, remove), and the finish + save to history. The persistent in-progress banner across tabs. At the end of this iteration the core loop — plan a workout, execute it, save it — is fully functional.
-- Iteration 3: Log tab \
+- Iteration 3: History tab \
   Build the Past Workouts list pulling from saved session history. Session detail view. PR detection and the PRs section, calculated from the history built up in iteration 2.
 - Iteration 4: Home tab \
   Now that all the data exists (active split, session history, PRs), the home screen can be built meaningfully. Today's workout card, the start CTA, the monthly dashboard, and the recent workouts strip.
@@ -94,7 +94,7 @@ Iteration 1 is complete and Iteration 2 is complete (Steps 1-6 done). The follow
 
 ## Next steps
 
-**Iteration 3 (Log tab)** is next: the Past Workouts list from saved session history, the session detail view, and PR detection + the PRs section calculated from the history built up in Iteration 2.
+**Iteration 3 (History tab)** is next: the Past Workouts list from saved session history, the session detail view, and PR detection + the PRs section calculated from the history built up in Iteration 2.
 
 ---
 
@@ -138,7 +138,7 @@ The navigator tree is a root `<Stack>` (`src/app/_layout.tsx`) holding the `(tab
 
 Why: pushing a *tabs-nested* route from the root `/session` screen is a **cross-navigator push** — React Navigation dives into the tabs navigator and orphans the pushed screen on the Plan tab's stack (its back-relationship is with the root history, not the Plan index), so `router.back()` misfires and the screen gets stuck there permanently, surviving even finishing the session. Promoting the screen to the root stack makes every push same-navigator: from a tab it opens over the tab bar (the standard "screen over the tabs" pattern) and back returns exactly where you were; from the session it is a clean sibling push back to `/session`.
 
-Tradeoff: a root screen sits **above** the tab bar, so it cannot show it — exercise creation from the Plan tab is now a focused full-screen (like the session), while `WorkoutEditor` (tab-local) keeps the tab bar. This is the intended pattern for future cross-navigator screens too (e.g. a session-detail view reachable from both Log and Home, a workout-detail view reachable from both Plan and Home) — one root route each, no per-navigator duplication.
+Tradeoff: a root screen sits **above** the tab bar, so it cannot show it — exercise creation from the Plan tab is now a focused full-screen (like the session), while `WorkoutEditor` (tab-local) keeps the tab bar. This is the intended pattern for future cross-navigator screens too (e.g. a session-detail view reachable from both History and Home, a workout-detail view reachable from both Plan and Home) — one root route each, no per-navigator duplication.
 
 Consequence — **a promoted screen must paint its own background.** The Plan stack's `_layout.tsx` sets `contentStyle: { backgroundColor: colors.dark.background }`, so any screen *under* the Plan stack inherits a dark background for free. The root `<Stack>` sets **no** `contentStyle`, so a screen moved to the root renders on the default (white) background unless it paints its own. Every root-level screen must therefore apply `layout.screen` (`{ flex: 1, backgroundColor: colors.dark.background }`) to its own root view — as `WorkoutSession` and `exercise/new` do. (This surfaced as a white-flash bug the moment `exercise/new` was promoted to the root and lost the inherited Plan-stack background.) The root `contentStyle` is deliberately left unset for now rather than hardcoding a base colour there — see "Theming is a future colour-consumption refactor" below.
 
@@ -213,7 +213,7 @@ This is implemented via frontend-only view models — `EditablePlannedSet`, `Edi
 When a session is seeded from a plan, each `PlannedSet` becomes an `EditableLoggedSet` (blank `weight: 0, reps: 0`) carrying the planned range as optional `targetMinReps`/`targetMaxReps` hint fields for the session UI. These hint fields are frontend view-model only — stripped by `stripToCanonicalExercises` before any write to storage.
 
 **Session storage — two AsyncStorage keys**
-`@quietrep/activeSession` holds the single in-progress session buffer (a canonical `WorkoutSession` with `finishedAt: null`). `@quietrep/sessions` holds the array of completed sessions (newest-first), used by the Log tab in Iteration 3. The active buffer is always written with view-model fields stripped — only the context layer (`ActiveSessionContext`, Iteration 2 Step 2) performs that strip before calling `setActiveSession`. `finishSession` stamps `finishedAt`, prepends to history, and clears the active key atomically.
+`@quietrep/activeSession` holds the single in-progress session buffer (a canonical `WorkoutSession` with `finishedAt: null`). `@quietrep/sessions` holds the array of completed sessions (newest-first), used by the History tab in Iteration 3. The active buffer is always written with view-model fields stripped — only the context layer (`ActiveSessionContext`, Iteration 2 Step 2) performs that strip before calling `setActiveSession`. `finishSession` stamps `finishedAt`, prepends to history, and clears the active key atomically.
 
 **ActiveSessionContext — React Context as subscription layer over AsyncStorage**
 AsyncStorage has no subscriptions: when one component writes, nothing else is notified. `ActiveSessionContext` solves this by holding the live session in React state — updating the provider's state re-renders all `useActiveSession()` consumers (session screen, resume banner) automatically. No component ever reads `@quietrep/activeSession` from AsyncStorage directly; all reads and mutations go through the four context actions.

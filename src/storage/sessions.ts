@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const HISTORY_KEY = '@quietrep/sessions';
 const ACTIVE_KEY = '@quietrep/activeSession';
 
-/** Returns all finished sessions, newest-first. Used by the Log tab (Iteration 3). */
+/** Returns all finished sessions, newest-first. Used by the History tab */
 export async function getSessions(): Promise<WorkoutSession[]> {
   const raw = await AsyncStorage.getItem(HISTORY_KEY);
   return raw ? JSON.parse(raw) : [];

@@ -9,7 +9,7 @@ const TABS = [
   { name: 'plan', label: 'Plan', icon: 'clipboard-edit-outline', lib: 'MCI' },
   { name: 'workout', label: null, icon: 'dumbbell', lib: 'MCI' },
   {
-    name: 'log',
+    name: 'history',
     label: 'History',
     icon: 'book-open-outline',
     lib: 'MCI',
