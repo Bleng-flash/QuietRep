@@ -10,6 +10,13 @@ export async function getSessions(): Promise<WorkoutSession[]> {
   return raw ? JSON.parse(raw) : [];
 }
 
+/** Returns a single finished session by id, or null if not found.
+ *  Used by the History session-detail screen. Mirrors a future GET /sessions/:id. */
+export async function getSessionById(sessionId: string): Promise<WorkoutSession | null> {
+  const sessions = await getSessions();
+  return sessions.find((session) => session.id === sessionId) ?? null;
+}
+
 /** Returns the in-progress session buffer, or null if no session is live. */
 export async function getActiveSession(): Promise<WorkoutSession | null> {
   const raw = await AsyncStorage.getItem(ACTIVE_KEY);

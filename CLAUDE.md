@@ -92,9 +92,23 @@ Iteration 1 is complete and Iteration 2 is complete (Steps 1-6 done). The follow
 - `src/components/session/WorkoutSession.tsx` — updated: passes `startedAt` to the header; renders `<ListEmptyText>` when `resolvedSessionExercises` is empty (Quick/Empty session or all exercises removed) instead of a bare "Add exercise" button; `handleRemoveExercise` now confirms via `Alert` **only when the exercise has logged data** (`weight > 0 || reps > 0`) — a blank just-added exercise is removed without nagging. The actual removal is factored into a private `removeExercise` helper called by both paths
 - Finish stays an instant single tap (no confirm — positive action, no un-finish) and remove-*set* stays confirm-free (low-stakes, frequent, last-set already guarded)
 
+**New in Iteration 3 (History tab — Past Workouts list + Session detail):**
+
+- `src/storage/sessions.ts` — `getSessionById(sessionId)` added (reads `getSessions()`, `.find` by id; mirrors a future `GET /sessions/:id`). Detail screen has no direct AsyncStorage access.
+- `src/utils/session.ts` — two formatters added: `formatSessionDate(iso)` (calendar date via `toLocaleDateString`, e.g. "Mon, Jul 14, 2026") and `formatSessionDuration(startedAt, finishedAt)` (session length, reuses `formatElapsed`; returns `''` when `finishedAt` is null). These are the calendar/date helpers the history rows and detail need — `formatElapsed` alone is a duration formatter.
+- New `src/components/history/` subdirectory (the History tab's own components):
+  - `SessionCard.tsx` — memoised list row; **primitive props** (`sessionId, name, startedAt, finishedAt, exerciseCount, setCount`) so unchanged rows bail out of re-render on focus reload; `layout.card`; press → `onPress(sessionId)`.
+  - `PastWorkoutsList.tsx` — the "By workout" body: `FlatList` of `SessionCard`s (newest-first straight from `getSessions()`), `windowSize={5}`, `ListEmptyText` empty state. Derives exercise/set counts inline off the canonical session — **no exercise resolution in the list** (only the detail resolves names).
+  - `ByExercisePlaceholder.tsx` — coming-soon stub for the future "By exercise" progression lens.
+  - `SessionDetail.tsx` — fat detail component; `useFocusEffect` → `Promise.all([getSessionById, getAllExercises])`; `exerciseMap` + resolved exercises via `useMemo`; back-chevron top bar; summary line (date • duration • N exercises • M sets); one `ReadOnlySessionExerciseCard` per exercise. `hasLoaded` flag distinguishes loading from not-found so it never flashes "Workout not found." during the initial read.
+  - `ReadOnlySessionExerciseCard.tsx` — **read-only** counterpart to `SessionExerciseCard` (the name mirrors the editable original): renders logged sets as plain `Text` (no `TextInput`, no add/remove), reusing the `layout.card` shell and column layout. Tolerates a dangling FK (`exercise?.name ?? 'Unknown exercise'`). The editable session components were deliberately **not** forced into a read-only mode — they are built around `TextInput` + the `Editable*` view models; the detail reads the simpler canonical `SessionExercise`/`LoggedSet` shapes.
+- `src/components/shared/SegmentedControl.tsx` — generic iOS-style pinned toggle (`{ options, value, onChange }`), kept in `shared/` since it's reusable beyond History.
+- `src/app/session/[sessionId].tsx` — new **root-stack** route (`/session/[sessionId]`), the read-only session-detail screen. Thin screen: `useLocalSearchParams` → `<SessionDetail />`. Lives at the root (not under the History tab) per "Shared screens live on the root stack" — reachable from History now and Home later without a cross-navigator push. Coexists with the live-session route `session.tsx` (`/session`); the file + same-named folder is supported by Expo Router (verified in the generated route types). Owns its background via `layout.screen`.
+- `src/app/(tabs)/history.tsx` — replaces the placeholder. **Pinned segmented control** landing: a static header (title + `SegmentedControl` for `[ By workout | By exercise ]`) stays put while only the list below scrolls. `byWorkout` → `PastWorkoutsList`; `byExercise` → `ByExercisePlaceholder`. `useFocusEffect` → `getSessions()`. Chosen over a hub-of-buttons so the primary content (past workouts) is immediate — no extra tap, no empty landing.
+
 ## Next steps
 
-**Iteration 3 (History tab)** is next: the Past Workouts list from saved session history, the session detail view, and PR detection + the PRs section calculated from the history built up in Iteration 2.
+**Iteration 3 remainder is deferred:** the **PRs section** (PR detection + 1RM) and the real **"By exercise"** progression view (per-exercise load/rep charts behind the segmented control's second tab, currently a placeholder) were intentionally scoped out. The "By exercise" toggle and detail-view read side are in place; revisit PRs/progression before moving to Iteration 4 (Home tab), which will consume this history.
 
 ---
 
@@ -275,10 +289,11 @@ Both the plan-editor and session view-model type chains are built purely by addi
 - Use abstraction — split into child components, do not generate monolithic files
 - Each component in its own file
 - Follow the existing pattern: SectionHeader, WorkoutCard, SplitCard, SetRow, ExercisePicker are all good examples of the right level of abstraction
-- `src/components/` is split into three subdirectories:
+- `src/components/` is split into four subdirectories:
   - `plan/` — components owned by the Plan tab: DayCircle, DayWorkoutList, EditorHeader, SetRow, SplitCard, WorkoutEditor, WorkoutExerciseCard, WorkoutPicker
   - `session/` — components owned by the live session flow: WorkoutFabMenu, WorkoutSession, SessionExerciseCard, LoggedSetRow, ResumeSessionBanner
-  - `shared/` — cross-tab primitives and components expected to be reused across tabs: ExercisePicker, ListEmptyText, NamePromptModal, PickerModal, SectionHeader, TabBar, WorkoutCard
+  - `history/` — components owned by the History tab: SessionCard, PastWorkoutsList, ByExercisePlaceholder, SessionDetail, ReadOnlySessionExerciseCard
+  - `shared/` — cross-tab primitives and components expected to be reused across tabs: ExercisePicker, ListEmptyText, NamePromptModal, PickerModal, SectionHeader, SegmentedControl, TabBar, WorkoutCard
 
 ### Code generation
 

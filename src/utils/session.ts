@@ -100,6 +100,38 @@ export function formatElapsed(startedAtIso: string, now: number): string {
   return `${paddedMinutes}:${paddedSeconds}`;
 }
 
+/** Formats a session's ISO timestamp as a calendar date for History rows/detail,
+ *  e.g. "Mon, Jul 14, 2026". Locale-driven via toLocaleDateString. */
+export function formatSessionDate(iso: string): string {
+  return new Date(iso).toLocaleDateString(undefined, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+/** Formats a completed session's total length (startedAt -> finishedAt) in human-readable units,
+ *  e.g. "4 hrs 30 mins", "45 mins", or "2 hrs" (minutes omitted when zero). Returns '' when finishedAt
+ *  is null (should not happen for a finished session, but the type allows it, so we guard).
+ *  Deliberately NOT formatElapsed's clock format (mm:ss) — a browsing summary reads better in words,
+ *  whereas formatElapsed drives the live ticking timer where a clock is what's expected. */
+export function formatSessionDuration(startedAt: string, finishedAt: string | null): string {
+  if (!finishedAt) return '';
+  const elapsedMs = Math.max(0, Date.parse(finishedAt) - Date.parse(startedAt));
+  const totalMinutes = Math.floor(elapsedMs / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  const hoursLabel = hours > 0 ? `${hours} hr${hours === 1 ? '' : 's'}` : '';
+  // Show minutes when there are any, or when there are no hours at all — so a sub-hour session
+  // still reads e.g. "45 mins" and a sub-minute one reads "0 mins" rather than an empty string.
+  const minutesLabel =
+    minutes > 0 || hours === 0 ? `${minutes} min${minutes === 1 ? '' : 's'}` : '';
+
+  return [hoursLabel, minutesLabel].filter(Boolean).join(' ');
+}
+
 /** Assembles a canonical WorkoutSession from the context's working state for storage writes.
  *  finishedAt is always null here — storage's finishSession() stamps it on the Finish action. */
 export function toCanonicalSession(
