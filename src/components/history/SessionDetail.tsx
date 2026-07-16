@@ -1,13 +1,13 @@
 import ReadOnlySessionExerciseCard from '@/components/history/ReadOnlySessionExerciseCard';
 import ListEmptyText from '@/components/shared/ListEmptyText';
-import { getAllExercises, getSessionById } from '@/storage';
+import { deleteSession, getAllExercises, getSessionById } from '@/storage';
 import { colors, layout, spacing, typography } from '@/styles';
 import type { Exercise, WorkoutSession } from '@/types';
 import { formatSessionDate, formatSessionDuration } from '@/utils/session';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface SessionDetailProps {
@@ -61,6 +61,22 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
     [session],
   );
 
+  // Destructive: confirm, then hard-delete from history and pop back to History, whose
+  // useFocusEffect reload drops the now-missing row on its own.
+  function handleDelete() {
+    Alert.alert('Delete workout?', 'This permanently removes this session from your history.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          await deleteSession(sessionId);
+          router.back();
+        },
+      },
+    ]);
+  }
+
   return (
     <View style={layout.screen}>
       {/* Back-chevron top bar — same recipe as the exercise library header */}
@@ -75,8 +91,19 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
         <Text style={typography.heading} numberOfLines={1}>
           {session?.name ?? ''}
         </Text>
-        {/* Placeholder matches back button width to keep title visually centered */}
-        <View style={{ width: 24 }} />
+        {/* Trash action, right-aligned. Same 24px footprint as the back chevron so the title stays
+            centered. Only shown once the session has loaded — nothing to delete while loading/not-found. */}
+        {session ? (
+          <Pressable
+            onPress={handleDelete}
+            hitSlop={8}
+            style={({ pressed }) => pressed && layout.pressedButton}
+          >
+            <Ionicons name="trash-outline" size={22} color={colors.dark.error} />
+          </Pressable>
+        ) : (
+          <View style={{ width: 24 }} />
+        )}
       </View>
 
       {session ? (

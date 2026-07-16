@@ -17,6 +17,15 @@ export async function getSessionById(sessionId: string): Promise<WorkoutSession 
   return sessions.find((session) => session.id === sessionId) ?? null;
 }
 
+/** Removes a finished session from history by id. Mirrors a future DELETE /sessions/:id. */
+export async function deleteSession(sessionId: string): Promise<void> {
+  const sessions = await getSessions();
+  await AsyncStorage.setItem(
+    HISTORY_KEY,
+    JSON.stringify(sessions.filter((session) => session.id !== sessionId)),
+  );
+}
+
 /** Returns the in-progress session buffer, or null if no session is live. */
 export async function getActiveSession(): Promise<WorkoutSession | null> {
   const raw = await AsyncStorage.getItem(ACTIVE_KEY);
