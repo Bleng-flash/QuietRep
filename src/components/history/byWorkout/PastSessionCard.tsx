@@ -1,5 +1,5 @@
 import { layout, spacing, typography } from '@/styles';
-import { formatSessionDate, formatSessionDuration } from '@/utils/session';
+import { formatSessionDate, formatSessionDuration } from '@/utils/datetime';
 import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 

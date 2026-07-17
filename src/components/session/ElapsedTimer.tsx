@@ -1,5 +1,5 @@
 import { typography } from '@/styles';
-import { formatElapsed } from '@/utils/session';
+import { formatElapsed } from '@/utils/datetime';
 import { useEffect, useState } from 'react';
 import { StyleProp, Text, TextStyle } from 'react-native';
 

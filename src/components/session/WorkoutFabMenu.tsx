@@ -3,7 +3,8 @@ import { getActiveSplitId, getAllExercises, getSplits, getWorkouts } from '@/sto
 import { colors, layout, radius, spacing, typography } from '@/styles';
 import type { Exercise, Workout } from '@/types';
 import { matchesSearchQuery } from '@/utils/search';
-import { getTodayKey, seedSessionExercises } from '@/utils/session';
+import { getTodayKey } from '@/utils/datetime';
+import { seedSessionExercises } from '@/utils/session';
 import { buildWorkoutSubtitle } from '@/utils/workout';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';

@@ -9,7 +9,7 @@ import {
   summarizeAllMonths,
   summarizeExerciseHistory,
   summarizeMonth,
-} from '@/utils/session';
+} from '@/utils/sessionStats';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAllExercises } from './exercises';
 

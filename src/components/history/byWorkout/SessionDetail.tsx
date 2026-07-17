@@ -3,7 +3,7 @@ import ListEmptyText from '@/components/shared/ListEmptyText';
 import { deleteSession, getAllExercises, getSessionById } from '@/storage';
 import { colors, layout, spacing, typography } from '@/styles';
 import type { Exercise, WorkoutSession } from '@/types';
-import { formatSessionDate, formatSessionDuration } from '@/utils/session';
+import { formatSessionDate, formatSessionDuration } from '@/utils/datetime';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';

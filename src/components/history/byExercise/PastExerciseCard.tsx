@@ -1,6 +1,6 @@
 import { layout, spacing, typography } from '@/styles';
 import type { MuscleGroup } from '@/types';
-import { formatSessionDate } from '@/utils/session';
+import { formatSessionDate } from '@/utils/datetime';
 import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 

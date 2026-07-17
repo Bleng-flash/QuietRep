@@ -1,6 +1,6 @@
 import { layout, spacing, typography } from '@/styles';
 import type { LoggedSet } from '@/types';
-import { formatSessionDate } from '@/utils/session';
+import { formatSessionDate } from '@/utils/datetime';
 import { memo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
