@@ -1,4 +1,4 @@
-import SessionCard from '@/components/history/SessionCard';
+import PastSessionCard from '@/components/history/byWorkout/PastSessionCard';
 import ListEmptyText from '@/components/shared/ListEmptyText';
 import { spacing } from '@/styles';
 import type { WorkoutSession } from '@/types';
@@ -10,7 +10,7 @@ interface PastSessionsListProps {
   onOpen: (sessionId: string) => void;
 }
 
-/** The "By workout" list body: finished sessions newest-first as tappable SessionCards.
+/** The "By workout" list body: finished sessions newest-first as tappable PastSessionCards.
  *  Exercise/set counts are derived here from the canonical session (no exercise resolution needed
  *  for the list — only the detail view resolves names). */
 export default function PastSessionsList({ sessions, onOpen }: PastSessionsListProps) {
@@ -21,7 +21,7 @@ export default function PastSessionsList({ sessions, onOpen }: PastSessionsListP
         0,
       );
       return (
-        <SessionCard
+        <PastSessionCard
           sessionId={item.id}
           name={item.name}
           startedAt={item.startedAt}

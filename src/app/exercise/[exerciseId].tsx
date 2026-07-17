@@ -1,4 +1,4 @@
-import ExerciseHistory from '@/components/history/ExerciseHistory';
+import ExerciseHistory from '@/components/history/byExercise/ExerciseHistory';
 import { useLocalSearchParams } from 'expo-router';
 
 // Read-only progression history for one exercise. Root-stack route so it's reachable from

@@ -1,5 +1,5 @@
-import PastExercisesList from '@/components/history/PastExercisesList';
-import PastSessionsList from '@/components/history/PastSessionsList';
+import PastExercisesList from '@/components/history/byExercise/PastExercisesList';
+import PastSessionsList from '@/components/history/byWorkout/PastSessionsList';
 import SegmentedControl from '@/components/shared/SegmentedControl';
 import { getExerciseHistorySummaries, getSessions } from '@/storage';
 import { layout, spacing, typography } from '@/styles';
@@ -52,7 +52,7 @@ export default function HistoryScreen() {
   );
 
   // Same shape as handleOpenSession, for the "By exercise" lens: opens the per-exercise
-  // progression detail. Memoised so the memoised ExerciseHistoryCards can bail out of re-render.
+  // progression detail. Memoised so the memoised PastExerciseCards can bail out of re-render.
   const handleOpenExercise = useCallback(
     (exerciseId: string) => {
       router.push({ pathname: '/exercise/[exerciseId]', params: { exerciseId } });

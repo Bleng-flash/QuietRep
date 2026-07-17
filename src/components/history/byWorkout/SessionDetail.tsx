@@ -1,4 +1,4 @@
-import ReadOnlySessionExerciseCard from '@/components/history/ReadOnlySessionExerciseCard';
+import ReadOnlySessionExerciseCard from '@/components/history/byWorkout/ReadOnlySessionExerciseCard';
 import ListEmptyText from '@/components/shared/ListEmptyText';
 import { deleteSession, getAllExercises, getSessionById } from '@/storage';
 import { colors, layout, spacing, typography } from '@/styles';

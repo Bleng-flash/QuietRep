@@ -3,7 +3,7 @@ import { formatSessionDate, formatSessionDuration } from '@/utils/session';
 import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
-interface SessionCardProps {
+interface PastSessionCardProps {
   sessionId: string;
   name: string;
   startedAt: string;
@@ -15,7 +15,7 @@ interface SessionCardProps {
 
 // Receives primitive props (not the whole WorkoutSession) so memo can bail out of re-render for
 // unchanged rows even when the parent reloads a fresh array of objects from storage on focus.
-const SessionCard = memo(function SessionCard({
+const PastSessionCard = memo(function PastSessionCard({
   sessionId,
   name,
   startedAt,
@@ -23,7 +23,7 @@ const SessionCard = memo(function SessionCard({
   exerciseCount,
   setCount,
   onPress,
-}: SessionCardProps) {
+}: PastSessionCardProps) {
   // Duration is '' only if finishedAt is null (shouldn't happen for a finished session) — filter it
   // out so the meta line never shows a dangling separator.
   const metaLine = [formatSessionDate(startedAt), formatSessionDuration(startedAt, finishedAt)]
@@ -48,4 +48,4 @@ const SessionCard = memo(function SessionCard({
   );
 });
 
-export default SessionCard;
+export default PastSessionCard;

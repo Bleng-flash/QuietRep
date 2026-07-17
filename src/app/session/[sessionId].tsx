@@ -1,4 +1,4 @@
-import SessionDetail from '@/components/history/SessionDetail';
+import SessionDetail from '@/components/history/byWorkout/SessionDetail';
 import { useLocalSearchParams } from 'expo-router';
 
 // Read-only detail for a past (finished) session. Root-stack route so it's reachable from History

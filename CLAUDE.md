@@ -120,6 +120,10 @@ Deliberately built **instead of** the originally-scoped 1RM-estimation-based PRs
 - `src/app/exercise/[exerciseId].tsx` — new **root-stack** route, thin screen → `<ExerciseHistory />`. Sits beside the static `exercise/new` in the same folder (Expo Router resolves static segments before dynamic ones). Root-level per "Shared screens live on the root stack" — reachable from History now, Home/Plan later.
 - `src/app/(tabs)/history.tsx` — `handleOpenExercise` mirrors `handleOpenSession` (`useCallback`, id-based `router.push`); the `byExercise` lens renders `PastExercisesList`. `ByExercisePlaceholder.tsx` deleted; `PastWorkoutsList` renamed to `PastSessionsList`.
 
+**History components reorganised into per-lens subdirectories (post-Iteration 3):**
+
+`src/components/history/` is now split by lens: `byWorkout/` (PastSessionsList, PastSessionCard, SessionDetail, ReadOnlySessionExerciseCard) and `byExercise/` (PastExercisesList, PastExerciseCard, ExerciseHistory, ExercisePerformanceCard). The subdirectory names match the `HistoryLens` keys in `history.tsx`. Two card renames landed with the move, giving each lens a symmetric List + Card pair: `SessionCard` → **`PastSessionCard`** (also disambiguates from the live session's `SessionExerciseCard`) and `ExerciseHistoryCard` → **`PastExerciseCard`**. Mentions earlier in this file use the original flat paths/names as a historical record.
+
 ## Next steps
 
 **Iteration 3 is complete.** Next up is **Iteration 4 (Home tab)**, which consumes the history built here (active split, session history, per-exercise progression).
@@ -316,7 +320,7 @@ Both the plan-editor and session view-model type chains are built purely by addi
 - `src/components/` is split into four subdirectories:
   - `plan/` — components owned by the Plan tab: DayCircle, DayWorkoutList, EditorHeader, SetRow, SplitCard, WorkoutEditor, WorkoutExerciseCard, WorkoutPicker
   - `session/` — components owned by the live session flow: WorkoutFabMenu, WorkoutSession, SessionExerciseCard, LoggedSetRow, ResumeSessionBanner
-  - `history/` — components owned by the History tab: SessionCard, PastSessionsList, PastExercisesList, ExerciseHistoryCard, ExerciseHistory, ExercisePerformanceCard, SessionDetail, ReadOnlySessionExerciseCard
+  - `history/` — components owned by the History tab, split into one subdirectory per lens: `byWorkout/` (PastSessionsList, PastSessionCard, SessionDetail, ReadOnlySessionExerciseCard) and `byExercise/` (PastExercisesList, PastExerciseCard, ExerciseHistory, ExercisePerformanceCard)
   - `shared/` — cross-tab primitives and components expected to be reused across tabs: ExercisePicker, ListEmptyText, NamePromptModal, PickerModal, SectionHeader, SegmentedControl, TabBar, WorkoutCard
 
 ### Code generation

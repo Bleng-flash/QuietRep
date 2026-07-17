@@ -1,4 +1,4 @@
-import ExercisePerformanceCard from '@/components/history/ExercisePerformanceCard';
+import ExercisePerformanceCard from '@/components/history/byExercise/ExercisePerformanceCard';
 import ListEmptyText from '@/components/shared/ListEmptyText';
 import { getExerciseById, getExercisePerformances } from '@/storage';
 import { colors, layout, spacing, typography } from '@/styles';

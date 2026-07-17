@@ -1,4 +1,4 @@
-import ExerciseHistoryCard from '@/components/history/ExerciseHistoryCard';
+import PastExerciseCard from '@/components/history/byExercise/PastExerciseCard';
 import ListEmptyText from '@/components/shared/ListEmptyText';
 import { spacing } from '@/styles';
 import type { ExerciseHistorySummary } from '@/types';
@@ -11,12 +11,12 @@ interface PastExercisesListProps {
 }
 
 /** The "By exercise" list body: every exercise that appears in session history, most-recently-trained
- *  first, as tappable ExerciseHistoryCards. Summaries arrive pre-joined from storage
+ *  first, as tappable PastExerciseCards. Summaries arrive pre-joined from storage
  *  (getExerciseHistorySummaries) — no exercise resolution happens here. */
 export default function PastExercisesList({ summaries, onOpen }: PastExercisesListProps) {
   const renderItem = useCallback(
     ({ item }: { item: ExerciseHistorySummary }) => (
-      <ExerciseHistoryCard
+      <PastExerciseCard
         exerciseId={item.exerciseId}
         name={item.name}
         muscleGroup={item.muscleGroup}
