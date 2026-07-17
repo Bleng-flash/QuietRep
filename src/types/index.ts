@@ -110,3 +110,24 @@ export type ResolvedEditableSessionExercise = EditableSessionExercise & {
   exercise: Exercise | undefined;
 };
 // ------------------------------------------------------------------------
+
+// -------- History view models: frontend only, no DB counterpart --------
+/** Represents one row in the History tab's "By exercise" list: an exercise that appears in at least one
+ *  past session, pre-joined with its catalog name/muscleGroup and a couple of summary stats. */
+export interface ExerciseHistorySummary {
+  exerciseId: string; // matches Exercise.id
+  name: string; // resolved from the catalog; 'Unknown exercise' for a dangling FK
+  muscleGroup: MuscleGroup;
+  sessionCount: number; // how many past sessions included this exercise
+  lastPerformedAt: string; // ISO 8601 — most recent session's startedAt
+}
+
+/** One past session's worth of logged sets for a single exercise, used by the exercise-history
+ *  detail screen to show progression over time (one card per session). */
+export interface ExercisePerformance {
+  sessionId: string;
+  sessionName: string;
+  performedAt: string; // ISO 8601 — the session's startedAt
+  sets: LoggedSet[];
+}
+// ------------------------------------------------------------------------

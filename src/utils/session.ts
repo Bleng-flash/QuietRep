@@ -2,6 +2,9 @@ import type {
   DayKey,
   EditableLoggedSet,
   EditableSessionExercise,
+  Exercise,
+  ExerciseHistorySummary,
+  ExercisePerformance,
   LoggedSet,
   PlannedSet,
   SessionExercise,
@@ -147,4 +150,86 @@ export function toCanonicalSession(
     finishedAt: null,
     exercises: stripToCanonicalExercises(editableExercises),
   };
+}
+
+/** Aggregates session history into one summary per exercise that has ever been logged, pre-joined
+ *  with the exercise catalog for display. Drives the History tab's "By exercise" list. An exercise
+ *  never performed is absent; a dangling FK (catalog entry deleted) still appears via a fallback name.
+ *  Result is sorted most-recently-trained first.
+ *
+ *  Pure computation — the client-side stand-in for the GROUP BY a future backend would run.
+ *  Components must not call this directly; they go through storage's getExerciseHistorySummaries(),
+ *  so at backend transition only that wrapper's internals change. */
+export function summarizeExerciseHistory(
+  sessions: WorkoutSession[],
+  allExercises: Exercise[],
+): ExerciseHistorySummary[] {
+  const exerciseById = new Map(allExercises.map((exercise) => [exercise.id, exercise]));
+  const summaryByExerciseId = new Map<string, ExerciseHistorySummary>();
+
+  for (const session of sessions) {
+    // A session may list the same exercise more than once; count it once toward sessionCount.
+    const countedInThisSession = new Set<string>();
+    for (const sessionExercise of session.exercises) {
+      if (countedInThisSession.has(sessionExercise.exerciseId)) continue;
+      countedInThisSession.add(sessionExercise.exerciseId);
+
+      const existing = summaryByExerciseId.get(sessionExercise.exerciseId);
+      if (existing) {
+        summaryByExerciseId.set(sessionExercise.exerciseId, {
+          ...existing,
+          sessionCount: existing.sessionCount + 1,
+          // ISO 8601 strings compare correctly lexicographically, so keep the later timestamp.
+          lastPerformedAt:
+            session.startedAt > existing.lastPerformedAt
+              ? session.startedAt
+              : existing.lastPerformedAt,
+        });
+      } else {
+        const exercise = exerciseById.get(sessionExercise.exerciseId);
+        summaryByExerciseId.set(sessionExercise.exerciseId, {
+          exerciseId: sessionExercise.exerciseId,
+          name: exercise?.name ?? 'Unknown exercise',
+          muscleGroup: exercise?.muscleGroup ?? 'Other',
+          sessionCount: 1,
+          lastPerformedAt: session.startedAt,
+        });
+      }
+    }
+  }
+
+  return Array.from(summaryByExerciseId.values()).sort((first, second) =>
+    second.lastPerformedAt.localeCompare(first.lastPerformedAt),
+  );
+}
+
+/** Collects every past session in which the given exercise was performed, as one ExercisePerformance
+ *  per session (its logged sets). Preserves the newest-first order of the passed-in sessions.
+ *  If an exercise appears more than once in a single session, its sets are concatenated into one entry.
+ *
+ *  Pure computation — the client-side stand-in for the WHERE exercise_id = ? query a future backend
+ *  would run. Components must not call this directly; they go through storage's
+ *  getExercisePerformances(exerciseId) wrapper (hence "collect", not "get" — get* signals a storage read). */
+export function collectExercisePerformances(
+  sessions: WorkoutSession[],
+  exerciseId: string,
+): ExercisePerformance[] {
+  const performances: ExercisePerformance[] = [];
+
+  for (const session of sessions) {
+    const setsForExercise = session.exercises
+      .filter((sessionExercise) => sessionExercise.exerciseId === exerciseId)
+      .flatMap((sessionExercise) => sessionExercise.sets);
+
+    if (setsForExercise.length === 0) continue;
+
+    performances.push({
+      sessionId: session.id,
+      sessionName: session.name,
+      performedAt: session.startedAt,
+      sets: setsForExercise,
+    });
+  }
+
+  return performances;
 }
