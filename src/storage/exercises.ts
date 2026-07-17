@@ -28,6 +28,15 @@ export async function getAllExercises(): Promise<Exercise[]> {
   return [...defaultExercises, ...userExercises];
 }
 
+/** Returns a single exercise by id, or null if not found (e.g. a dangling FK after a user
+ *  exercise was deleted). Mirrors a future GET /exercises/:id — components needing one exercise
+ *  call this rather than scanning getAllExercises() themselves, so at backend transition only
+ *  these internals change. Sibling of getSessionById in sessions.ts. */
+export async function getExerciseById(exerciseId: string): Promise<Exercise | null> {
+  const allExercises = await getAllExercises();
+  return allExercises.find((exercise) => exercise.id === exerciseId) ?? null;
+}
+
 // Adds a user-created exercise. Returns null (and shows an Alert) if an exercise
 // with the same name already exists — name uniqueness is enforced across both
 // default and user exercises since the picker shows them together.

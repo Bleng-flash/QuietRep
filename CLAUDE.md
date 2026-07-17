@@ -15,16 +15,16 @@ Iteration sequence for the frontend:
 - Iteration 2: Start workout session \
   Build the FAB flow and full session view. Bottom sheet entry point, the three start options, the in-session exercise/set/rep logging, mid-session modifications (reorder, swap, add, remove), and the finish + save to history. The persistent in-progress banner across tabs. At the end of this iteration the core loop — plan a workout, execute it, save it — is fully functional.
 - Iteration 3: History tab \
-  Build the Past Workouts list pulling from saved session history. Session detail view. PR detection and the PRs section, calculated from the history built up in iteration 2.
+  Build the Past Workouts list pulling from saved session history. Session detail view. Per-exercise progression view (the "By exercise" lens), calculated from the history built up in iteration 2.
 - Iteration 4: Home tab \
-  Now that all the data exists (active split, session history, PRs), the home screen can be built meaningfully. Today's workout card, the start CTA, the monthly dashboard, and the recent workouts strip.
+  Now that all the data exists (active split, session history, per-exercise progression), the home screen can be built meaningfully. Today's workout card, the start CTA, the monthly dashboard, and the recent workouts strip.
 - Iteration 5: Profile tab \
-  Bodyweight log, units preference (propagated back through earlier screens), rest timer settings wired into the session view, 1RM formula preference, data export. Polish pass on everything.
+  Bodyweight log, units preference (propagated back through earlier screens), rest timer settings wired into the session view, data export. Polish pass on everything.
 - Iteration 6: Polish + predefined content \
   Predefined exercise library. Animations and transitions. Empty state illustrations. Onboarding flow for first-time users. Any UX rough edges surfaced from using the app.
 
 \
-Iteration 1 is complete, **iteration 2 is complete** (all six steps done), and **iteration 3 is complete except the deferred PRs section**. The table below details the progress within iteration 2.
+Iteration 1 is complete, **iteration 2 is complete** (all six steps done), and **iteration 3 is complete**. The table below details the progress within iteration 2.
 | Step | Feature | Status |
 | ---- | ----------------------------------------------------------------------- | ----------- |
 | 1 | Session types, storage (`sessions.ts`), and utils (`session.ts`) | Done |
@@ -36,7 +36,7 @@ Iteration 1 is complete, **iteration 2 is complete** (all six steps done), and *
 
 ## Current State
 
-Iteration 1 is complete, Iteration 2 is complete (Steps 1-6 done), and Iteration 3 is complete except the deferred PRs section (see Next steps). The following is fully functional:
+Iteration 1 is complete, Iteration 2 is complete (Steps 1-6 done), and Iteration 3 is complete. The following is fully functional:
 
 **Iteration 1 (complete):**
 - Plan index screen with Splits, Workouts, and Exercises sections
@@ -108,21 +108,25 @@ Iteration 1 is complete, Iteration 2 is complete (Steps 1-6 done), and Iteration
 
 **New in Iteration 3 (By-exercise progression view — replaces the placeholder):**
 
-Deliberately built **instead of** the originally-scoped 1RM-estimation-based PRs: an honest progression lens — pick a logged exercise, see every set you actually lifted across all past sessions with dates. No estimation formula committed to (the 1RM formula choice is an Iteration 5 user preference).
+Deliberately built **instead of** the originally-scoped 1RM-estimation-based PRs (since descoped entirely — see Next steps): an honest progression lens — pick a logged exercise, see every set you actually lifted across all past sessions with dates. No estimation formula committed to.
 
 - `src/types/index.ts` — history view models (frontend only, no DB counterpart): `ExerciseHistorySummary` (one By-exercise list row: `exerciseId, name, muscleGroup, sessionCount, lastPerformedAt`) and `ExercisePerformance` (one session's logged sets for one exercise: `sessionId, sessionName, performedAt, sets`).
 - `src/utils/session.ts` — pure aggregations: `summarizeExerciseHistory(sessions, allExercises)` (one summary per distinct logged exercise; duplicate entries in a session count once; dangling FK → "Unknown exercise"/"Other"; sorted most-recently-trained first) and `collectExercisePerformances(sessions, exerciseId)` (one entry per session containing the exercise, newest-first preserved from `getSessions()`; duplicate entries' sets concatenated). **Components must not call these directly** — they are the client-side stand-ins for future server queries (see "Derived reads live behind storage endpoint mirrors" below).
 - `src/storage/sessions.ts` — endpoint mirrors: `getExerciseHistorySummaries()` (mirrors a future `GET /exercises/history-summary`) and `getExercisePerformances(exerciseId)` (mirrors `GET /exercises/:id/performances`). Both read raw sessions and delegate to the pure utils.
 - `src/components/history/PastExercisesList.tsx` — the "By exercise" lens body: `FlatList` of `ExerciseHistoryCard`s, same memo chain + `windowSize={5}` + `ListEmptyText` shape as `PastSessionsList`. Summaries arrive pre-joined from storage — no exercise resolution here.
 - `src/components/history/ExerciseHistoryCard.tsx` — memoised primitive-prop row (mirrors `SessionCard`): name / muscle group / `"N sessions  •  Last performed: {date}"` as three lines; id-based `onPress(exerciseId)`.
-- `src/components/history/ExerciseHistory.tsx` — fat detail component: `useFocusEffect` → `Promise.all([getExercisePerformances(exerciseId), getAllExercises()])`; back-chevron top bar (SessionDetail's recipe, no trash — nothing to delete); `hasLoaded` flag against not-found flash; `FlatList` (`windowSize={5}`) of `ExercisePerformanceCard`s with a `ListHeaderComponent` summary caption (`{muscleGroup}  •  {N} sessions`). A dangling FK still shows its history under "Unknown exercise". `layout.screen` on the root view (root routes paint their own background).
+- `src/components/history/ExerciseHistory.tsx` — fat detail component: `useFocusEffect` → `Promise.all([getExercisePerformances(exerciseId), getExerciseById(exerciseId)])`; back-chevron top bar (SessionDetail's recipe, no trash — nothing to delete); `hasLoaded` flag against not-found flash; `FlatList` (`windowSize={5}`) of `ExercisePerformanceCard`s with a `ListHeaderComponent` summary caption (`{muscleGroup}  •  {N} sessions`). A dangling FK still shows its history under "Unknown exercise". `layout.screen` on the root view (root routes paint their own background).
 - `src/components/history/ExercisePerformanceCard.tsx` — one past session's block: date-led header (`formatSessionDate`) with session name as caption, then the `Load (kg)` / `Reps` column layout mirroring `ReadOnlySessionExerciseCard`. Memoised for the detail's FlatList.
 - `src/app/exercise/[exerciseId].tsx` — new **root-stack** route, thin screen → `<ExerciseHistory />`. Sits beside the static `exercise/new` in the same folder (Expo Router resolves static segments before dynamic ones). Root-level per "Shared screens live on the root stack" — reachable from History now, Home/Plan later.
 - `src/app/(tabs)/history.tsx` — `handleOpenExercise` mirrors `handleOpenSession` (`useCallback`, id-based `router.push`); the `byExercise` lens renders `PastExercisesList`. `ByExercisePlaceholder.tsx` deleted; `PastWorkoutsList` renamed to `PastSessionsList`.
 
 ## Next steps
 
-**Iteration 3 remainder is deferred:** the **PRs section** (PR detection + 1RM estimation) is the sole remaining Iteration-3 item, intentionally scoped out. When built, the 1RM estimate must be a single swappable function (e.g. `estimateOneRepMax(weight, reps)`), since the formula choice (Epley/Brzycki/…) becomes a user preference in Iteration 5. The By-exercise progression view now exists as the honest no-estimation alternative; a per-exercise load/rep **chart** on top of it is a possible future enhancement of the same lens. Revisit PRs before moving to Iteration 4 (Home tab), which will consume this history.
+**Iteration 3 is complete.** Next up is **Iteration 4 (Home tab)**, which consumes the history built here (active split, session history, per-exercise progression).
+
+**Descoped — possible future improvements (not planned features):**
+- **PRs section (PR detection + 1RM estimation)** — originally scoped for Iteration 3, deliberately dropped in favour of the By-exercise progression view (the honest no-estimation alternative). If ever revisited: the 1RM estimate must be a single swappable function (e.g. `estimateOneRepMax(weight, reps)`), with the formula choice (Epley/Brzycki/…) surfaced as a Profile-tab user preference.
+- **Per-exercise load/rep charts** — a visual layer on top of the existing By-exercise lens and its `ExercisePerformance` data.
 
 ---
 
@@ -194,6 +198,7 @@ Default and user-created exercises are stored under separate keys — `@quietrep
 - `getDefaultExercises()` — reads `DEFAULTS_KEY` only
 - `getUserExercises()` — reads `USER_KEY` only
 - `getAllExercises()` — parallel read of both, returns defaults first then user exercises
+- `getExerciseById(exerciseId)` — single-exercise lookup, `null` if not found; mirrors a future `GET /exercises/:id` (see "Derived reads live behind storage endpoint mirrors")
 - `addExercise(data)` — writes to `USER_KEY`; enforces name uniqueness across both keys via Alert
 - `deleteExercise(id)` — removes from `USER_KEY` only; default exercises are not deletable
 - `seedDefaultExercises()` — diffs `DEFAULT_EXERCISES` against both keys (not just `DEFAULTS_KEY`) before writing, so a user-created exercise that shares a name with a newly added default is not duplicated. If the user later deletes their custom version, the next launch seeds the default correctly.
@@ -245,6 +250,8 @@ When a session is seeded from a plan, each `PlannedSet` becomes an `EditableLogg
 
 **Derived reads live behind storage endpoint mirrors — pure aggregation utils underneath**
 When the UI needs *derived* history data (aggregations/filters over sessions), the read is exposed as a storage function that mirrors the future REST endpoint — `getExerciseHistorySummaries()` (`GET /exercises/history-summary`) and `getExercisePerformances(exerciseId)` (`GET /exercises/:id/performances`) in `src/storage/sessions.ts`. Internally each reads the raw data and delegates to a **pure util** in `src/utils/session.ts` (`summarizeExerciseHistory`, `collectExercisePerformances`) — today's client-side stand-ins for the `GROUP BY` / `WHERE` queries a backend database would run. Components call **only the storage wrappers, never the utils**, so at backend transition only the wrapper internals change (read-all-and-compute → one fetch) and no component is touched. Naming rule that encodes the layering: `get*` signals a storage read; the pure utils use `summarize*`/`collect*` instead.
+
+The same principle draws the line for **single-entity lookups**: a component may join or derive view models from collections it legitimately consumes wholesale (e.g. the full exercise catalog for a picker, or an `exerciseMap` join per the ResolvedX pattern), but it must **not scan a collection to emulate a more specific endpoint** — a `.find`-by-id over `getAllExercises()` is a `GET /exercises/:id` in disguise and belongs in storage (`getExerciseById`, sibling of `getSessionById`).
 
 **ActiveSessionContext — React Context as subscription layer over AsyncStorage**
 AsyncStorage has no subscriptions: when one component writes, nothing else is notified. `ActiveSessionContext` solves this by holding the live session in React state — updating the provider's state re-renders all `useActiveSession()` consumers (session screen, resume banner) automatically. No component ever reads `@quietrep/activeSession` from AsyncStorage directly; all reads and mutations go through the four context actions.

@@ -1,6 +1,6 @@
 import ExercisePerformanceCard from '@/components/history/ExercisePerformanceCard';
 import ListEmptyText from '@/components/shared/ListEmptyText';
-import { getAllExercises, getExercisePerformances } from '@/storage';
+import { getExerciseById, getExercisePerformances } from '@/storage';
 import { colors, layout, spacing, typography } from '@/styles';
 import type { Exercise, ExercisePerformance } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -30,14 +30,12 @@ export default function ExerciseHistory({ exerciseId }: ExerciseHistoryProps) {
   useFocusEffect(
     useCallback(() => {
       async function loadHistory() {
-        const [loadedPerformances, allExercises] = await Promise.all([
+        const [loadedPerformances, foundExercise] = await Promise.all([
           getExercisePerformances(exerciseId),
-          getAllExercises(),
+          getExerciseById(exerciseId),
         ]);
         setPerformances(loadedPerformances);
-        setExercise(
-          allExercises.find((catalogExercise) => catalogExercise.id === exerciseId) ?? null,
-        );
+        setExercise(foundExercise);
         setHasLoaded(true);
       }
       loadHistory();
