@@ -24,7 +24,7 @@ Iteration sequence for the frontend:
   Predefined exercise library. Animations and transitions. Empty state illustrations. Onboarding flow for first-time users. Any UX rough edges surfaced from using the app.
 
 \
-Iteration 1 is complete, and **iteration 2 is now complete** (all six steps done). The table below details the progress within iteration 2.
+Iteration 1 is complete, **iteration 2 is complete** (all six steps done), and **iteration 3 is complete except the deferred PRs section**. The table below details the progress within iteration 2.
 | Step | Feature | Status |
 | ---- | ----------------------------------------------------------------------- | ----------- |
 | 1 | Session types, storage (`sessions.ts`), and utils (`session.ts`) | Done |
@@ -36,7 +36,7 @@ Iteration 1 is complete, and **iteration 2 is now complete** (all six steps done
 
 ## Current State
 
-Iteration 1 is complete and Iteration 2 is complete (Steps 1-6 done). The following is fully functional:
+Iteration 1 is complete, Iteration 2 is complete (Steps 1-6 done), and Iteration 3 is complete except the deferred PRs section (see Next steps). The following is fully functional:
 
 **Iteration 1 (complete):**
 - Plan index screen with Splits, Workouts, and Exercises sections
@@ -98,17 +98,31 @@ Iteration 1 is complete and Iteration 2 is complete (Steps 1-6 done). The follow
 - `src/utils/session.ts` — two formatters added: `formatSessionDate(iso)` (calendar date via `toLocaleDateString`, e.g. "Mon, Jul 14, 2026") and `formatSessionDuration(startedAt, finishedAt)` (session length, reuses `formatElapsed`; returns `''` when `finishedAt` is null). These are the calendar/date helpers the history rows and detail need — `formatElapsed` alone is a duration formatter.
 - New `src/components/history/` subdirectory (the History tab's own components):
   - `SessionCard.tsx` — memoised list row; **primitive props** (`sessionId, name, startedAt, finishedAt, exerciseCount, setCount`) so unchanged rows bail out of re-render on focus reload; `layout.card`; press → `onPress(sessionId)`.
-  - `PastWorkoutsList.tsx` — the "By workout" body: `FlatList` of `SessionCard`s (newest-first straight from `getSessions()`), `windowSize={5}`, `ListEmptyText` empty state. Derives exercise/set counts inline off the canonical session — **no exercise resolution in the list** (only the detail resolves names).
-  - `ByExercisePlaceholder.tsx` — coming-soon stub for the future "By exercise" progression lens.
+  - `PastSessionsList.tsx` — the "By workout" body: `FlatList` of `SessionCard`s (newest-first straight from `getSessions()`), `windowSize={5}`, `ListEmptyText` empty state. Derives exercise/set counts inline off the canonical session — **no exercise resolution in the list** (only the detail resolves names). (Originally `PastWorkoutsList`; renamed when the By-exercise lens landed — it renders `SessionCard`s, so "sessions" is the accurate noun, and it pairs with `PastExercisesList`.)
+  - `ByExercisePlaceholder.tsx` — coming-soon stub for the future "By exercise" progression lens. (Superseded: replaced by the real `PastExercisesList` lens and deleted — see the By-exercise section below.)
   - `SessionDetail.tsx` — fat detail component; `useFocusEffect` → `Promise.all([getSessionById, getAllExercises])`; `exerciseMap` + resolved exercises via `useMemo`; back-chevron top bar; summary line (date • duration • N exercises • M sets); one `ReadOnlySessionExerciseCard` per exercise. `hasLoaded` flag distinguishes loading from not-found so it never flashes "Workout not found." during the initial read. The top bar's right slot is a **delete (trash) action** — `Alert` destructive confirm → `deleteSession(sessionId)` → `router.back()`, landing on History whose `useFocusEffect` reload drops the now-missing row (no extra plumbing). The trash button renders only once `session` is loaded (falls back to a width-24 spacer while loading/not-found, so the centred title never shifts). This is the app's only entry point for removing a past session — deliberately in the detail view rather than a list-row swipe, which would need gesture-handler and complicate `SessionCard`'s primitive-prop memoisation.
   - `ReadOnlySessionExerciseCard.tsx` — **read-only** counterpart to `SessionExerciseCard` (the name mirrors the editable original): renders logged sets as plain `Text` (no `TextInput`, no add/remove), reusing the `layout.card` shell and column layout. Tolerates a dangling FK (`exercise?.name ?? 'Unknown exercise'`). The editable session components were deliberately **not** forced into a read-only mode — they are built around `TextInput` + the `Editable*` view models; the detail reads the simpler canonical `SessionExercise`/`LoggedSet` shapes.
 - `src/components/shared/SegmentedControl.tsx` — generic iOS-style pinned toggle (`{ options, value, onChange }`), kept in `shared/` since it's reusable beyond History.
 - `src/app/session/[sessionId].tsx` — new **root-stack** route (`/session/[sessionId]`), the read-only session-detail screen. Thin screen: `useLocalSearchParams` → `<SessionDetail />`. Lives at the root (not under the History tab) per "Shared screens live on the root stack" — reachable from History now and Home later without a cross-navigator push. Coexists with the live-session route `session.tsx` (`/session`); the file + same-named folder is supported by Expo Router (verified in the generated route types). Owns its background via `layout.screen`.
-- `src/app/(tabs)/history.tsx` — replaces the placeholder. **Pinned segmented control** landing: a static header (title + `SegmentedControl` for `[ By workout | By exercise ]`) stays put while only the list below scrolls. `byWorkout` → `PastWorkoutsList`; `byExercise` → `ByExercisePlaceholder`. `useFocusEffect` → `getSessions()`. Chosen over a hub-of-buttons so the primary content (past workouts) is immediate — no extra tap, no empty landing.
+- `src/app/(tabs)/history.tsx` — replaces the placeholder. **Pinned segmented control** landing: a static header (title + `SegmentedControl` for `[ By workout | By exercise ]`) stays put while only the list below scrolls. `byWorkout` → `PastSessionsList`; `byExercise` → `PastExercisesList` (originally `ByExercisePlaceholder`). `useFocusEffect` → `Promise.all([getSessions(), getExerciseHistorySummaries()])` so both lenses load in parallel. Chosen over a hub-of-buttons so the primary content (past workouts) is immediate — no extra tap, no empty landing.
+
+**New in Iteration 3 (By-exercise progression view — replaces the placeholder):**
+
+Deliberately built **instead of** the originally-scoped 1RM-estimation-based PRs: an honest progression lens — pick a logged exercise, see every set you actually lifted across all past sessions with dates. No estimation formula committed to (the 1RM formula choice is an Iteration 5 user preference).
+
+- `src/types/index.ts` — history view models (frontend only, no DB counterpart): `ExerciseHistorySummary` (one By-exercise list row: `exerciseId, name, muscleGroup, sessionCount, lastPerformedAt`) and `ExercisePerformance` (one session's logged sets for one exercise: `sessionId, sessionName, performedAt, sets`).
+- `src/utils/session.ts` — pure aggregations: `summarizeExerciseHistory(sessions, allExercises)` (one summary per distinct logged exercise; duplicate entries in a session count once; dangling FK → "Unknown exercise"/"Other"; sorted most-recently-trained first) and `collectExercisePerformances(sessions, exerciseId)` (one entry per session containing the exercise, newest-first preserved from `getSessions()`; duplicate entries' sets concatenated). **Components must not call these directly** — they are the client-side stand-ins for future server queries (see "Derived reads live behind storage endpoint mirrors" below).
+- `src/storage/sessions.ts` — endpoint mirrors: `getExerciseHistorySummaries()` (mirrors a future `GET /exercises/history-summary`) and `getExercisePerformances(exerciseId)` (mirrors `GET /exercises/:id/performances`). Both read raw sessions and delegate to the pure utils.
+- `src/components/history/PastExercisesList.tsx` — the "By exercise" lens body: `FlatList` of `ExerciseHistoryCard`s, same memo chain + `windowSize={5}` + `ListEmptyText` shape as `PastSessionsList`. Summaries arrive pre-joined from storage — no exercise resolution here.
+- `src/components/history/ExerciseHistoryCard.tsx` — memoised primitive-prop row (mirrors `SessionCard`): name / muscle group / `"N sessions  •  Last performed: {date}"` as three lines; id-based `onPress(exerciseId)`.
+- `src/components/history/ExerciseHistory.tsx` — fat detail component: `useFocusEffect` → `Promise.all([getExercisePerformances(exerciseId), getAllExercises()])`; back-chevron top bar (SessionDetail's recipe, no trash — nothing to delete); `hasLoaded` flag against not-found flash; `FlatList` (`windowSize={5}`) of `ExercisePerformanceCard`s with a `ListHeaderComponent` summary caption (`{muscleGroup}  •  {N} sessions`). A dangling FK still shows its history under "Unknown exercise". `layout.screen` on the root view (root routes paint their own background).
+- `src/components/history/ExercisePerformanceCard.tsx` — one past session's block: date-led header (`formatSessionDate`) with session name as caption, then the `Load (kg)` / `Reps` column layout mirroring `ReadOnlySessionExerciseCard`. Memoised for the detail's FlatList.
+- `src/app/exercise/[exerciseId].tsx` — new **root-stack** route, thin screen → `<ExerciseHistory />`. Sits beside the static `exercise/new` in the same folder (Expo Router resolves static segments before dynamic ones). Root-level per "Shared screens live on the root stack" — reachable from History now, Home/Plan later.
+- `src/app/(tabs)/history.tsx` — `handleOpenExercise` mirrors `handleOpenSession` (`useCallback`, id-based `router.push`); the `byExercise` lens renders `PastExercisesList`. `ByExercisePlaceholder.tsx` deleted; `PastWorkoutsList` renamed to `PastSessionsList`.
 
 ## Next steps
 
-**Iteration 3 remainder is deferred:** the **PRs section** (PR detection + 1RM) and the real **"By exercise"** progression view (per-exercise load/rep charts behind the segmented control's second tab, currently a placeholder) were intentionally scoped out. The "By exercise" toggle and detail-view read side are in place; revisit PRs/progression before moving to Iteration 4 (Home tab), which will consume this history.
+**Iteration 3 remainder is deferred:** the **PRs section** (PR detection + 1RM estimation) is the sole remaining Iteration-3 item, intentionally scoped out. When built, the 1RM estimate must be a single swappable function (e.g. `estimateOneRepMax(weight, reps)`), since the formula choice (Epley/Brzycki/…) becomes a user preference in Iteration 5. The By-exercise progression view now exists as the honest no-estimation alternative; a per-exercise load/rep **chart** on top of it is a possible future enhancement of the same lens. Revisit PRs before moving to Iteration 4 (Home tab), which will consume this history.
 
 ---
 
@@ -229,6 +243,9 @@ When a session is seeded from a plan, each `PlannedSet` becomes an `EditableLogg
 **Session storage — two AsyncStorage keys**
 `@quietrep/activeSession` holds the single in-progress session buffer (a canonical `WorkoutSession` with `finishedAt: null`). `@quietrep/sessions` holds the array of completed sessions (newest-first), used by the History tab in Iteration 3. The active buffer is always written with view-model fields stripped — only the context layer (`ActiveSessionContext`, Iteration 2 Step 2) performs that strip before calling `setActiveSession`. `finishSession` stamps `finishedAt`, prepends to history, and clears the active key atomically.
 
+**Derived reads live behind storage endpoint mirrors — pure aggregation utils underneath**
+When the UI needs *derived* history data (aggregations/filters over sessions), the read is exposed as a storage function that mirrors the future REST endpoint — `getExerciseHistorySummaries()` (`GET /exercises/history-summary`) and `getExercisePerformances(exerciseId)` (`GET /exercises/:id/performances`) in `src/storage/sessions.ts`. Internally each reads the raw data and delegates to a **pure util** in `src/utils/session.ts` (`summarizeExerciseHistory`, `collectExercisePerformances`) — today's client-side stand-ins for the `GROUP BY` / `WHERE` queries a backend database would run. Components call **only the storage wrappers, never the utils**, so at backend transition only the wrapper internals change (read-all-and-compute → one fetch) and no component is touched. Naming rule that encodes the layering: `get*` signals a storage read; the pure utils use `summarize*`/`collect*` instead.
+
 **ActiveSessionContext — React Context as subscription layer over AsyncStorage**
 AsyncStorage has no subscriptions: when one component writes, nothing else is notified. `ActiveSessionContext` solves this by holding the live session in React state — updating the provider's state re-renders all `useActiveSession()` consumers (session screen, resume banner) automatically. No component ever reads `@quietrep/activeSession` from AsyncStorage directly; all reads and mutations go through the four context actions.
 
@@ -292,7 +309,7 @@ Both the plan-editor and session view-model type chains are built purely by addi
 - `src/components/` is split into four subdirectories:
   - `plan/` — components owned by the Plan tab: DayCircle, DayWorkoutList, EditorHeader, SetRow, SplitCard, WorkoutEditor, WorkoutExerciseCard, WorkoutPicker
   - `session/` — components owned by the live session flow: WorkoutFabMenu, WorkoutSession, SessionExerciseCard, LoggedSetRow, ResumeSessionBanner
-  - `history/` — components owned by the History tab: SessionCard, PastWorkoutsList, ByExercisePlaceholder, SessionDetail, ReadOnlySessionExerciseCard
+  - `history/` — components owned by the History tab: SessionCard, PastSessionsList, PastExercisesList, ExerciseHistoryCard, ExerciseHistory, ExercisePerformanceCard, SessionDetail, ReadOnlySessionExerciseCard
   - `shared/` — cross-tab primitives and components expected to be reused across tabs: ExercisePicker, ListEmptyText, NamePromptModal, PickerModal, SectionHeader, SegmentedControl, TabBar, WorkoutCard
 
 ### Code generation

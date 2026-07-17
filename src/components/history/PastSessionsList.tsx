@@ -5,7 +5,7 @@ import type { WorkoutSession } from '@/types';
 import { useCallback } from 'react';
 import { FlatList, View } from 'react-native';
 
-interface PastWorkoutsListProps {
+interface PastSessionsListProps {
   sessions: WorkoutSession[];
   onOpen: (sessionId: string) => void;
 }
@@ -13,7 +13,7 @@ interface PastWorkoutsListProps {
 /** The "By workout" list body: finished sessions newest-first as tappable SessionCards.
  *  Exercise/set counts are derived here from the canonical session (no exercise resolution needed
  *  for the list — only the detail view resolves names). */
-export default function PastWorkoutsList({ sessions, onOpen }: PastWorkoutsListProps) {
+export default function PastSessionsList({ sessions, onOpen }: PastSessionsListProps) {
   const renderItem = useCallback(
     ({ item }: { item: WorkoutSession }) => {
       const setCount = item.exercises.reduce(

@@ -1,9 +1,9 @@
-import ByExercisePlaceholder from '@/components/history/ByExercisePlaceholder';
-import PastWorkoutsList from '@/components/history/PastWorkoutsList';
+import PastExercisesList from '@/components/history/PastExercisesList';
+import PastSessionsList from '@/components/history/PastSessionsList';
 import SegmentedControl from '@/components/shared/SegmentedControl';
-import { getSessions } from '@/storage';
+import { getExerciseHistorySummaries, getSessions } from '@/storage';
 import { layout, spacing, typography } from '@/styles';
-import type { WorkoutSession } from '@/types';
+import type { ExerciseHistorySummary, WorkoutSession } from '@/types';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -23,14 +23,19 @@ export default function HistoryScreen() {
 
   const [lens, setLens] = useState<HistoryLens>('byWorkout');
   const [sessions, setSessions] = useState<WorkoutSession[]>([]);
+  const [exerciseSummaries, setExerciseSummaries] = useState<ExerciseHistorySummary[]>([]);
 
   useFocusEffect(
     useCallback(() => {
-      async function loadSessions() {
-        const storedSessions = await getSessions();
+      async function loadHistory() {
+        const [storedSessions, storedSummaries] = await Promise.all([
+          getSessions(),
+          getExerciseHistorySummaries(),
+        ]);
         setSessions(storedSessions);
+        setExerciseSummaries(storedSummaries);
       }
-      loadSessions();
+      loadHistory();
     }, []),
   );
 
@@ -46,6 +51,15 @@ export default function HistoryScreen() {
     [router],
   );
 
+  // Same shape as handleOpenSession, for the "By exercise" lens: opens the per-exercise
+  // progression detail. Memoised so the memoised ExerciseHistoryCards can bail out of re-render.
+  const handleOpenExercise = useCallback(
+    (exerciseId: string) => {
+      router.push({ pathname: '/exercise/[exerciseId]', params: { exerciseId } });
+    },
+    [router],
+  );
+
   return (
     <View style={layout.screen}>
       {/* Pinned header — title + segmented control stay put while the list below scrolls */}
@@ -56,9 +70,9 @@ export default function HistoryScreen() {
 
       <View style={{ flex: 1 }}>
         {lens === 'byWorkout' ? (
-          <PastWorkoutsList sessions={sessions} onOpen={handleOpenSession} />
+          <PastSessionsList sessions={sessions} onOpen={handleOpenSession} />
         ) : (
-          <ByExercisePlaceholder />
+          <PastExercisesList summaries={exerciseSummaries} onOpen={handleOpenExercise} />
         )}
       </View>
     </View>
