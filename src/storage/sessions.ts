@@ -1,5 +1,15 @@
-import type { ExerciseHistorySummary, ExercisePerformance, WorkoutSession } from '@/types';
-import { collectExercisePerformances, summarizeExerciseHistory } from '@/utils/session';
+import type {
+  ExerciseHistorySummary,
+  ExercisePerformance,
+  MonthlyStatsEntry,
+  WorkoutSession,
+} from '@/types';
+import {
+  collectExercisePerformances,
+  summarizeAllMonths,
+  summarizeExerciseHistory,
+  summarizeMonth,
+} from '@/utils/session';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAllExercises } from './exercises';
 
@@ -44,6 +54,22 @@ export async function getExerciseHistorySummaries(): Promise<ExerciseHistorySumm
 export async function getExercisePerformances(exerciseId: string): Promise<ExercisePerformance[]> {
   const sessions = await getSessions();
   return collectExercisePerformances(sessions, exerciseId);
+}
+
+/** Returns the aggregated stats for the current calendar month, powering the Home dashboard.
+ *  Mirrors a future GET /sessions/monthly-summary. Today the GROUP BY a backend would run happens
+ *  client-side via summarizeMonth; at backend transition only this function's internals change. */
+export async function getCurrentMonthSummary(): Promise<MonthlyStatsEntry> {
+  const sessions = await getSessions();
+  return summarizeMonth(sessions);
+}
+
+/** Returns per-month aggregated stats, newest-first, one entry per month that has sessions.
+ *  Drives the Home tab's monthly-history drill-down. Mirrors a future GET /sessions/monthly-stats.
+ *  Today the GROUP BY month a backend would run happens client-side via summarizeAllMonths. */
+export async function getMonthlyStatsHistory(): Promise<MonthlyStatsEntry[]> {
+  const sessions = await getSessions();
+  return summarizeAllMonths(sessions);
 }
 
 /** Returns the in-progress session buffer, or null if no session is live. */

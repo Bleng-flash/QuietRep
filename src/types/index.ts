@@ -131,3 +131,17 @@ export interface ExercisePerformance {
   sets: LoggedSet[];
 }
 // ------------------------------------------------------------------------
+
+// -------- Home view models: frontend only, no DB counterpart --------
+/** Aggregated stats for one calendar month of finished sessions, tagged with the month they cover.
+ *  Powers both the Home dashboard (the current month) and the monthly-history drill-down list (one
+ *  entry per past month). The month label ("July 2026") is formatted in the component from
+ *  year+month, so no label field is stored here. */
+export interface MonthlyStatsEntry {
+  year: number; // e.g. 2026
+  month: number; // 0-11 (JS Date month index)
+  workoutCount: number; // number of finished sessions in the month
+  totalSets: number; // number of logged sets across those sessions
+  totalDurationMs: number; // sum of (finishedAt - startedAt) across those sessions
+}
+// ------------------------------------------------------------------------

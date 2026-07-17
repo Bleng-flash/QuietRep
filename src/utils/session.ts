@@ -6,6 +6,7 @@ import type {
   ExerciseHistorySummary,
   ExercisePerformance,
   LoggedSet,
+  MonthlyStatsEntry,
   PlannedSet,
   SessionExercise,
   WorkoutExercise,
@@ -121,10 +122,7 @@ export function formatSessionDate(iso: string): string {
  *  whereas formatElapsed drives the live ticking timer where a clock is what's expected. */
 export function formatSessionDuration(startedAt: string, finishedAt: string | null): string {
   if (!finishedAt) return '';
-  const elapsedMs = Math.max(0, Date.parse(finishedAt) - Date.parse(startedAt));
-  const totalMinutes = Math.floor(elapsedMs / 60000);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
+  const { hours, minutes } = msToHoursMinutes(Date.parse(finishedAt) - Date.parse(startedAt));
 
   const hoursLabel = hours > 0 ? `${hours} hr${hours === 1 ? '' : 's'}` : '';
   // Show minutes when there are any, or when there are no hours at all — so a sub-hour session
@@ -133,6 +131,23 @@ export function formatSessionDuration(startedAt: string, finishedAt: string | nu
     minutes > 0 || hours === 0 ? `${minutes} min${minutes === 1 ? '' : 's'}` : '';
 
   return [hoursLabel, minutesLabel].filter(Boolean).join(' ');
+}
+
+/** Splits a millisecond duration into whole hours and remaining minutes (seconds discarded).
+ *  Math.max(0, …) guards against clock skew so a negative span never underflows.
+ *  Shared by formatSessionDuration (verbose) and formatTotalDuration (compact). */
+function msToHoursMinutes(ms: number): { hours: number; minutes: number } {
+  const totalMinutes = Math.floor(Math.max(0, ms) / 60000);
+  return { hours: Math.floor(totalMinutes / 60), minutes: totalMinutes % 60 };
+}
+
+/** Formats a total duration compactly for the Home dashboard tiles / month rows, e.g. "12h 30m",
+ *  "45m", "0m". Deliberately terser than formatSessionDuration's "4 hrs 30 mins" — a small stat
+ *  cell reads better in abbreviated units. Hours are omitted when zero; minutes are always shown. */
+export function formatTotalDuration(totalMs: number): string {
+  const { hours, minutes } = msToHoursMinutes(totalMs);
+  const hoursLabel = hours > 0 ? `${hours}h` : '';
+  return [hoursLabel, `${minutes}m`].filter(Boolean).join(' ');
 }
 
 /** Assembles a canonical WorkoutSession from the context's working state for storage writes.
@@ -232,4 +247,95 @@ export function collectExercisePerformances(
   }
 
   return performances;
+}
+
+/** Aggregates one month's finished sessions into a MonthlyStatsEntry, tagged with the (year, month)
+ *  the caller has already resolved. Shared by summarizeMonth and summarizeAllMonths — keeps the
+ *  per-metric arithmetic in one place. */
+function buildMonthlyStatsEntry(
+  sessions: WorkoutSession[],
+  year: number,
+  month: number,
+): MonthlyStatsEntry {
+  let totalSets = 0;
+  let totalDurationMs = 0;
+
+  for (const session of sessions) {
+    for (const sessionExercise of session.exercises) {
+      totalSets += sessionExercise.sets.length;
+    }
+    // A finished session always has finishedAt, but the type allows null, so we guard.
+    if (session.finishedAt) {
+      totalDurationMs += Math.max(
+        0,
+        Date.parse(session.finishedAt) - Date.parse(session.startedAt),
+      );
+    }
+  }
+
+  return { year, month, workoutCount: sessions.length, totalSets, totalDurationMs };
+}
+
+/** Aggregates the finished sessions performed in referenceDate's calendar month (default: now) into
+ *  the three Home-dashboard metrics. A session is attributed to the month it was STARTED, not
+ *  finished, so one spanning midnight into a new month (e.g. start 31 Jul 23:50, finish 1 Aug 01:30)
+ *  counts in the month it was actually performed. The !finishedAt guard still excludes in-flight
+ *  sessions (history only holds completed ones, but the type allows null).
+ *
+ *  Pure computation — the client-side stand-in for a server-side
+ *  `GROUP BY date_trunc('month', started_at)` filtered to the current month. `month` is a derived
+ *  expression over the timestamp, never a stored column — the DB truncates it just as we do here.
+ *  Components must not call this directly; they go through storage's getCurrentMonthSummary(). */
+export function summarizeMonth(
+  sessions: WorkoutSession[],
+  referenceDate: Date = new Date(),
+): MonthlyStatsEntry {
+  const targetYear = referenceDate.getFullYear();
+  const targetMonth = referenceDate.getMonth();
+
+  const sessionsThisMonth = sessions.filter((session) => {
+    if (!session.finishedAt) return false;
+    const startedDate = new Date(session.startedAt);
+    return startedDate.getFullYear() === targetYear && startedDate.getMonth() === targetMonth;
+  });
+
+  return buildMonthlyStatsEntry(sessionsThisMonth, targetYear, targetMonth);
+}
+
+/** Groups finished sessions by calendar month and aggregates each into a MonthlyStatsEntry.
+ *  One entry per month that has at least one session (gap months skipped), sorted newest-first —
+ *  so the last entry is the first recorded session's month and the first entry is the most recent.
+ *  A session is attributed to the month it was STARTED (see summarizeMonth), so a cross-midnight
+ *  session lands in the month it was performed rather than the month it happened to finish.
+ *
+ *  Pure computation — the client-side stand-in for a server-side
+ *  `GROUP BY date_trunc('month', started_at)` (month is a derived expression over the timestamp,
+ *  not a stored column). Components must not call this directly; they go through storage's
+ *  getMonthlyStatsHistory(). */
+export function summarizeAllMonths(sessions: WorkoutSession[]): MonthlyStatsEntry[] {
+  // Bucket sessions by "year-month" strings so each distinct calendar month is aggregated exactly once.
+  // eg. monthKey of "2026-0" represents January 2026 (JS Date months is represented from 0 - 11)
+  const sessionsByMonthKey = new Map<string, WorkoutSession[]>();
+  for (const session of sessions) {
+    if (!session.finishedAt) continue;
+    const startedDate = new Date(session.startedAt);
+    const monthKey = `${startedDate.getFullYear()}-${startedDate.getMonth()}`;
+    const bucket = sessionsByMonthKey.get(monthKey);
+    if (bucket) {
+      bucket.push(session);
+    } else {
+      sessionsByMonthKey.set(monthKey, [session]);
+    }
+  }
+
+  const entries: MonthlyStatsEntry[] = [];
+  for (const [monthKey, monthSessions] of sessionsByMonthKey) {
+    const [year, month] = monthKey.split('-').map(Number);
+    entries.push(buildMonthlyStatsEntry(monthSessions, year, month));
+  }
+
+  // Newest-first: sort by year, then month, both descending.
+  return entries.sort((first, second) =>
+    first.year !== second.year ? second.year - first.year : second.month - first.month,
+  );
 }
