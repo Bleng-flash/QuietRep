@@ -1,4 +1,4 @@
-import EditorHeader from '@/components/plan/EditorHeader';
+import EditorHeader from '@/components/shared/EditorHeader';
 import { MUSCLE_GROUPS } from '@/constants/muscleGroups';
 import { addExercise } from '@/storage';
 import { colors, layout, radius, spacing, typography } from '@/styles';

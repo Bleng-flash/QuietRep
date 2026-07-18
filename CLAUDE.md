@@ -64,7 +64,7 @@ Iteration 1 is complete, Iteration 2 is complete (Steps 1-6 done), Iteration 3 i
 
 **New in Iteration 2, Step 3:**
 
-- `src/components/session/LoggedSetRow.tsx` — mirrors `SetRow` for weight/reps logging; local `weightText`/`repsText` buffers; `buildRepsPlaceholder` uses `targetMinReps`/`targetMaxReps` as input placeholder hint; `onChange` emits `LoggedSet` (caller spreads to preserve `localKey`)
+- `src/components/session/LoggedSetRow.tsx` — mirrors `PlannedSetRow` for weight/reps logging; local `weightText`/`repsText` buffers; `buildRepsPlaceholder` uses `targetMinReps`/`targetMaxReps` as input placeholder hint; `onChange` emits `LoggedSet` (caller spreads to preserve `localKey`)
 - `src/components/session/SessionExerciseCard.tsx` — mirrors `WorkoutExerciseCard`; `handleSetChange` spreads `currentSet` first so `localKey` + target hints survive; `handleAddSet` copies last set's weight/reps with fresh `localKey`, no target hints; column headers "Load (kg)" / "Reps"; sets keyed by `set.localKey`
 - `src/components/session/SessionHeader.tsx` — session-specific top bar ("Discard" / editable centered title / "Finish"); `useSafeAreaInsets` applied inline; spinner when `isFinishing` (superseded by Step 5: left slot is now a **minimise** button and Discard moved to a footer danger button)
 - `src/components/session/WorkoutSession.tsx` — fat component consuming `useActiveSession()`; `useFocusEffect` → `getAllExercises()`; `exerciseMap` + `resolvedSessionExercises` + `alreadyAddedIds` via `useMemo`; all mutations via `updateActiveSession`; discard confirm alert; `DraggableCardList` + `ExercisePicker` overlay
@@ -265,11 +265,11 @@ The `| undefined` on the related entity is intentional — it covers dangling FK
 
 **Stable identity keys for stateful list rows — `localKey` pattern**
 
-When a list-item component holds local state derived from props (e.g., `SetRow`'s `minRepsText`/`maxRepsText` buffers, seeded once at mount via `useState` and never re-synced — see `src/components/plan/SetRow.tsx`), keying the list by array index breaks under insertion, removal, or reorder. React reuses component instances by *position*: removing item 0 shifts items 1..n into slots 0..n-1, but each reused instance keeps its stale local state, which now describes the wrong logical item. The underlying data is correct (verified by saving and reopening) — only the display is wrong, and a row appears to vanish from the wrong end of the list.
+When a list-item component holds local state derived from props (e.g., `PlannedSetRow`'s `minRepsText`/`maxRepsText` buffers, seeded once at mount via `useState` and never re-synced — see `src/components/plan/PlannedSetRow.tsx`), keying the list by array index breaks under insertion, removal, or reorder. React reuses component instances by *position*: removing item 0 shifts items 1..n into slots 0..n-1, but each reused instance keeps its stale local state, which now describes the wrong logical item. The underlying data is correct (verified by saving and reopening) — only the display is wrong, and a row appears to vanish from the wrong end of the list.
 
 Fix: give each item a stable, client-generated `localKey` (via `uuid()`) and key the list by it instead of by array index, so each component instance stays bound to the same logical item across any reordering operation. `localKey` is a render-only identity — generated when editor state is seeded or created, and stripped before the data reaches storage, so persisted entities keep their canonical `{ minReps, maxReps }` shape.
 
-This is implemented via frontend-only view models — `EditablePlannedSet`, `EditableWorkoutExercise`, and `ResolvedEditableWorkoutExercise` in `src/types/index.ts` — following the exact "frontend view model, no DB counterpart" framing as `ResolvedWorkoutExercise` above (do not add `localKey` directly to `PlannedSet`; that would blur the "types mirror the backend shape" contract — see Types are designed for backend transition below). See `WorkoutEditor` → `WorkoutExerciseCard` → `SetRow` for the canonical example. The session view (`EditableLoggedSet` → `EditableSessionExercise` → `ResolvedEditableSessionExercise`) follows the exact same pattern for Iteration 2.
+This is implemented via frontend-only view models — `EditablePlannedSet`, `EditableWorkoutExercise`, and `ResolvedEditableWorkoutExercise` in `src/types/index.ts` — following the exact "frontend view model, no DB counterpart" framing as `ResolvedWorkoutExercise` above (do not add `localKey` directly to `PlannedSet`; that would blur the "types mirror the backend shape" contract — see Types are designed for backend transition below). See `WorkoutEditor` → `WorkoutExerciseCard` → `PlannedSetRow` for the canonical example. The session view (`EditableLoggedSet` → `EditableSessionExercise` → `ResolvedEditableSessionExercise`) follows the exact same pattern for Iteration 2.
 
 **PlannedSet vs LoggedSet — plan template vs runtime record**
 `PlannedSet` (`minReps`, `maxReps`) belongs to the plan layer and lives on `WorkoutExercise`. It is a rep-range target, set when building a workout template, never modified during a session. `LoggedSet` (`weight`, `reps`) belongs to the session layer and lives on `SessionExercise`. It is what the user actually lifted. The two must never be conflated: load is a runtime value and has no place in the plan schema.
@@ -352,13 +352,13 @@ Both the plan-editor and session view-model type chains are built purely by addi
 
 - Use abstraction — split into child components, do not generate monolithic files
 - Each component in its own file
-- Follow the existing pattern: SectionHeader, WorkoutCard, SplitCard, SetRow, ExercisePicker are all good examples of the right level of abstraction
+- Follow the existing pattern: SectionHeader, WorkoutCard, SplitCard, PlannedSetRow, ExercisePicker are all good examples of the right level of abstraction
 - `src/components/` is split into four subdirectories:
-  - `plan/` — components owned by the Plan tab: DayCircle, DayWorkoutList, EditorHeader, SetRow, SplitCard, WorkoutEditor, WorkoutExerciseCard, WorkoutPicker
+  - `plan/` — components owned by the Plan tab: DayCircle, DayWorkoutList, PlannedSetRow, SplitCard, WorkoutEditor, WorkoutExerciseCard, WorkoutPicker
   - `session/` — components owned by the live session flow: WorkoutFabMenu, WorkoutSession, SessionExerciseCard, LoggedSetRow, ResumeSessionBanner
   - `history/` — components owned by the History tab, split into one subdirectory per lens: `byWorkout/` (PastSessionsList, PastSessionCard, SessionDetail, ReadOnlySessionExerciseCard) and `byExercise/` (PastExercisesList, PastExerciseCard, ExerciseHistory, ExercisePerformanceCard)
   - `home/` — components owned by the Home tab: StatTile, MonthlyStatsCard, RecentWorkouts
-  - `shared/` — cross-tab primitives and components expected to be reused across tabs: ExercisePicker, ListEmptyText, NamePromptModal, PickerModal, SectionHeader, SegmentedControl, TabBar, WorkoutCard
+  - `shared/` — cross-tab primitives and components expected to be reused across tabs: EditorHeader, ExercisePicker, ListEmptyText, NamePromptModal, PickerModal, SectionHeader, SegmentedControl, TabBar, WorkoutCard
 
 ### Code generation
 

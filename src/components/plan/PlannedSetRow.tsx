@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
-interface SetRowProps {
+interface PlannedSetRowProps {
   setIndex: number;
   plannedSet: PlannedSet;
   isOnly: boolean;
@@ -12,7 +12,13 @@ interface SetRowProps {
   onRemove: () => void;
 }
 
-export default function SetRow({ setIndex, plannedSet, isOnly, onChange, onRemove }: SetRowProps) {
+export default function PlannedSetRow({
+  setIndex,
+  plannedSet,
+  isOnly,
+  onChange,
+  onRemove,
+}: PlannedSetRowProps) {
   /** Only when React mounts a component it runs useState once to set the initial value.
    * After that, on every re-render, the state just holds whatever was
    * last set via the setter function. */

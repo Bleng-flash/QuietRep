@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   cardSlot: {
     flex: 1,
   },
-  // Fixed-width remove column — 36 matches SetRow's remove column for app-wide consistency,
+  // Fixed-width remove column — 36 matches PlannedSetRow's remove column for app-wide consistency,
   // and the add button reserves the same width (removeColumn) so the two line up.
   removeButton: {
     width: 36,

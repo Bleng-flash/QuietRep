@@ -1,4 +1,4 @@
-import SetRow from '@/components/plan/SetRow';
+import PlannedSetRow from '@/components/plan/PlannedSetRow';
 import { colors, layout, spacing, typography } from '@/styles';
 import type { EditablePlannedSet, PlannedSet, ResolvedEditableWorkoutExercise } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,7 +21,7 @@ export default function WorkoutExerciseCard({
   const { exercise, sets } = resolvedWorkoutExercise;
 
   function handleSetChange(setIndex: number, updated: PlannedSet) {
-    // SetRow emits a plain PlannedSet ({ minReps, maxReps }) — spread currentSet first so the
+    // PlannedSetRow emits a plain PlannedSet ({ minReps, maxReps }) — spread currentSet first so the
     // EditablePlannedSet's localKey survives the merge instead of being dropped.
     onSetsChange(
       sets.map((currentSet: EditablePlannedSet, index: number) =>
@@ -38,7 +38,7 @@ export default function WorkoutExerciseCard({
   function handleAddSet() {
     const lastSet = sets[sets.length - 1];
     // Copy the previous set's values but mint a fresh localKey — the new set is a distinct
-    // identity, so it must not share a key (and thus a SetRow instance) with any existing set.
+    // identity, so it must not share a key (and thus a PlannedSetRow instance) with any existing set.
     const newSet: EditablePlannedSet = lastSet
       ? { ...lastSet, localKey: uuid() }
       : { minReps: 0, maxReps: 0, localKey: uuid() };
@@ -76,10 +76,10 @@ export default function WorkoutExerciseCard({
       </View>
 
       {sets.map((plannedSet, setIndex) => (
-        <SetRow
-          // Key by the set's stable localKey (not its array index) so each SetRow instance
+        <PlannedSetRow
+          // Key by the set's stable localKey (not its array index) so each PlannedSetRow instance
           // stays bound to the same logical set across removals/reorders — this is what
-          // prevents SetRow's local text-buffer state from sticking to the wrong set.
+          // prevents PlannedSetRow's local text-buffer state from sticking to the wrong set.
           key={plannedSet.localKey}
           setIndex={setIndex}
           plannedSet={plannedSet}

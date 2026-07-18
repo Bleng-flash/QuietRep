@@ -1,4 +1,4 @@
-import EditorHeader from '@/components/plan/EditorHeader';
+import EditorHeader from '@/components/shared/EditorHeader';
 import WorkoutExerciseCard from '@/components/plan/WorkoutExerciseCard';
 import DraggableCardList from '@/components/shared/DraggableCardList';
 import ExercisePicker from '@/components/shared/ExercisePicker';

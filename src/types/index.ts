@@ -41,7 +41,7 @@ export interface WorkoutExercise {
 // -------- Editor view models: frontend only, no DB counterpart --------
 /** localKey is a stable React list key for set rows in the workout editor; it is generated in
  *  the editor and stripped before persisting, so it never reaches storage.
- *  Keying SetRow by it keeps each row's local text buffer bound to the right set when
+ *  Keying PlannedSetRow by it keeps each row's local text buffer bound to the right set when
  *  sets are removed or reordered. */
 export type EditablePlannedSet = PlannedSet & { localKey: string };
 
@@ -54,7 +54,6 @@ export type EditableWorkoutExercise = Omit<WorkoutExercise, 'sets'> & {
 export type ResolvedEditableWorkoutExercise = EditableWorkoutExercise & {
   exercise: Exercise | undefined;
 };
-
 // ------------------------------------------------------------------------
 
 /** A named (ordered) collection of WorkoutExercise entries */

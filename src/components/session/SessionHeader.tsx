@@ -27,7 +27,7 @@ export default function SessionHeader({
 }: SessionHeaderProps) {
   const insets = useSafeAreaInsets();
 
-  // Local text buffer (same local-state + callback pattern as SetRow) — the child owns the raw
+  // Local text buffer (same local-state + callback pattern as PlannedSetRow) — the child owns the raw
   // string; the parent receives every keystroke via onNameChange and persists it (debounced).
   const [nameText, setNameText] = useState(name);
 
