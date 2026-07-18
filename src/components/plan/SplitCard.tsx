@@ -89,7 +89,7 @@ export default function SplitCard({
   }
 
   return (
-    <View style={[layout.card, isActive && styles.activeCard]}>
+    <View style={[layout.card, isActive ? styles.activeCard : styles.inactiveCard]}>
       {/* ── Header: name (tap to rename) + active toggle + delete ── */}
       <View style={layout.rowBetween}>
         <Pressable
@@ -163,9 +163,16 @@ export default function SplitCard({
 }
 
 const styles = StyleSheet.create({
+  // Both states set the left edge explicitly. If only the active state did, de-activating would
+  // leave borderLeftWidth to reset to null — and native zeroes that edge rather than falling back
+  // to layout.card's borderWidth: 2, so the left border would vanish permanently.
   activeCard: {
     borderLeftWidth: 3,
     borderLeftColor: colors.dark.primary,
+  },
+  inactiveCard: {
+    borderLeftWidth: 2,
+    borderLeftColor: colors.dark.border,
   },
 
   // ── Header ──
