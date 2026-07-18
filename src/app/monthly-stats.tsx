@@ -9,7 +9,12 @@ import { useCallback, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// Root-stack monthly-stats history drill-down, reached from the Home dashboard's "All months" link.
+// Monthly-stats history drill-down, reached only from the Home dashboard's "All months" link.
+// Kept on the ROOT stack (not tab-local under Home) for symmetry with its twin session/[sessionId]
+// (session-detail), which Home also opens via RecentWorkouts and is root-pinned because History
+// shares it — so both Home drill-downs hide the tab bar identically. Root also avoids renaming the
+// tabs `index` route to make Home a nested stack. A deliberate exception to "one-tab reach ->
+// tab-local", the same call as exercise/[exerciseId].
 // Read-only: one card per calendar month that has finished sessions, newest-first (current month at
 // top) back to the first recorded session's month; gap months are skipped.
 
