@@ -6,12 +6,20 @@ interface SectionHeaderProps {
   title: string;
   onButtonPress?: () => void;
   buttonLabel?: string;
+  // Drops the default top margin for a section that leads a screen (nothing sits above it),
+  // so its heading aligns with the top of other tabs instead of sitting spacing.l lower.
+  flushTop?: boolean;
 }
 
 /** If onButtonPress is undefined (not passed), the entire Pressable is not rendered at all */
-export default function SectionHeader({ title, onButtonPress, buttonLabel }: SectionHeaderProps) {
+export default function SectionHeader({
+  title,
+  onButtonPress,
+  buttonLabel,
+  flushTop = false,
+}: SectionHeaderProps) {
   return (
-    <View style={[layout.rowBetween, styles.container]}>
+    <View style={[layout.rowBetween, styles.container, flushTop && styles.flushTop]}>
       <Text style={typography.heading}>{title}</Text>
 
       {onButtonPress && (
@@ -32,6 +40,9 @@ const styles = StyleSheet.create({
   container: {
     marginTop: spacing.l,
     marginBottom: spacing.s,
+  },
+  flushTop: {
+    marginTop: 0,
   },
   addButton: {
     flexDirection: 'row',

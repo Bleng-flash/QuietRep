@@ -60,10 +60,12 @@ export default function PlanScreen() {
       showsVerticalScrollIndicator={false}
     >
       {/* ── Splits ── */}
+      {/* flushTop: leads the screen, so drop the default top margin to align with Home/History */}
       <SectionHeader
         title="Splits"
         onButtonPress={() => setIsNewSplitOpen(true)}
         buttonLabel="New Split"
+        flushTop
       />
 
       {splits.length === 0 ? (
