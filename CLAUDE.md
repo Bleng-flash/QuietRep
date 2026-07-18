@@ -24,7 +24,7 @@ Iteration sequence for the frontend:
   Predefined exercise library. Animations and transitions. Empty state illustrations. Onboarding flow for first-time users. Any UX rough edges surfaced from using the app.
 
 \
-Iteration 1 is complete, **iteration 2 is complete** (all six steps done), and **iteration 3 is complete**. The table below details the progress within iteration 2.
+Iteration 1 is complete, **iteration 2 is complete** (all six steps done), **iteration 3 is complete**, and **iteration 4 (Home tab) is complete**. The table below details the progress within iteration 2.
 | Step | Feature | Status |
 | ---- | ----------------------------------------------------------------------- | ----------- |
 | 1 | Session types, storage (`sessions.ts`), and utils (`session.ts`) | Done |
@@ -36,7 +36,7 @@ Iteration 1 is complete, **iteration 2 is complete** (all six steps done), and *
 
 ## Current State
 
-Iteration 1 is complete, Iteration 2 is complete (Steps 1-6 done), and Iteration 3 is complete. The following is fully functional:
+Iteration 1 is complete, Iteration 2 is complete (Steps 1-6 done), Iteration 3 is complete, and Iteration 4 (Home tab) is complete. The following is fully functional:
 
 **Iteration 1 (complete):**
 - Plan index screen with Splits, Workouts, and Exercises sections
@@ -124,9 +124,30 @@ Deliberately built **instead of** the originally-scoped 1RM-estimation-based PRs
 
 `src/components/history/` is now split by lens: `byWorkout/` (PastSessionsList, PastSessionCard, SessionDetail, ReadOnlySessionExerciseCard) and `byExercise/` (PastExercisesList, PastExerciseCard, ExerciseHistory, ExercisePerformanceCard). The subdirectory names match the `HistoryLens` keys in `history.tsx`. Two card renames landed with the move, giving each lens a symmetric List + Card pair: `SessionCard` → **`PastSessionCard`** (also disambiguates from the live session's `SessionExerciseCard`) and `ExerciseHistoryCard` → **`PastExerciseCard`**. Mentions earlier in this file use the original flat paths/names as a historical record.
 
+**New in Iteration 4 (Home tab):**
+
+Scope was **deliberately reduced** from the original plan (Today's workout card, start CTA, monthly dashboard, recent workouts strip) to two pieces plus a drill-down:
+- **No workout-starting on Home** — the centre-tab FAB (`WorkoutFabMenu`) is already the single prominent entry point; duplicating it on Home added no value. So there is no start CTA and no "today's workout" resolver on Home.
+- **Today's workout card deferred** — dropped for now to first get a feel for Home with just the dashboard + recent list; can be added later.
+
+Data layer (pure reads/aggregations, mirrors future endpoints — see "Derived reads live behind storage endpoint mirrors" and "`src/utils/` is organised by concern"):
+- `src/types/index.ts` — `MonthlyStatsEntry` (one **frontend-only** view model: `year, month` (0-11 JS index) `+ workoutCount, totalSets, totalDurationMs`). One comprehensive type serves both the current-month dashboard and each history row — `summarizeMonth` tags its result with the reference month, so no separate untagged "just the metrics" type is needed (which would have forced `Omit`-subtraction, against the additive-intersections rule).
+- `src/utils/sessionStats.ts` — pure aggregations: `summarizeMonth(sessions, referenceDate?)` (current month) and `summarizeAllMonths(sessions)` (one entry per month with sessions, newest-first, gap months skipped), both keyed off **`startedAt`** (a session is attributed to the month it was *performed*, so a cross-midnight session counts in its start month), sharing a private `buildMonthlyStatsEntry(sessions, year, month)` reducer.
+- `src/utils/datetime.ts` — `formatTotalDuration(totalMs)` compact formatter (`"12h 30m"`/`"45m"`/`"0m"`), sharing a private `msToHoursMinutes` with `formatSessionDuration`.
+- `src/storage/sessions.ts` — endpoint mirrors `getCurrentMonthSummary()` (`GET /sessions/monthly-summary`) and `getMonthlyStatsHistory()` (`GET /sessions/monthly-stats`), each delegating to the pure util.
+
+New `src/components/home/` subdirectory (the Home tab's own components):
+- `StatTile.tsx` — one stat cell: a prominent value over a caption label; layout-neutral (`flex: 1`, centred) so three compose into a row. `adjustsFontSizeToFit` lets a long value shrink rather than truncate. The value colour lives on the value **`Text`** (RN ignores `color` on a `View`, and `Text` doesn't inherit it from a `View` parent).
+- `MonthlyStatsCard.tsx` — memoised, **primitive-prop** card: a month label header (`"July 2026"`, from `year`+`month`) over three `StatTile`s. Used **both** for the current month on Home and once per past month on the drill-down. (An earlier thinner `MonthlyDashboard` variant without the month label was consolidated away in favour of this richer card.)
+- `RecentWorkouts.tsx` — the "Recent workouts" section: a `SectionHeader` + the newest few finished sessions (`RECENT_LIMIT = 5`) as `PastSessionCard`s reused from History, each tapping into `/session/[sessionId]`. A plain `.map` (not a `FlatList`) — the list is capped and lives inside the Home screen's `ScrollView`, so virtualization would only fight the outer scroll. Owns its single-destination navigation internally via `useRouter` (per the over-prop rule).
+- `src/app/(tabs)/index.tsx` — replaces the placeholder. Thin screen: `useFocusEffect` → `Promise.all([getCurrentMonthSummary(), getSessions()])` (two reads mirroring two future endpoints). Renders a **QuietRep wordmark** (plain-text branding via the new `typography.appTitle` token; "Rep" carries the primary accent), then a "This month" header row with an **"All months" link** → `/monthly-stats`, the current-month `MonthlyStatsCard` (`{...currentMonth}` spread — its props mirror `MonthlyStatsEntry` exactly), and `RecentWorkouts`. Initial state is a zeroed `MonthlyStatsEntry` for the current month so the first paint needs no null guard.
+- `src/app/monthly-stats.tsx` — new **root-stack** route (`/monthly-stats`), the monthly-history drill-down reached from the Home "All months" link. Back-chevron top bar (the `ExerciseHistory`/`SessionDetail` recipe, no trash), `FlatList` of `MonthlyStatsCard`s, `hasLoaded` guard against an empty-state flash. Deliberately kept as a **self-contained screen** (not the usual thin-screen + fat-component split) because it takes no route params and has a single consumer — an extracted component would wire nothing; see "Thin screens, fat components".
+- `src/components/shared/SectionHeader.tsx` — added an opt-in `flushTop` prop that drops the leading `marginTop: spacing.l` for a section that heads a screen. Applied to the Plan tab's first "Splits" header, which sat `spacing.l` lower than Home/History's top content; the two other Plan sections keep their inter-section spacing.
+- `src/styles/typography.ts` — new `appTitle` token (30/800) for the QuietRep wordmark.
+
 ## Next steps
 
-**Iteration 3 is complete.** Next up is **Iteration 4 (Home tab)**, which consumes the history built here (active split, session history, per-exercise progression).
+**Iteration 4 is complete.** Next up is **Iteration 5 (Profile tab)** — bodyweight log, units preference (propagated back through earlier screens, e.g. the hardcoded "Load (kg)" label), rest timer settings wired into the session view, data export, and a polish pass. This is also where the deferred **dark/light theming** refactor and the **units preference** land (see the corresponding Key Design Decisions).
 
 **Descoped — possible future improvements (not planned features):**
 - **PRs section (PR detection + 1RM estimation)** — originally scoped for Iteration 3, deliberately dropped in favour of the By-exercise progression view (the honest no-estimation alternative). If ever revisited: the 1RM estimate must be a single swappable function (e.g. `estimateOneRepMax(weight, reps)`), with the formula choice (Epley/Brzycki/…) surfaced as a Profile-tab user preference.
@@ -164,6 +185,8 @@ Any component or screen that renders its own top bar must apply `useSafeAreaInse
 
 **Thin screens, fat components**
 Screen files are wiring only — route params, storage calls, navigation. All UI and logic live in shared components. As much as possible, try to abstract out child components.
+
+Exception — a screen that does **no wiring** (no route params) **and** has a single consumer may hold its body directly rather than delegating to a fat component, since the component would be pure indirection. `src/app/monthly-stats.tsx` is the canonical example: it takes no params and is the only thing that renders the monthly-history list, so the `useFocusEffect` load + list live in the screen. The sibling detail screens (`session/[sessionId]`, `exercise/[exerciseId]`) keep the split because they genuinely wire a route param into their fat component. If a second consumer appears, extract the body back into a component.
 
 **Shared screens live on the root stack**
 The navigator tree is a root `<Stack>` (`src/app/_layout.tsx`) holding the `(tabs)` tab navigator and root-level screens (`session`, `exercise/new`). The **Plan** tab is itself a nested `<Stack>` (`(tabs)/plan/_layout.tsx`). The rule for where a route file belongs:
@@ -330,6 +353,7 @@ Both the plan-editor and session view-model type chains are built purely by addi
   - `plan/` — components owned by the Plan tab: DayCircle, DayWorkoutList, EditorHeader, SetRow, SplitCard, WorkoutEditor, WorkoutExerciseCard, WorkoutPicker
   - `session/` — components owned by the live session flow: WorkoutFabMenu, WorkoutSession, SessionExerciseCard, LoggedSetRow, ResumeSessionBanner
   - `history/` — components owned by the History tab, split into one subdirectory per lens: `byWorkout/` (PastSessionsList, PastSessionCard, SessionDetail, ReadOnlySessionExerciseCard) and `byExercise/` (PastExercisesList, PastExerciseCard, ExerciseHistory, ExercisePerformanceCard)
+  - `home/` — components owned by the Home tab: StatTile, MonthlyStatsCard, RecentWorkouts
   - `shared/` — cross-tab primitives and components expected to be reused across tabs: ExercisePicker, ListEmptyText, NamePromptModal, PickerModal, SectionHeader, SegmentedControl, TabBar, WorkoutCard
 
 ### Code generation

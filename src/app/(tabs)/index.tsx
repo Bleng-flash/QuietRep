@@ -53,12 +53,19 @@ export default function HomeScreen() {
         paddingBottom: spacing.xxl,
       }}
     >
+      {/* QuietRep wordmark — brands the Home tab so it opens on the app identity. */}
+      <Text style={[typography.appTitle, styles.brand]}>QuietRep</Text>
+
       <View style={[layout.rowBetween, styles.sectionHeader]}>
         <Text style={typography.heading}>This month</Text>
         <Pressable
           onPress={() => router.push('/monthly-stats')}
           hitSlop={8}
-          style={({ pressed }) => [layout.row, styles.allMonthsLink, pressed && layout.pressedButton]}
+          style={({ pressed }) => [
+            layout.row,
+            styles.allMonthsLink,
+            pressed && layout.pressedButton,
+          ]}
         >
           <Text style={typography.actionSubtle}>All months</Text>
           <Ionicons name="chevron-forward" size={16} color={colors.dark.textSubtle} />
@@ -73,6 +80,10 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  brand: {
+    marginBottom: spacing.l,
+    color: colors.dark.primary,
+  },
   sectionHeader: {
     marginBottom: spacing.s,
   },

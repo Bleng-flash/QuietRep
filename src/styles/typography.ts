@@ -2,6 +2,13 @@ import { StyleSheet } from 'react-native';
 import { colors } from './colors';
 
 export const typography = StyleSheet.create({
+  // App wordmark — larger and heavier than heading, for the QuietRep branding on the Home tab.
+  appTitle: {
+    fontSize: 30,
+    fontWeight: '800',
+    color: colors.dark.text,
+    letterSpacing: 0.3,
+  },
   heading: {
     fontSize: 22,
     fontWeight: '700',
