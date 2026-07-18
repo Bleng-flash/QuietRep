@@ -16,7 +16,7 @@ export default function StatTile({ value, label }: StatTileProps) {
       <Text style={[typography.heading, styles.value]} numberOfLines={1} adjustsFontSizeToFit>
         {value}
       </Text>
-      <Text style={[typography.caption, styles.label]} numberOfLines={1}>
+      <Text style={[typography.caption, styles.label]} numberOfLines={2}>
         {label}
       </Text>
     </View>
