@@ -1,3 +1,4 @@
+import { MAX_REPS, MAX_WEIGHT } from '@/constants/inputLimits';
 import type {
   EditableLoggedSet,
   EditableSessionExercise,
@@ -8,6 +9,22 @@ import type {
   WorkoutSession,
 } from '@/types';
 import { v4 as uuid } from 'uuid';
+
+// A logged set is valid iff reps is a whole number in [1, MAX_REPS] and weight is a non-negative
+// number in [0, MAX_WEIGHT]. Weight 0 is allowed — bodyweight exercises (pull-ups, dips)
+// legitimately carry no external load; only reps must be at least 1. Mirrors isPlannedSetValid.
+// The single source of truth for both the finish-time block and the per-row error highlight.
+export function isLoggedSetValid(loggedSet: LoggedSet): boolean {
+  const { weight, reps } = loggedSet;
+  return (
+    Number.isInteger(reps) &&
+    reps >= 1 &&
+    reps <= MAX_REPS &&
+    Number.isFinite(weight) &&
+    weight >= 0 &&
+    weight <= MAX_WEIGHT
+  );
+}
 
 /** Creates a blank EditableLoggedSet seeded from a PlannedSet's rep range.
  *  weight and reps start at 0; the planned range is carried as faint target hints in the session UI. */

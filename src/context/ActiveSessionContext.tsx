@@ -131,7 +131,8 @@ export function ActiveSessionProvider({ children }: { children: ReactNode }) {
     }
     const canonicalSession = toCanonicalSession(
       activeSession.id,
-      activeSession.name,
+      // Trim session name before writing to history. Mirrors WorkoutEditor's onSave(name.trim()).
+      activeSession.name.trim(),
       activeSession.startedAt,
       activeSession.exercises,
     );

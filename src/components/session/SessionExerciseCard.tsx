@@ -7,12 +7,14 @@ import { v4 as uuid } from 'uuid';
 
 interface SessionExerciseCardProps {
   resolvedSessionExercise: ResolvedEditableSessionExercise;
+  invalidSetKeys: Set<string>; // localKeys of sets to flag red after a failed finish
   onSetsChange: (sets: EditableLoggedSet[]) => void;
   onRemove: () => void;
 }
 
 export default function SessionExerciseCard({
   resolvedSessionExercise,
+  invalidSetKeys,
   onSetsChange,
   onRemove,
 }: SessionExerciseCardProps) {
@@ -33,12 +35,9 @@ export default function SessionExerciseCard({
   }
 
   function handleAddSet() {
-    const lastSet = sets[sets.length - 1];
-    // Copy last set's weight/reps but mint a fresh localKey — ad-hoc sets added mid-session
-    // have no PlannedSet backing, so no target hints are carried forward.
-    const newSet: EditableLoggedSet = lastSet
-      ? { weight: lastSet.weight, reps: lastSet.reps, localKey: uuid() }
-      : { weight: 0, reps: 0, localKey: uuid() };
+    // Start each new set blank — loads and reps commonly change set to set in a live session.
+    // A blank set (reps 0) also stays invalid until logged, so it can't be Finished unperformed.
+    const newSet: EditableLoggedSet = { weight: 0, reps: 0, localKey: uuid() };
     onSetsChange([...sets, newSet]);
   }
 
@@ -72,18 +71,22 @@ export default function SessionExerciseCard({
         <View style={{ width: 32 }} />
       </View>
 
-      {sets.map((editableLoggedSet, setIndex) => (
-        <LoggedSetRow
-          // Key by localKey (not index) so each row stays bound to the same logical set
-          // across additions and removals — prevents stale text-buffer state.
-          key={editableLoggedSet.localKey}
-          setIndex={setIndex}
-          editableLoggedSet={editableLoggedSet}
-          isOnly={sets.length === 1}
-          onChange={(updated) => handleSetChange(setIndex, updated)}
-          onRemove={() => handleRemoveSet(setIndex)}
-        />
-      ))}
+      {/* gap separates the set rows so adjacent error-state borders never touch/merge */}
+      <View style={{ gap: spacing.xs }}>
+        {sets.map((editableLoggedSet, setIndex) => (
+          <LoggedSetRow
+            // Key by localKey (not index) so each row stays bound to the same logical set
+            // across additions and removals — prevents stale text-buffer state.
+            key={editableLoggedSet.localKey}
+            setIndex={setIndex}
+            editableLoggedSet={editableLoggedSet}
+            isOnly={sets.length === 1}
+            hasError={invalidSetKeys.has(editableLoggedSet.localKey)}
+            onChange={(updated) => handleSetChange(setIndex, updated)}
+            onRemove={() => handleRemoveSet(setIndex)}
+          />
+        ))}
+      </View>
 
       <Pressable
         onPress={handleAddSet}

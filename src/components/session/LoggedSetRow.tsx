@@ -1,4 +1,4 @@
-import { colors, layout, spacing, typography } from '@/styles';
+import { colors, layout, radius, spacing, typography } from '@/styles';
 import type { EditableLoggedSet, LoggedSet } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
@@ -8,14 +8,34 @@ interface LoggedSetRowProps {
   setIndex: number;
   editableLoggedSet: EditableLoggedSet;
   isOnly: boolean;
+  hasError: boolean; // when true, the row is tinted red to flag an invalid set on finish
   onChange: (updated: LoggedSet) => void;
   onRemove: () => void;
+}
+
+// Strip anything that isn't a digit, so the reps field can only ever hold a non-negative integer
+// (negatives, decimals, and pasted letters are impossible by construction — not merely blocked by
+// the keyboard). The MAX_REPS cap is enforced at finish (isLoggedSetValid + red highlight), not here.
+function sanitizeReps(text: string): string {
+  return text.replace(/\D/g, ''); // replace every character that is not a digit 0-9 with ''
+}
+
+// Keep digits and at most one decimal point, so the load field only ever holds a valid
+// non-negative decimal (e.g. "53.75"). A trailing "53." is preserved so mid-typing works;
+// parseFloat tolerates it. The MAX_WEIGHT cap is enforced at finish, not here.
+function sanitizeWeight(text: string): string {
+  const cleaned = text.replace(/[^0-9.]/g, ''); // strips any chars that are not 0-9 or a dot
+  const firstDot = cleaned.indexOf('.');
+  if (firstDot === -1) return cleaned;
+  // Keep the first decimal point, strip any subsequent ones.
+  return cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
 }
 
 export default function LoggedSetRow({
   setIndex,
   editableLoggedSet,
   isOnly,
+  hasError,
   onChange,
   onRemove,
 }: LoggedSetRowProps) {
@@ -36,20 +56,22 @@ export default function LoggedSetRow({
   );
 
   return (
-    <View style={[layout.row, styles.row]}>
+    <View style={[layout.row, styles.row, hasError && styles.rowError]}>
       <Text style={[typography.caption, styles.label]}>Set {setIndex + 1}</Text>
 
       <TextInput
         style={[typography.body, layout.inputField, styles.input]}
         keyboardType="decimal-pad"
+        maxLength={6}
         value={weightText}
         placeholder="0"
         placeholderTextColor={colors.dark.textDisabled}
         onChangeText={(text) => {
-          setWeightText(text);
+          const cleaned = sanitizeWeight(text);
+          setWeightText(cleaned);
           onChange({
             ...editableLoggedSet,
-            weight: parseFloat(text) || 0,
+            weight: parseFloat(cleaned) || 0,
             reps: editableLoggedSet.reps,
           });
         }}
@@ -58,15 +80,17 @@ export default function LoggedSetRow({
       <TextInput
         style={[typography.body, layout.inputField, styles.input]}
         keyboardType="number-pad"
+        maxLength={3}
         value={repsText}
         placeholder={repsPlaceholder}
         placeholderTextColor={colors.dark.textDisabled}
         onChangeText={(text) => {
-          setRepsText(text);
+          const cleaned = sanitizeReps(text);
+          setRepsText(cleaned);
           onChange({
             ...editableLoggedSet,
             weight: editableLoggedSet.weight,
-            reps: parseInt(text, 10) || 0,
+            reps: parseInt(cleaned, 10) || 0,
           });
         }}
       />
@@ -94,7 +118,7 @@ function buildRepsPlaceholder(
   if (targetMinReps !== undefined && targetMaxReps !== undefined) {
     return targetMinReps === targetMaxReps
       ? String(targetMinReps)
-      : `${targetMinReps}-${targetMaxReps}`;
+      : `${targetMinReps} - ${targetMaxReps}`;
   }
   if (targetMinReps !== undefined) return String(targetMinReps);
   if (targetMaxReps !== undefined) return String(targetMaxReps);
@@ -105,6 +129,16 @@ const styles = StyleSheet.create({
   row: {
     gap: spacing.s,
     paddingVertical: spacing.s,
+    paddingHorizontal: spacing.xs,
+    // Transparent border reserved so toggling the error border causes no layout shift.
+    borderWidth: 1,
+    borderColor: 'transparent',
+    borderRadius: radius.m,
+  },
+  // Reddish tint flagging a set that failed validation on finish.
+  rowError: {
+    borderColor: colors.dark.error,
+    backgroundColor: colors.dark.errorSubtle,
   },
   label: {
     width: 48,

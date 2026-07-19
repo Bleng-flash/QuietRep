@@ -12,6 +12,7 @@ import type {
   Exercise,
   ResolvedEditableSessionExercise,
 } from '@/types';
+import { isLoggedSetValid } from '@/utils/session';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
@@ -26,6 +27,9 @@ export default function WorkoutSession() {
   const [allExercises, setAllExercises] = useState<Exercise[]>([]);
   const [isPickerVisible, setIsPickerVisible] = useState(false);
   const [isFinishing, setIsFinishing] = useState(false);
+  // Flipped true by the first failed finish; from then on invalid sets are highlighted red and
+  // recomputed live from state, so the red clears as the user fixes each set.
+  const [showErrors, setShowErrors] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -63,6 +67,19 @@ export default function WorkoutSession() {
       ),
     [activeSession?.exercises],
   );
+
+  // localKeys of every set that fails validation, but only once a finish has been attempted.
+  // Recomputes from session state so highlighted rows clear as they become valid.
+  const invalidSetKeys = useMemo(() => {
+    const keys = new Set<string>();
+    if (!showErrors) return keys;
+    for (const sessionExercise of activeSession?.exercises ?? []) {
+      for (const loggedSet of sessionExercise.sets) {
+        if (!isLoggedSetValid(loggedSet)) keys.add(loggedSet.localKey);
+      }
+    }
+    return keys;
+  }, [showErrors, activeSession?.exercises]);
 
   function handleAddExercise(exercise: Exercise) {
     const newEntry: EditableSessionExercise = {
@@ -126,6 +143,18 @@ export default function WorkoutSession() {
       Alert.alert('Name required', 'Please give this session a name before finishing.');
       return;
     }
+    if (activeSession.exercises.length === 0) {
+      Alert.alert('No exercises', 'Add at least one exercise before finishing.');
+      return;
+    }
+    const hasInvalidSet = activeSession.exercises.some((sessionExercise) =>
+      sessionExercise.sets.some((loggedSet) => !isLoggedSetValid(loggedSet)),
+    );
+    if (hasInvalidSet) {
+      setShowErrors(true);
+      Alert.alert('Check your sets', 'Each set needs at least 1 rep and a load of 0 or more.');
+      return;
+    }
     setIsFinishing(true);
     try {
       await finishActiveSession();
@@ -185,6 +214,7 @@ export default function WorkoutSession() {
               <Pressable onLongPress={drag} delayLongPress={200}>
                 <SessionExerciseCard
                   resolvedSessionExercise={item}
+                  invalidSetKeys={invalidSetKeys}
                   onSetsChange={(updatedSets) => handleSetsChange(item.exerciseId, updatedSets)}
                   onRemove={() => handleRemoveExercise(item.exerciseId)}
                 />
