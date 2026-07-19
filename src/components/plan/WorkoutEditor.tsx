@@ -1,6 +1,6 @@
-import EditorHeader from '@/components/shared/EditorHeader';
 import WorkoutExerciseCard from '@/components/plan/WorkoutExerciseCard';
 import DraggableCardList from '@/components/shared/DraggableCardList';
+import EditorHeader from '@/components/shared/EditorHeader';
 import ExercisePicker from '@/components/shared/ExercisePicker';
 import { getAllExercises } from '@/storage';
 import { colors, layout, spacing, typography } from '@/styles';
@@ -12,6 +12,7 @@ import type {
   Workout,
   WorkoutExercise,
 } from '@/types';
+import { isPlannedSetValid } from '@/utils/workout';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
@@ -52,6 +53,9 @@ export default function WorkoutEditor({ initialWorkout, onSave, onDelete }: Work
   const [allExercises, setAllExercises] = useState<Exercise[]>([]);
   const [isPickerVisible, setIsPickerVisible] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  // Flipped true by the first failed save; from then on invalid rep ranges are highlighted red and
+  // recomputed live from state, so the red clears as the user fixes each set.
+  const [showErrors, setShowErrors] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -89,6 +93,19 @@ export default function WorkoutEditor({ initialWorkout, onSave, onDelete }: Work
       })),
     [workoutExercises, exerciseMap],
   );
+
+  // localKeys of every set whose rep range fails validation, but only once a save has been
+  // attempted. Recomputes from workoutExercises so highlighted rows clear as they become valid.
+  const invalidSetKeys = useMemo(() => {
+    const keys = new Set<string>();
+    if (!showErrors) return keys;
+    for (const workoutExercise of workoutExercises) {
+      for (const plannedSet of workoutExercise.sets) {
+        if (!isPlannedSetValid(plannedSet)) keys.add(plannedSet.localKey);
+      }
+    }
+    return keys;
+  }, [showErrors, workoutExercises]);
 
   function handleAddExercise(exercise: Exercise) {
     const newEntry: EditableWorkoutExercise = {
@@ -133,6 +150,17 @@ export default function WorkoutEditor({ initialWorkout, onSave, onDelete }: Work
     }
     if (workoutExercises.length === 0) {
       Alert.alert('No exercises', 'Add at least one exercise before saving.');
+      return;
+    }
+    const hasInvalidSet = workoutExercises.some((workoutExercise) =>
+      workoutExercise.sets.some((plannedSet) => !isPlannedSetValid(plannedSet)),
+    );
+    if (hasInvalidSet) {
+      setShowErrors(true);
+      Alert.alert(
+        'Check rep ranges',
+        'Each set needs a low and high rep target from 1 to 100, with low not greater than high.',
+      );
       return;
     }
     setIsSaving(true);
@@ -188,6 +216,7 @@ export default function WorkoutEditor({ initialWorkout, onSave, onDelete }: Work
             <Pressable onLongPress={drag} delayLongPress={200}>
               <WorkoutExerciseCard
                 resolvedWorkoutExercise={item}
+                invalidSetKeys={invalidSetKeys}
                 onSetsChange={(updatedSets) => handleSetsChange(item.exerciseId, updatedSets)}
                 onRemove={() => handleRemoveExercise(item.exerciseId)}
               />

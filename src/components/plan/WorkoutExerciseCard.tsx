@@ -7,6 +7,7 @@ import { v4 as uuid } from 'uuid';
 
 interface WorkoutExerciseCardProps {
   resolvedWorkoutExercise: ResolvedEditableWorkoutExercise;
+  invalidSetKeys: Set<string>; // localKeys of sets to flag red after a failed save
   onSetsChange: (sets: EditablePlannedSet[]) => void;
   onRemove: () => void;
 }
@@ -14,6 +15,7 @@ interface WorkoutExerciseCardProps {
 /** A card for displaying and editing an exercise within a workout. */
 export default function WorkoutExerciseCard({
   resolvedWorkoutExercise,
+  invalidSetKeys,
   onSetsChange,
   onRemove,
 }: WorkoutExerciseCardProps) {
@@ -75,19 +77,23 @@ export default function WorkoutExerciseCard({
         <View style={{ width: 32 }} />
       </View>
 
-      {sets.map((plannedSet, setIndex) => (
-        <PlannedSetRow
-          // Key by the set's stable localKey (not its array index) so each PlannedSetRow instance
-          // stays bound to the same logical set across removals/reorders — this is what
-          // prevents PlannedSetRow's local text-buffer state from sticking to the wrong set.
-          key={plannedSet.localKey}
-          setIndex={setIndex}
-          plannedSet={plannedSet}
-          isOnly={sets.length === 1}
-          onChange={(updated) => handleSetChange(setIndex, updated)}
-          onRemove={() => handleRemoveSet(setIndex)}
-        />
-      ))}
+      {/* gap separates the set rows so adjacent error-state borders never touch/merge */}
+      <View style={{ gap: spacing.xs }}>
+        {sets.map((plannedSet, setIndex) => (
+          <PlannedSetRow
+            // Key by the set's stable localKey (not its array index) so each PlannedSetRow instance
+            // stays bound to the same logical set across removals/reorders — this is what
+            // prevents PlannedSetRow's local text-buffer state from sticking to the wrong set.
+            key={plannedSet.localKey}
+            setIndex={setIndex}
+            plannedSet={plannedSet}
+            isOnly={sets.length === 1}
+            hasError={invalidSetKeys.has(plannedSet.localKey)}
+            onChange={(updated) => handleSetChange(setIndex, updated)}
+            onRemove={() => handleRemoveSet(setIndex)}
+          />
+        ))}
+      </View>
 
       <Pressable
         onPress={handleAddSet}

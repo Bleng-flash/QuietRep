@@ -1,4 +1,18 @@
-import type { Exercise, MuscleGroup, Workout } from '@/types';
+import { MAX_REPS } from '@/constants/inputLimits';
+import type { Exercise, MuscleGroup, PlannedSet, Workout } from '@/types';
+
+// A planned set is valid iff both reps are whole numbers in [1, MAX_REPS] and low <= high.
+// low === high is allowed — that is a fixed-rep target, not an error.
+export function isPlannedSetValid(plannedSet: PlannedSet): boolean {
+  const { minReps, maxReps } = plannedSet;
+  return (
+    Number.isInteger(minReps) &&
+    Number.isInteger(maxReps) &&
+    minReps >= 1 &&
+    maxReps <= MAX_REPS &&
+    minReps <= maxReps
+  );
+}
 
 // Builds the subtitle string shown beneath a workout name — e.g. "3 exercises : Chest | Triceps".
 // Shared between WorkoutCard and WorkoutPicker to keep the format consistent.
