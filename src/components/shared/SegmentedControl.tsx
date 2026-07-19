@@ -1,4 +1,6 @@
-import { colors, layout, radius, spacing, typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { radius, spacing, type Palette } from '@/styles';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 // Generic over T — the caller's literal key union (e.g. 'byWorkout' | 'byExercise' in History) — rather than a
@@ -24,6 +26,9 @@ export default function SegmentedControl<T extends string>({
   value,
   onChange,
 }: SegmentedControlProps<T>) {
+  const { colors, layout, typography } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <View style={styles.container}>
       {options.map((option) => {
@@ -46,22 +51,23 @@ export default function SegmentedControl<T extends string>({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    backgroundColor: colors.dark.backgroundSubtle,
-    borderRadius: radius.m,
-    padding: spacing.xs,
-    gap: spacing.xs,
-  },
-  segment: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.s,
-    borderRadius: radius.s,
-  },
-  segmentActive: {
-    backgroundColor: colors.dark.surfaceRaised,
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      backgroundColor: colors.backgroundSubtle,
+      borderRadius: radius.m,
+      padding: spacing.xs,
+      gap: spacing.xs,
+    },
+    segment: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: spacing.s,
+      borderRadius: radius.s,
+    },
+    segmentActive: {
+      backgroundColor: colors.surfaceRaised,
+    },
+  });

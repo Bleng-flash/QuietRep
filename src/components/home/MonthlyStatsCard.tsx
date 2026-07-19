@@ -1,5 +1,6 @@
 import StatTile from '@/components/home/StatTile';
-import { layout, spacing, typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { spacing } from '@/styles';
 import { formatTotalDuration } from '@/utils/datetime';
 import { memo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -21,6 +22,7 @@ const MonthlyStatsCard = memo(function MonthlyStatsCard({
   totalSets,
   totalDurationMs,
 }: MonthlyStatsCardProps) {
+  const { layout, typography } = useTheme();
   // month is a 0-11 JS Date index, so new Date(year, month) lands on the correct month.
   const monthLabel = new Date(year, month).toLocaleDateString(undefined, {
     month: 'long',

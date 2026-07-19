@@ -1,5 +1,6 @@
-import { colors, layout, radius, spacing, typography } from '@/styles';
-import { useEffect, useState } from 'react';
+import { useTheme } from '@/context/ThemeContext';
+import { radius, spacing, type Palette } from '@/styles';
+import { useEffect, useMemo, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Modal,
@@ -31,6 +32,8 @@ export default function NamePromptModal({
   onConfirm,
   onClose,
 }: NamePromptModalProps) {
+  const { colors, layout, typography } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [nameText, setNameText] = useState(initialValue);
 
   // useEffect (not useFocusEffect) — this is a component, not a navigation screen.
@@ -62,7 +65,7 @@ export default function NamePromptModal({
               value={nameText}
               onChangeText={setNameText}
               placeholder="Name"
-              placeholderTextColor={colors.dark.textDisabled}
+              placeholderTextColor={colors.textDisabled}
               autoFocus
               autoCorrect={false}
               returnKeyType="done"
@@ -96,27 +99,28 @@ export default function NamePromptModal({
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: colors.dark.overlay,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.l,
-  },
-  dialog: {
-    backgroundColor: colors.dark.surfaceRaised,
-    borderRadius: radius.xl,
-    borderWidth: 1,
-    borderColor: colors.dark.border,
-    padding: spacing.l,
-  },
-  title: {
-    marginBottom: spacing.m,
-  },
-  actions: {
-    marginTop: spacing.l,
-  },
-  disabledAction: {
-    color: colors.dark.textDisabled,
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: colors.overlay,
+      justifyContent: 'center',
+      paddingHorizontal: spacing.l,
+    },
+    dialog: {
+      backgroundColor: colors.surfaceRaised,
+      borderRadius: radius.xl,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: spacing.l,
+    },
+    title: {
+      marginBottom: spacing.m,
+    },
+    actions: {
+      marginTop: spacing.l,
+    },
+    disabledAction: {
+      color: colors.textDisabled,
+    },
+  });

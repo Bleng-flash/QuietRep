@@ -1,5 +1,6 @@
 import PlannedSetRow from '@/components/plan/PlannedSetRow';
-import { colors, layout, spacing, typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { spacing } from '@/styles';
 import type { EditablePlannedSet, PlannedSet, ResolvedEditableWorkoutExercise } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -19,6 +20,7 @@ export default function WorkoutExerciseCard({
   onSetsChange,
   onRemove,
 }: WorkoutExerciseCardProps) {
+  const { colors, layout, typography } = useTheme();
   // Destructure for convenient access in handlers and JSX below
   const { exercise, sets } = resolvedWorkoutExercise;
 
@@ -66,7 +68,7 @@ export default function WorkoutExerciseCard({
             hitSlop={8}
             style={({ pressed }) => [pressed && layout.pressedButton]}
           >
-            <Ionicons name="trash-outline" size={20} color={colors.dark.error} />
+            <Ionicons name="trash-outline" size={20} color={colors.error} />
           </Pressable>
         </View>
       </View>
@@ -100,7 +102,7 @@ export default function WorkoutExerciseCard({
         hitSlop={8}
         style={({ pressed }) => [styles.addSetButton, pressed && layout.pressedButton]}
       >
-        <Ionicons name="add" size={16} color={colors.dark.primary} />
+        <Ionicons name="add" size={16} color={colors.primary} />
         <Text style={typography.actionSecondary}>Add set</Text>
       </Pressable>
     </View>

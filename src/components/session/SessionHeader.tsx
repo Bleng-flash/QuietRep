@@ -1,5 +1,6 @@
 import ElapsedTimer from '@/components/session/ElapsedTimer';
-import { colors, layout, spacing, typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { spacing } from '@/styles';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -25,6 +26,7 @@ export default function SessionHeader({
   onFinish,
   isFinishing,
 }: SessionHeaderProps) {
+  const { colors, layout, typography } = useTheme();
   const insets = useSafeAreaInsets();
 
   // Local text buffer (same local-state + callback pattern as PlannedSetRow) — the child owns the raw
@@ -39,7 +41,7 @@ export default function SessionHeader({
         hitSlop={8}
         style={({ pressed }) => [pressed && layout.pressedButton]}
       >
-        <MaterialIcons name="close-fullscreen" size={24} color={colors.dark.textSubtle} />
+        <MaterialIcons name="close-fullscreen" size={24} color={colors.textSubtle} />
       </Pressable>
 
       {/* Centre column: tap-to-rename title (reads as an editable heading) with the live
@@ -53,7 +55,7 @@ export default function SessionHeader({
             onNameChange(text);
           }}
           placeholder="Workout name"
-          placeholderTextColor={colors.dark.textDisabled}
+          placeholderTextColor={colors.textDisabled}
           returnKeyType="done"
           maxLength={60}
         />
@@ -67,7 +69,7 @@ export default function SessionHeader({
         style={({ pressed }) => [pressed && layout.pressedButton]}
       >
         {isFinishing ? (
-          <ActivityIndicator size="small" color={colors.dark.primary} />
+          <ActivityIndicator size="small" color={colors.primary} />
         ) : (
           <Text style={typography.actionPrimary}>Finish</Text>
         )}

@@ -1,8 +1,9 @@
 import PastExercisesList from '@/components/history/byExercise/PastExercisesList';
 import PastSessionsList from '@/components/history/byWorkout/PastSessionsList';
 import SegmentedControl from '@/components/shared/SegmentedControl';
+import { useTheme } from '@/context/ThemeContext';
 import { getExerciseHistorySummaries, getSessions } from '@/storage';
-import { layout, spacing, typography } from '@/styles';
+import { spacing } from '@/styles';
 import type { ExerciseHistorySummary, WorkoutSession } from '@/types';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -18,6 +19,7 @@ const LENS_OPTIONS: { key: HistoryLens; label: string }[] = [
 ];
 
 export default function HistoryScreen() {
+  const { layout, typography } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 

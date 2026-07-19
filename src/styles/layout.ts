@@ -1,94 +1,100 @@
 import { StyleSheet } from 'react-native';
-import { colors } from './colors';
+import type { Palette } from './colors';
 import { radius } from './radius';
 import { spacing } from './spacing';
 
-export const layout = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.dark.background,
-  },
-  screenPadded: {
-    flex: 1,
-    backgroundColor: colors.dark.background,
-    paddingHorizontal: spacing.m,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  rowBetween: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  centered: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  card: {
-    backgroundColor: colors.dark.surface,
-    borderRadius: radius.l,
-    padding: spacing.m,
-    borderWidth: 2,
-    borderColor: colors.dark.border,
-  },
-  // Top bar shared by editor screens (WorkoutEditor, and future exercise editors)
-  topBar: {
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.m,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.dark.borderSubtle,
-  },
-  // 1px horizontal rule — callers add their own margin/color overrides as needed
-  divider: {
-    height: 1,
-    backgroundColor: colors.dark.border,
-  },
-  // Dashed destructive action button used for delete operations in editors.
-  // Does not include margin — callers apply marginTop/marginHorizontal as needed.
-  dangerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.s,
-    borderWidth: 1,
-    borderColor: colors.dark.error,
-    borderStyle: 'dashed',
-    borderRadius: radius.l,
-    paddingVertical: spacing.m,
-    backgroundColor: colors.dark.errorSubtle,
-  },
-  // Primary dashed additive-action button (parallels dangerButton in primary colour).
-  // Does not include margin or flex — callers add those. Compact callers may override
-  // gap / borderRadius / paddingVertical for smaller, nested contexts.
-  addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.s,
-    borderWidth: 1,
-    borderColor: colors.dark.primary,
-    borderStyle: 'dashed',
-    borderRadius: radius.l,
-    paddingVertical: spacing.m,
-    backgroundColor: colors.dark.primarySubtle,
-  },
-  // Base surface style for TextInput fields. Compose with typography.body for the text style.
-  // Callers may add overrides (e.g. width, padding, textAlign) for specific input shapes.
-  inputField: {
-    backgroundColor: colors.dark.inputBackground,
-    borderWidth: 1,
-    borderColor: colors.dark.border,
-    borderRadius: radius.m,
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.s + 2,
-  },
-  pressedButton: {
-    opacity: 0.6,
-  },
-  pressedCard: {
-    opacity: 0.75,
-  },
-});
+// Factory: builds the layout StyleSheet for a given palette. Called by ThemeProvider
+// and exposed reactively via useTheme().layout, so styles rebuild when the theme toggles.
+export const makeLayout = (colors: Palette) =>
+  StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    screenPadded: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingHorizontal: spacing.m,
+    },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    rowBetween: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    centered: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.l,
+      padding: spacing.m,
+      borderWidth: 2,
+      borderColor: colors.border,
+    },
+    // Top bar shared by editor screens (WorkoutEditor, and future exercise editors)
+    topBar: {
+      paddingHorizontal: spacing.m,
+      paddingVertical: spacing.m,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderSubtle,
+    },
+    // 1px horizontal rule — callers add their own margin/color overrides as needed
+    divider: {
+      height: 1,
+      backgroundColor: colors.border,
+    },
+    // Dashed destructive action button used for delete operations in editors.
+    // Does not include margin — callers apply marginTop/marginHorizontal as needed.
+    dangerButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.s,
+      borderWidth: 1,
+      borderColor: colors.error,
+      borderStyle: 'dashed',
+      borderRadius: radius.l,
+      paddingVertical: spacing.m,
+      backgroundColor: colors.errorSubtle,
+    },
+    // Primary dashed additive-action button (parallels dangerButton in primary colour).
+    // Does not include margin or flex — callers add those. Compact callers may override
+    // gap / borderRadius / paddingVertical for smaller, nested contexts.
+    addButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.s,
+      borderWidth: 1,
+      borderColor: colors.primary,
+      borderStyle: 'dashed',
+      borderRadius: radius.l,
+      paddingVertical: spacing.m,
+      backgroundColor: colors.primarySubtle,
+    },
+    // Base surface style for TextInput fields. Compose with typography.body for the text style.
+    // Callers may add overrides (e.g. width, padding, textAlign) for specific input shapes.
+    inputField: {
+      backgroundColor: colors.inputBackground,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radius.m,
+      paddingHorizontal: spacing.m,
+      paddingVertical: spacing.s + 2,
+    },
+    pressedButton: {
+      opacity: 0.6,
+    },
+    pressedCard: {
+      opacity: 0.75,
+    },
+  });
+
+// The resolved layout stylesheet for one palette — the shape useTheme().layout returns.
+export type Layout = ReturnType<typeof makeLayout>;

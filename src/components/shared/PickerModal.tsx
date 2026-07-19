@@ -1,5 +1,6 @@
 import ListEmptyText from '@/components/shared/ListEmptyText';
-import { colors, layout, picker, spacing, typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { spacing } from '@/styles';
 import { matchesSearchQuery } from '@/utils/search';
 import { Ionicons } from '@expo/vector-icons';
 import type { ReactElement } from 'react';
@@ -39,6 +40,7 @@ export default function PickerModal<ItemType extends { name: string }>({
   onCreateNew,
   onClose,
 }: PickerModalProps<ItemType>) {
+  const { colors, layout, typography, picker } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
 
   const closePicker = useCallback(() => {
@@ -92,18 +94,18 @@ export default function PickerModal<ItemType extends { name: string }>({
         <View style={[layout.rowBetween, picker.header]}>
           <Text style={typography.heading}>{title}</Text>
           <Pressable onPress={closePicker} hitSlop={8}>
-            <Ionicons name="close" size={24} color={colors.dark.textSubtle} />
+            <Ionicons name="close" size={24} color={colors.textSubtle} />
           </Pressable>
         </View>
 
         <View style={picker.searchBar}>
-          <Ionicons name="search" size={16} color={colors.dark.textSubtle} />
+          <Ionicons name="search" size={16} color={colors.textSubtle} />
           <TextInput
             style={picker.searchInput}
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholder={searchPlaceholder}
-            placeholderTextColor={colors.dark.textDisabled}
+            placeholderTextColor={colors.textDisabled}
             autoCorrect={false}
             clearButtonMode="while-editing"
           />
@@ -120,7 +122,7 @@ export default function PickerModal<ItemType extends { name: string }>({
               onPress={handleCreateNew}
               style={({ pressed }) => [picker.createButton, pressed && layout.pressedButton]}
             >
-              <Ionicons name="add-circle-outline" size={18} color={colors.dark.primary} />
+              <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
               <Text style={picker.createLabel}>{createLabel}</Text>
             </Pressable>
           }
@@ -145,6 +147,10 @@ const PickerRow = memo(function PickerRow<ItemType>({
   renderItemContent,
   onSelectId,
 }: PickerRowProps<ItemType>) {
+  // Own useTheme() call — PickerRow is a memoised sibling of the main component, not nested
+  // in its render, so it can't close over the parent's themed styles. Context change still
+  // re-renders it (past memo), which is what we want on a theme toggle.
+  const { layout, picker } = useTheme();
   return (
     <Pressable
       onPress={() => !isDisabled && onSelectId(keyId)}

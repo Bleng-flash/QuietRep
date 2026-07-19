@@ -1,4 +1,4 @@
-import { typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
 import { formatElapsed } from '@/utils/datetime';
 import { useEffect, useState } from 'react';
 import { StyleProp, Text, TextStyle } from 'react-native';
@@ -12,6 +12,7 @@ interface ElapsedTimerProps {
 // Its own tiny component on purpose: the once-per-second `now` update re-renders only this leaf,
 // so the session header's name TextInput and the exercise cards don't re-render every tick.
 export default function ElapsedTimer({ startedAt, textStyle }: ElapsedTimerProps) {
+  const { typography } = useTheme();
   const [now, setNow] = useState(() => Date.now());
 
   // useEffect (not useFocusEffect) — this is a plain non-screen component with no navigation

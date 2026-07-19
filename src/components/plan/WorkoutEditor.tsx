@@ -2,8 +2,9 @@ import WorkoutExerciseCard from '@/components/plan/WorkoutExerciseCard';
 import DraggableCardList from '@/components/shared/DraggableCardList';
 import EditorHeader from '@/components/shared/EditorHeader';
 import ExercisePicker from '@/components/shared/ExercisePicker';
+import { useTheme } from '@/context/ThemeContext';
 import { getAllExercises } from '@/storage';
-import { colors, layout, spacing, typography } from '@/styles';
+import { spacing, type Palette } from '@/styles';
 import type {
   EditablePlannedSet,
   EditableWorkoutExercise,
@@ -43,6 +44,8 @@ function toEditableExercises(exercises: WorkoutExercise[]): EditableWorkoutExerc
 }
 
 export default function WorkoutEditor({ initialWorkout, onSave, onDelete }: WorkoutEditorProps) {
+  const { colors, layout, typography } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const isEditMode = initialWorkout !== undefined;
 
   const [workoutName, setWorkoutName] = useState(initialWorkout?.name ?? '');
@@ -201,7 +204,7 @@ export default function WorkoutEditor({ initialWorkout, onSave, onDelete }: Work
           value={workoutName}
           onChangeText={setWorkoutName}
           placeholder="Workout name"
-          placeholderTextColor={colors.dark.textDisabled}
+          placeholderTextColor={colors.textDisabled}
           returnKeyType="done"
           maxLength={60}
         />
@@ -232,7 +235,7 @@ export default function WorkoutEditor({ initialWorkout, onSave, onDelete }: Work
             pressed && layout.pressedButton,
           ]}
         >
-          <Ionicons name="add" size={20} color={colors.dark.primary} />
+          <Ionicons name="add" size={20} color={colors.primary} />
           <Text style={typography.actionPrimary}>Add exercise</Text>
         </Pressable>
 
@@ -252,7 +255,7 @@ export default function WorkoutEditor({ initialWorkout, onSave, onDelete }: Work
               pressed && layout.pressedButton,
             ]}
           >
-            <Ionicons name="trash-outline" size={18} color={colors.dark.error} />
+            <Ionicons name="trash-outline" size={18} color={colors.error} />
             <Text style={typography.actionDanger}>Delete Workout</Text>
           </Pressable>
         )}
@@ -269,20 +272,21 @@ export default function WorkoutEditor({ initialWorkout, onSave, onDelete }: Work
   );
 }
 
-const styles = StyleSheet.create({
-  scrollContent: {
-    padding: spacing.m,
-    paddingBottom: spacing.xxl,
-  },
-  nameInput: {
-    marginBottom: spacing.l,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.dark.border,
-    paddingBottom: spacing.s,
-  },
-  emptyHint: {
-    textAlign: 'center',
-    paddingHorizontal: spacing.l,
-    lineHeight: 18,
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    scrollContent: {
+      padding: spacing.m,
+      paddingBottom: spacing.xxl,
+    },
+    nameInput: {
+      marginBottom: spacing.l,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+      paddingBottom: spacing.s,
+    },
+    emptyHint: {
+      textAlign: 'center',
+      paddingHorizontal: spacing.l,
+      lineHeight: 18,
+    },
+  });

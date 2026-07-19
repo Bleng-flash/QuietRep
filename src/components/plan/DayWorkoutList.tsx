@@ -1,12 +1,13 @@
 import DraggableCardList from '@/components/shared/DraggableCardList';
 import WorkoutCard from '@/components/shared/WorkoutCard';
 import WorkoutPicker from '@/components/plan/WorkoutPicker';
+import { useTheme } from '@/context/ThemeContext';
 import { addWorkoutToSplit, deleteWorkout, updateSplit } from '@/storage';
-import { colors, layout, radius, spacing, typography } from '@/styles';
+import { radius, spacing, type Palette } from '@/styles';
 import type { DayKey, Exercise, Split, Workout } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 interface DayWorkoutListProps {
@@ -29,6 +30,8 @@ export default function DayWorkoutList({
   allExercises,
   onChanged,
 }: DayWorkoutListProps) {
+  const { colors, layout, typography } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const router = useRouter();
   const [isPickerVisible, setIsPickerVisible] = useState(false);
 
@@ -97,7 +100,7 @@ export default function DayWorkoutList({
                 hitSlop={8}
                 style={({ pressed }) => [styles.removeButton, pressed && layout.pressedButton]}
               >
-                <Ionicons name="close" size={18} color={colors.dark.error} />
+                <Ionicons name="close" size={18} color={colors.error} />
               </Pressable>
             </View>
           )}
@@ -111,7 +114,7 @@ export default function DayWorkoutList({
           onPress={() => setIsPickerVisible(true)}
           style={({ pressed }) => [layout.addButton, styles.compactAddButton, pressed && layout.pressedButton]}
         >
-          <Ionicons name="add" size={18} color={colors.dark.primary} />
+          <Ionicons name="add" size={18} color={colors.primary} />
           <Text style={styles.addLabel}>Add workout</Text>
         </Pressable>
         <View style={styles.removeColumn} />
@@ -129,37 +132,38 @@ export default function DayWorkoutList({
   );
 }
 
-const styles = StyleSheet.create({
-  cardSlot: {
-    flex: 1,
-  },
-  // Fixed-width remove column — 36 matches PlannedSetRow's remove column for app-wide consistency,
-  // and the add button reserves the same width (removeColumn) so the two line up.
-  removeButton: {
-    width: 36,
-    alignItems: 'center',
-    paddingVertical: spacing.s,
-  },
-  removeColumn: {
-    width: 36,
-  },
-  emptyHint: {
-    paddingVertical: spacing.s,
-  },
-  addRow: {
-    marginTop: spacing.xs,
-  },
-  // Compact overrides on top of layout.addButton — smaller scale for nested day context.
-  // flex: 1 so it spans the workout-card column only, not the reserved remove column.
-  compactAddButton: {
-    flex: 1,
-    gap: spacing.xs,
-    borderRadius: radius.m,
-    paddingVertical: spacing.s,
-  },
-  addLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.dark.primary,
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    cardSlot: {
+      flex: 1,
+    },
+    // Fixed-width remove column — 36 matches PlannedSetRow's remove column for app-wide consistency,
+    // and the add button reserves the same width (removeColumn) so the two line up.
+    removeButton: {
+      width: 36,
+      alignItems: 'center',
+      paddingVertical: spacing.s,
+    },
+    removeColumn: {
+      width: 36,
+    },
+    emptyHint: {
+      paddingVertical: spacing.s,
+    },
+    addRow: {
+      marginTop: spacing.xs,
+    },
+    // Compact overrides on top of layout.addButton — smaller scale for nested day context.
+    // flex: 1 so it spans the workout-card column only, not the reserved remove column.
+    compactAddButton: {
+      flex: 1,
+      gap: spacing.xs,
+      borderRadius: radius.m,
+      paddingVertical: spacing.s,
+    },
+    addLabel: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.primary,
+    },
+  });

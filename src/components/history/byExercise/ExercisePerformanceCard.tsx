@@ -1,4 +1,5 @@
-import { layout, spacing, typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { spacing } from '@/styles';
 import type { LoggedSet } from '@/types';
 import { formatSessionDate } from '@/utils/datetime';
 import { memo } from 'react';
@@ -20,6 +21,7 @@ function ExercisePerformanceCard({
   performedAt,
   sets,
 }: ExercisePerformanceCardProps) {
+  const { layout, typography } = useTheme();
   return (
     <View style={layout.card}>
       {/* Header */}

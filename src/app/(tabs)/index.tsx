@@ -1,11 +1,12 @@
 import MonthlyStatsCard from '@/components/home/MonthlyStatsCard';
 import RecentWorkouts from '@/components/home/RecentWorkouts';
+import { useTheme } from '@/context/ThemeContext';
 import { getCurrentMonthSummary, getSessions } from '@/storage';
-import { colors, layout, spacing, typography } from '@/styles';
+import { spacing, type Palette } from '@/styles';
 import type { MonthlyStatsEntry, WorkoutSession } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -22,6 +23,8 @@ const EMPTY_MONTH: MonthlyStatsEntry = {
 };
 
 export default function HomeScreen() {
+  const { colors, layout, typography } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -68,7 +71,7 @@ export default function HomeScreen() {
           ]}
         >
           <Text style={typography.actionSubtle}>All months</Text>
-          <Ionicons name="chevron-forward" size={16} color={colors.dark.textSubtle} />
+          <Ionicons name="chevron-forward" size={16} color={colors.textSubtle} />
         </Pressable>
       </View>
 
@@ -79,15 +82,16 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  brand: {
-    marginBottom: spacing.l,
-    color: colors.dark.primary,
-  },
-  sectionHeader: {
-    marginBottom: spacing.s,
-  },
-  allMonthsLink: {
-    gap: spacing.xs,
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    brand: {
+      marginBottom: spacing.l,
+      color: colors.primary,
+    },
+    sectionHeader: {
+      marginBottom: spacing.s,
+    },
+    allMonthsLink: {
+      gap: spacing.xs,
+    },
+  });

@@ -1,12 +1,13 @@
 import WorkoutEditor from '@/components/plan/WorkoutEditor';
+import { useTheme } from '@/context/ThemeContext';
 import { deleteWorkout, getWorkoutById, updateWorkout } from '@/storage';
-import { colors, layout } from '@/styles';
 import type { Workout, WorkoutExercise } from '@/types';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 export default function EditWorkoutScreen() {
+  const { colors, layout } = useTheme();
   const { workoutId } = useLocalSearchParams<{ workoutId: string }>();
   const [workout, setWorkout] = useState<Workout | undefined>(undefined);
 
@@ -38,7 +39,7 @@ export default function EditWorkoutScreen() {
   if (!workout) {
     return (
       <View style={[layout.screen, layout.centered]}>
-        <ActivityIndicator color={colors.dark.primary} />
+        <ActivityIndicator color={colors.primary} />
       </View>
     );
   }

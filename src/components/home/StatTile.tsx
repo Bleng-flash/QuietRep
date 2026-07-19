@@ -1,4 +1,6 @@
-import { colors, spacing, typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { spacing, type Palette } from '@/styles';
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 interface StatTileProps {
@@ -11,6 +13,8 @@ interface StatTileProps {
  *  adjustsFontSizeToFit lets a long value (e.g. "12h 30m") shrink to fit its column rather than
  *  truncate with an ellipsis. */
 export default function StatTile({ value, label }: StatTileProps) {
+  const { colors, typography } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.tile}>
       <Text style={[typography.heading, styles.value]} numberOfLines={1} adjustsFontSizeToFit>
@@ -23,16 +27,17 @@ export default function StatTile({ value, label }: StatTileProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  tile: {
-    flex: 1,
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  value: {
-    color: colors.dark.primary,
-  },
-  label: {
-    textAlign: 'center',
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    tile: {
+      flex: 1,
+      alignItems: 'center',
+      gap: spacing.xs,
+    },
+    value: {
+      color: colors.primary,
+    },
+    label: {
+      textAlign: 'center',
+    },
+  });

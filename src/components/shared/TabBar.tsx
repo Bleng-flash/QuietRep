@@ -1,6 +1,8 @@
-import { colors, spacing } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { spacing, type Palette } from '@/styles';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -29,6 +31,8 @@ interface TabBarProps extends BottomTabBarProps {
 }
 
 export default function TabBar({ state, navigation, onFabPress }: TabBarProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
 
   return (
@@ -49,7 +53,7 @@ export default function TabBar({ state, navigation, onFabPress }: TabBarProps) {
             return <View key={tab.name} style={styles.slot} />;
           }
 
-          const color = isFocused ? colors.dark.primary : colors.dark.textSubtle;
+          const color = isFocused ? colors.primary : colors.textSubtle;
 
           return (
             <Pressable
@@ -73,59 +77,60 @@ export default function TabBar({ state, navigation, onFabPress }: TabBarProps) {
         style={({ pressed }) => [styles.workoutButton, pressed && styles.workoutButtonPressed]}
         onPress={onFabPress}
       >
-        <MaterialCommunityIcons name="dumbbell" size={36} color={colors.dark.textInverse} />
+        <MaterialCommunityIcons name="dumbbell" size={36} color={colors.textInverse} />
       </Pressable>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  outerWrapper: {
-    position: 'relative', // workout button positions against this
-  },
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    outerWrapper: {
+      position: 'relative', // workout button positions against this
+    },
 
-  bar: {
-    flexDirection: 'row',
-    backgroundColor: colors.dark.backgroundSubtle,
-    borderTopWidth: 0.5,
-    borderTopColor: colors.dark.border,
-    minHeight: 70, // floor for the content area; paddingBottom (set inline) grows the bar past this to clear the safe area
-    paddingTop: 5,
-  },
+    bar: {
+      flexDirection: 'row',
+      backgroundColor: colors.backgroundSubtle,
+      borderTopWidth: 0.5,
+      borderTopColor: colors.border,
+      minHeight: 70, // floor for the content area; paddingBottom (set inline) grows the bar past this to clear the safe area
+      paddingTop: 5,
+    },
 
-  slot: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 3,
-  },
+    slot: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 3,
+    },
 
-  label: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
+    label: {
+      fontSize: 12,
+      fontWeight: '500',
+    },
 
-  workoutButton: {
-    position: 'absolute', // lifted out of the bar's flow
-    top: -20, // protrudes above the bar
-    alignSelf: 'center', // centred horizontally in outerWrapper
-    width: 64,
-    height: 64,
-    borderRadius: 32, // perfect circle
-    backgroundColor: colors.dark.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
+    workoutButton: {
+      position: 'absolute', // lifted out of the bar's flow
+      top: -20, // protrudes above the bar
+      alignSelf: 'center', // centred horizontally in outerWrapper
+      width: 64,
+      height: 64,
+      borderRadius: 32, // perfect circle
+      backgroundColor: colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
 
-    // shadow for visual lift
-    shadowColor: colors.dark.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8, // Android shadow
-  },
+      // shadow for visual lift
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.4,
+      shadowRadius: 12,
+      elevation: 8, // Android shadow
+    },
 
-  workoutButtonPressed: {
-    backgroundColor: colors.dark.primaryMuted,
-    shadowOpacity: 0.2,
-  },
-});
+    workoutButtonPressed: {
+      backgroundColor: colors.primaryMuted,
+      shadowOpacity: 0.2,
+    },
+  });

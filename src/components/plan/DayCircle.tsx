@@ -1,4 +1,6 @@
-import { colors } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { type Palette } from '@/styles';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
 interface DayCircleProps {
@@ -9,6 +11,9 @@ interface DayCircleProps {
 }
 
 export default function DayCircle({ label, isSelected, isRest, onPress }: DayCircleProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   // isSelected gets priority visually; otherwise a rest day is a muted outline and a day with
   // workouts gets the subtle filled treatment.
   const circleStyle = isSelected ? styles.selected : isRest ? styles.rest : styles.workout;
@@ -25,44 +30,45 @@ export default function DayCircle({ label, isSelected, isRest, onPress }: DayCir
   );
 }
 
-const styles = StyleSheet.create({
-  circle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-  },
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    circle: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+    },
 
-  // Circle states
-  rest: {
-    backgroundColor: 'transparent',
-    borderColor: colors.dark.border,
-  },
-  workout: {
-    backgroundColor: colors.dark.primarySubtle,
-    borderColor: colors.dark.primaryMuted,
-  },
-  selected: {
-    backgroundColor: colors.dark.primary,
-    borderColor: colors.dark.primary,
-  },
+    // Circle states
+    rest: {
+      backgroundColor: 'transparent',
+      borderColor: colors.border,
+    },
+    workout: {
+      backgroundColor: colors.primarySubtle,
+      borderColor: colors.primaryMuted,
+    },
+    selected: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
 
-  // Label base
-  label: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
+    // Label base
+    label: {
+      fontSize: 12,
+      fontWeight: '600',
+    },
 
-  // Label states
-  restLabel: {
-    color: colors.dark.textDisabled,
-  },
-  workoutLabel: {
-    color: colors.dark.primary,
-  },
-  selectedLabel: {
-    color: colors.dark.textInverse,
-  },
-});
+    // Label states
+    restLabel: {
+      color: colors.textDisabled,
+    },
+    workoutLabel: {
+      color: colors.primary,
+    },
+    selectedLabel: {
+      color: colors.textInverse,
+    },
+  });

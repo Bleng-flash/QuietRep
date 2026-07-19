@@ -1,5 +1,6 @@
 import PickerModal from '@/components/shared/PickerModal';
-import { spacing, typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { spacing } from '@/styles';
 import type { Exercise, Workout } from '@/types';
 import { buildWorkoutSubtitle } from '@/utils/workout';
 import { useCallback } from 'react';
@@ -22,6 +23,7 @@ export default function WorkoutPicker({
   onCreateNew,
   onClose,
 }: WorkoutPickerProps) {
+  const { typography } = useTheme();
   const renderWorkoutContent = useCallback(
     (workout: Workout) => (
       <View style={{ gap: spacing.xs }}>
@@ -33,7 +35,7 @@ export default function WorkoutPicker({
         </Text>
       </View>
     ),
-    [allExercises],
+    [allExercises, typography],
   );
 
   return (

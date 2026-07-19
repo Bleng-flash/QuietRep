@@ -1,11 +1,12 @@
 import EditorHeader from '@/components/shared/EditorHeader';
+import { useTheme } from '@/context/ThemeContext';
 import { MUSCLE_GROUPS } from '@/constants/muscleGroups';
 import { addExercise } from '@/storage';
-import { colors, layout, radius, spacing, typography } from '@/styles';
+import { radius, spacing, type Palette } from '@/styles';
 import { MuscleGroup } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Alert,
   Keyboard,
@@ -20,6 +21,7 @@ import {
 } from 'react-native';
 
 export default function NewExerciseScreen() {
+  const { colors, layout, typography } = useTheme();
   const router = useRouter();
 
   const [exerciseName, setExerciseName] = useState('');
@@ -91,7 +93,7 @@ export default function NewExerciseScreen() {
               value={exerciseName}
               onChangeText={setExerciseName}
               placeholder="e.g  Barbell Squat"
-              placeholderTextColor={colors.dark.textDisabled}
+              placeholderTextColor={colors.textDisabled}
               autoCorrect={false}
               autoFocus
               // Cap the name (matches NamePromptModal / SessionHeader) so it stays sane wherever
@@ -127,6 +129,9 @@ interface MuscleGroupDropdownProps {
 }
 
 function MuscleGroupDropdown({ selected, onSelect, isOpen, onOpenChange }: MuscleGroupDropdownProps) {
+  const { colors, layout, typography } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   function handleSelect(muscleGroup: MuscleGroup): void {
     onSelect(muscleGroup);
     onOpenChange(false);
@@ -143,13 +148,13 @@ function MuscleGroupDropdown({ selected, onSelect, isOpen, onOpenChange }: Muscl
         }}
         style={({ pressed }) => [layout.rowBetween, layout.inputField, pressed && layout.pressedButton]}
       >
-        <Text style={[typography.body, !selected && { color: colors.dark.textDisabled }]}>
+        <Text style={[typography.body, !selected && { color: colors.textDisabled }]}>
           {selected ?? 'Select muscle group…'}
         </Text>
         <Ionicons
           name={isOpen ? 'chevron-up' : 'chevron-down'}
           size={18}
-          color={colors.dark.textSubtle}
+          color={colors.textSubtle}
         />
       </Pressable>
 
@@ -169,13 +174,13 @@ function MuscleGroupDropdown({ selected, onSelect, isOpen, onOpenChange }: Muscl
               <Text
                 style={[
                   typography.body,
-                  muscleGroup === selected && { color: colors.dark.primary },
+                  muscleGroup === selected && { color: colors.primary },
                 ]}
               >
                 {muscleGroup}
               </Text>
               {muscleGroup === selected && (
-                <Ionicons name="checkmark" size={20} color={colors.dark.primary} />
+                <Ionicons name="checkmark" size={20} color={colors.primary} />
               )}
             </Pressable>
           ))}
@@ -185,22 +190,23 @@ function MuscleGroupDropdown({ selected, onSelect, isOpen, onOpenChange }: Muscl
   );
 }
 
-const styles = StyleSheet.create({
-  dropdownList: {
-    marginTop: spacing.xs,
-    backgroundColor: colors.dark.surface,
-    borderWidth: 1,
-    borderColor: colors.dark.border,
-    borderRadius: radius.m,
-    maxHeight: 260,
-  },
-  dropdownOption: {
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.m,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.dark.borderSubtle,
-  },
-  dropdownOptionSelected: {
-    backgroundColor: colors.dark.primarySubtle,
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    dropdownList: {
+      marginTop: spacing.xs,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radius.m,
+      maxHeight: 260,
+    },
+    dropdownOption: {
+      paddingHorizontal: spacing.m,
+      paddingVertical: spacing.m,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderSubtle,
+    },
+    dropdownOptionSelected: {
+      backgroundColor: colors.primarySubtle,
+    },
+  });

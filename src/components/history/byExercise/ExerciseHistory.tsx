@@ -1,7 +1,8 @@
 import ExercisePerformanceCard from '@/components/history/byExercise/ExercisePerformanceCard';
 import ListEmptyText from '@/components/shared/ListEmptyText';
+import { useTheme } from '@/context/ThemeContext';
 import { getExerciseById, getExercisePerformances } from '@/storage';
-import { colors, layout, spacing, typography } from '@/styles';
+import { spacing } from '@/styles';
 import type { Exercise, ExercisePerformance } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -18,6 +19,7 @@ interface ExerciseHistoryProps {
  *  The exercise name resolves against the catalog; a dangling FK (exercise deleted after being
  *  logged) still shows its history under "Unknown exercise". */
 export default function ExerciseHistory({ exerciseId }: ExerciseHistoryProps) {
+  const { colors, layout, typography } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -63,7 +65,7 @@ export default function ExerciseHistory({ exerciseId }: ExerciseHistoryProps) {
           hitSlop={8}
           style={({ pressed }) => pressed && layout.pressedButton}
         >
-          <Ionicons name="chevron-back" size={24} color={colors.dark.textSubtle} />
+          <Ionicons name="chevron-back" size={24} color={colors.textSubtle} />
         </Pressable>
         <Text style={typography.heading} numberOfLines={1}>
           {exercise?.name ?? (hasLoaded ? 'Unknown exercise' : '')}

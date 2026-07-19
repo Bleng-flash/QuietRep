@@ -1,5 +1,7 @@
-import { colors, layout, spacing, typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { spacing, type Palette } from '@/styles';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 interface SectionHeaderProps {
@@ -18,6 +20,9 @@ export default function SectionHeader({
   buttonLabel,
   flushTop = false,
 }: SectionHeaderProps) {
+  const { colors, layout, typography } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <View style={[layout.rowBetween, styles.container, flushTop && styles.flushTop]}>
       <Text style={typography.heading}>{title}</Text>
@@ -28,7 +33,7 @@ export default function SectionHeader({
           hitSlop={8} // hitSlop expands the touchable area of a pressable beyond its visual bounds without affecting layout.
           style={({ pressed }) => [styles.addButton, pressed && layout.pressedButton]}
         >
-          <MaterialCommunityIcons name="plus" size={28} color={colors.dark.primary} />
+          <MaterialCommunityIcons name="plus" size={28} color={colors.primary} />
           <Text style={styles.addLabel}>{buttonLabel}</Text>
         </Pressable>
       )}
@@ -36,22 +41,23 @@ export default function SectionHeader({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    marginTop: spacing.l,
-    marginBottom: spacing.s,
-  },
-  flushTop: {
-    marginTop: 0,
-  },
-  addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  addLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: colors.dark.primary,
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    container: {
+      marginTop: spacing.l,
+      marginBottom: spacing.s,
+    },
+    flushTop: {
+      marginTop: 0,
+    },
+    addButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+    },
+    addLabel: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: colors.primary,
+    },
+  });

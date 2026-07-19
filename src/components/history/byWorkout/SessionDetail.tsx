@@ -1,7 +1,8 @@
 import ReadOnlySessionExerciseCard from '@/components/history/byWorkout/ReadOnlySessionExerciseCard';
 import ListEmptyText from '@/components/shared/ListEmptyText';
+import { useTheme } from '@/context/ThemeContext';
 import { deleteSession, getAllExercises, getSessionById } from '@/storage';
-import { colors, layout, spacing, typography } from '@/styles';
+import { spacing } from '@/styles';
 import type { Exercise, WorkoutSession } from '@/types';
 import { formatSessionDate, formatSessionDuration } from '@/utils/datetime';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,6 +18,7 @@ interface SessionDetailProps {
 /** Read-only detail for one past session: header + summary line + one ReadOnlySessionExerciseCard per
  *  exercise. Resolves each SessionExercise.exerciseId against the catalog (dangling FK tolerated). */
 export default function SessionDetail({ sessionId }: SessionDetailProps) {
+  const { colors, layout, typography } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -86,7 +88,7 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
           hitSlop={8}
           style={({ pressed }) => pressed && layout.pressedButton}
         >
-          <Ionicons name="chevron-back" size={24} color={colors.dark.textSubtle} />
+          <Ionicons name="chevron-back" size={24} color={colors.textSubtle} />
         </Pressable>
         <Text style={typography.heading} numberOfLines={1}>
           {session?.name ?? ''}
@@ -99,7 +101,7 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
             hitSlop={8}
             style={({ pressed }) => pressed && layout.pressedButton}
           >
-            <Ionicons name="trash-outline" size={22} color={colors.dark.error} />
+            <Ionicons name="trash-outline" size={22} color={colors.error} />
           </Pressable>
         ) : (
           <View style={{ width: 24 }} />

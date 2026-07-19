@@ -4,8 +4,9 @@ import DraggableCardList from '@/components/shared/DraggableCardList';
 import ExercisePicker from '@/components/shared/ExercisePicker';
 import ListEmptyText from '@/components/shared/ListEmptyText';
 import { useActiveSession } from '@/context/ActiveSessionContext';
+import { useTheme } from '@/context/ThemeContext';
 import { getAllExercises } from '@/storage';
-import { colors, layout, spacing, typography } from '@/styles';
+import { spacing } from '@/styles';
 import type {
   EditableLoggedSet,
   EditableSessionExercise,
@@ -21,6 +22,7 @@ import { ScrollViewContainer } from 'react-native-reorderable-list';
 import { v4 as uuid } from 'uuid';
 
 export default function WorkoutSession() {
+  const { colors, layout, typography } = useTheme();
   const { activeSession, updateActiveSession, finishActiveSession, discardActiveSession } =
     useActiveSession();
 
@@ -231,7 +233,7 @@ export default function WorkoutSession() {
             pressed && layout.pressedButton,
           ]}
         >
-          <Ionicons name="add" size={20} color={colors.dark.primary} />
+          <Ionicons name="add" size={20} color={colors.primary} />
           <Text style={typography.actionPrimary}>Add exercise</Text>
         </Pressable>
 
@@ -245,7 +247,7 @@ export default function WorkoutSession() {
             pressed && layout.pressedButton,
           ]}
         >
-          <Ionicons name="trash-outline" size={20} color={colors.dark.error} />
+          <Ionicons name="trash-outline" size={20} color={colors.error} />
           <Text style={typography.actionDanger}>Discard session</Text>
         </Pressable>
       </ScrollViewContainer>

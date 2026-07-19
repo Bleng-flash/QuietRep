@@ -1,4 +1,5 @@
-import { layout, spacing, typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { spacing } from '@/styles';
 import type { Exercise, LoggedSet } from '@/types';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -12,6 +13,7 @@ interface ReadOnlySessionExerciseCardProps {
 /** Read-only counterpart to SessionExerciseCard: renders a past session's logged sets as plain
  *  text (no TextInputs, no add/remove). Reuses the layout.card shell and column layout. */
 export default function ReadOnlySessionExerciseCard({ exercise, sets }: ReadOnlySessionExerciseCardProps) {
+  const { layout, typography } = useTheme();
   return (
     <View style={[layout.card, { marginBottom: spacing.m }]}>
       {/* Header */}

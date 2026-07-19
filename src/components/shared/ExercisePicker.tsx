@@ -1,8 +1,9 @@
 import PickerModal from '@/components/shared/PickerModal';
-import { colors, layout, radius, spacing, typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { radius, spacing, type Palette } from '@/styles';
 import type { Exercise } from '@/types';
 import { useRouter } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 interface ExercisePickerProps {
@@ -20,6 +21,8 @@ export default function ExercisePicker({
   onSelect,
   onClose,
 }: ExercisePickerProps) {
+  const { colors, layout, typography } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const router = useRouter();
 
   const isExerciseDisabled = useCallback(
@@ -44,7 +47,7 @@ export default function ExercisePicker({
         {isAdded && <Text style={styles.addedBadge}>Added</Text>}
       </View>
     ),
-    [],
+    [layout, typography, styles],
   );
 
   return (
@@ -65,17 +68,18 @@ export default function ExercisePicker({
   );
 }
 
-const styles = StyleSheet.create({
-  exerciseContent: {
-    flex: 1,
-  },
-  addedBadge: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: colors.dark.primary,
-    backgroundColor: colors.dark.primarySubtle,
-    paddingHorizontal: spacing.s,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.s,
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    exerciseContent: {
+      flex: 1,
+    },
+    addedBadge: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: colors.primary,
+      backgroundColor: colors.primarySubtle,
+      paddingHorizontal: spacing.s,
+      paddingVertical: spacing.xs,
+      borderRadius: radius.s,
+    },
+  });

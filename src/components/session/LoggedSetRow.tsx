@@ -1,7 +1,8 @@
-import { colors, layout, radius, spacing, typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { radius, spacing, type Palette } from '@/styles';
 import type { EditableLoggedSet, LoggedSet } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 interface LoggedSetRowProps {
@@ -39,6 +40,9 @@ export default function LoggedSetRow({
   onChange,
   onRemove,
 }: LoggedSetRowProps) {
+  const { colors, layout, typography } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   // Text buffer pattern (same as SetRow) — local string state seeded once at mount
   // so the TextInput can display a blank field when value is 0.
   const [weightText, setWeightText] = useState(
@@ -65,7 +69,7 @@ export default function LoggedSetRow({
         maxLength={6}
         value={weightText}
         placeholder="0"
-        placeholderTextColor={colors.dark.textDisabled}
+        placeholderTextColor={colors.textDisabled}
         onChangeText={(text) => {
           const cleaned = sanitizeWeight(text);
           setWeightText(cleaned);
@@ -83,7 +87,7 @@ export default function LoggedSetRow({
         maxLength={3}
         value={repsText}
         placeholder={repsPlaceholder}
-        placeholderTextColor={colors.dark.textDisabled}
+        placeholderTextColor={colors.textDisabled}
         onChangeText={(text) => {
           const cleaned = sanitizeReps(text);
           setRepsText(cleaned);
@@ -104,7 +108,7 @@ export default function LoggedSetRow({
         <Ionicons
           name="remove-circle-outline"
           size={20}
-          color={isOnly ? colors.dark.textDisabled : colors.dark.error}
+          color={isOnly ? colors.textDisabled : colors.error}
         />
       </Pressable>
     </View>
@@ -125,32 +129,33 @@ function buildRepsPlaceholder(
   return '0';
 }
 
-const styles = StyleSheet.create({
-  row: {
-    gap: spacing.s,
-    paddingVertical: spacing.s,
-    paddingHorizontal: spacing.xs,
-    // Transparent border reserved so toggling the error border causes no layout shift.
-    borderWidth: 1,
-    borderColor: 'transparent',
-    borderRadius: radius.m,
-  },
-  // Reddish tint flagging a set that failed validation on finish.
-  rowError: {
-    borderColor: colors.dark.error,
-    backgroundColor: colors.dark.errorSubtle,
-  },
-  label: {
-    width: 48,
-  },
-  input: {
-    flex: 1,
-    paddingHorizontal: spacing.s,
-    paddingVertical: spacing.xs + 2,
-    textAlign: 'center',
-  },
-  removeButton: {
-    width: 32,
-    alignItems: 'center',
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    row: {
+      gap: spacing.s,
+      paddingVertical: spacing.s,
+      paddingHorizontal: spacing.xs,
+      // Transparent border reserved so toggling the error border causes no layout shift.
+      borderWidth: 1,
+      borderColor: 'transparent',
+      borderRadius: radius.m,
+    },
+    // Reddish tint flagging a set that failed validation on finish.
+    rowError: {
+      borderColor: colors.error,
+      backgroundColor: colors.errorSubtle,
+    },
+    label: {
+      width: 48,
+    },
+    input: {
+      flex: 1,
+      paddingHorizontal: spacing.s,
+      paddingVertical: spacing.xs + 2,
+      textAlign: 'center',
+    },
+    removeButton: {
+      width: 32,
+      alignItems: 'center',
+    },
+  });

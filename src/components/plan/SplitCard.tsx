@@ -9,7 +9,8 @@ import {
   setActiveSplit,
   updateSplit,
 } from '@/storage';
-import { colors, layout, spacing, typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { spacing, type Palette } from '@/styles';
 import type { DayKey, Exercise, Split, Workout } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
@@ -35,6 +36,8 @@ export default function SplitCard({
   allExercises,
   onChanged,
 }: SplitCardProps) {
+  const { colors, layout, typography } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [selectedDay, setSelectedDay] = useState<DayKey | null>(null);
   const [isRenameOpen, setIsRenameOpen] = useState(false);
 
@@ -107,16 +110,16 @@ export default function SplitCard({
           <Switch
             value={isActive}
             onValueChange={handleToggleActive}
-            trackColor={{ false: colors.dark.border, true: colors.dark.primaryMuted }}
-            thumbColor={colors.dark.text}
-            ios_backgroundColor={colors.dark.border}
+            trackColor={{ false: colors.border, true: colors.primaryMuted }}
+            thumbColor={colors.text}
+            ios_backgroundColor={colors.border}
           />
           <Pressable
             onPress={confirmDelete}
             hitSlop={8}
             style={({ pressed }) => [pressed && layout.pressedButton]}
           >
-            <Ionicons name="trash-outline" size={18} color={colors.dark.error} />
+            <Ionicons name="trash-outline" size={18} color={colors.error} />
           </Pressable>
         </View>
       </View>
@@ -162,55 +165,56 @@ export default function SplitCard({
   );
 }
 
-const styles = StyleSheet.create({
-  // Both states set the left edge explicitly. If only the active state did, de-activating would
-  // leave borderLeftWidth to reset to null — and native zeroes that edge rather than falling back
-  // to layout.card's borderWidth: 2, so the left border would vanish permanently.
-  activeCard: {
-    borderLeftWidth: 3,
-    borderLeftColor: colors.dark.primary,
-  },
-  inactiveCard: {
-    borderLeftWidth: 2,
-    borderLeftColor: colors.dark.border,
-  },
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    // Both states set the left edge explicitly. If only the active state did, de-activating would
+    // leave borderLeftWidth to reset to null — and native zeroes that edge rather than falling back
+    // to layout.card's borderWidth: 2, so the left border would vanish permanently.
+    activeCard: {
+      borderLeftWidth: 3,
+      borderLeftColor: colors.primary,
+    },
+    inactiveCard: {
+      borderLeftWidth: 2,
+      borderLeftColor: colors.border,
+    },
 
-  // ── Header ──
-  nameSlot: {
-    flex: 1,
-    marginRight: spacing.s,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.s,
-  },
-  activeLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.dark.textSubtle,
-    letterSpacing: 0.4,
-  },
+    // ── Header ──
+    nameSlot: {
+      flex: 1,
+      marginRight: spacing.s,
+    },
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.s,
+    },
+    activeLabel: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.textSubtle,
+      letterSpacing: 0.4,
+    },
 
-  // ── Day row ──
-  dayRow: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-    marginTop: spacing.m,
-  },
+    // ── Day row ──
+    dayRow: {
+      flexDirection: 'row',
+      gap: spacing.xs,
+      marginTop: spacing.m,
+    },
 
-  // ── Expanded section ──
-  expandedSection: {
-    marginTop: spacing.m,
-  },
-  dividerSpacing: {
-    marginBottom: spacing.m,
-  },
-  expandedDayLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.dark.textSubtle,
-    marginBottom: spacing.s,
-    letterSpacing: 0.3,
-  },
-});
+    // ── Expanded section ──
+    expandedSection: {
+      marginTop: spacing.m,
+    },
+    dividerSpacing: {
+      marginBottom: spacing.m,
+    },
+    expandedDayLabel: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textSubtle,
+      marginBottom: spacing.s,
+      letterSpacing: 0.3,
+    },
+  });

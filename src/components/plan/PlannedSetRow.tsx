@@ -1,7 +1,8 @@
-import { colors, layout, radius, spacing, typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { radius, spacing, type Palette } from '@/styles';
 import type { PlannedSet } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 interface PlannedSetRowProps {
@@ -31,6 +32,9 @@ export default function PlannedSetRow({
   onChange,
   onRemove,
 }: PlannedSetRowProps) {
+  const { colors, layout, typography } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   /** Only when React mounts a component it runs useState once to set the initial value.
    * After that, on every re-render, the state just holds whatever was
    * last set via the setter function. */
@@ -53,7 +57,7 @@ export default function PlannedSetRow({
           maxLength={3}
           value={minRepsText}
           placeholder="—"
-          placeholderTextColor={colors.dark.textDisabled}
+          placeholderTextColor={colors.textDisabled}
           onChangeText={(text) => {
             const cleaned = sanitizeReps(text);
             setMinRepsText(cleaned);
@@ -67,7 +71,7 @@ export default function PlannedSetRow({
           maxLength={3}
           value={maxRepsText}
           placeholder="—"
-          placeholderTextColor={colors.dark.textDisabled}
+          placeholderTextColor={colors.textDisabled}
           onChangeText={(text) => {
             const cleaned = sanitizeReps(text);
             setMaxRepsText(cleaned);
@@ -85,51 +89,52 @@ export default function PlannedSetRow({
         <Ionicons
           name="remove-circle-outline"
           size={20}
-          color={isOnly ? colors.dark.textDisabled : colors.dark.error}
+          color={isOnly ? colors.textDisabled : colors.error}
         />
       </Pressable>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
-    gap: spacing.s,
-    paddingVertical: spacing.s,
-    paddingHorizontal: spacing.xs,
-    // Transparent border reserved so toggling the error border causes no layout shift.
-    borderWidth: 1,
-    borderColor: 'transparent',
-    borderRadius: radius.m,
-  },
-  // Reddish tint flagging a set whose rep range failed validation on save.
-  rowError: {
-    borderColor: colors.dark.error,
-    backgroundColor: colors.dark.errorSubtle,
-  },
-  label: {
-    width: 48,
-  },
-  // Single column holding both range inputs and the "to" separator, centered.
-  rangeGroup: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.s,
-  },
-  rangeSeparator: {
-    color: colors.dark.textSubtle,
-  },
-  removeButton: {
-    width: 32,
-    alignItems: 'center',
-  },
-  // Overrides for inputField: bounded width so both inputs + "to" fit on one line, centered text
-  input: {
-    width: 64,
-    paddingHorizontal: spacing.s,
-    paddingVertical: spacing.xs + 2,
-    textAlign: 'center',
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    row: {
+      gap: spacing.s,
+      paddingVertical: spacing.s,
+      paddingHorizontal: spacing.xs,
+      // Transparent border reserved so toggling the error border causes no layout shift.
+      borderWidth: 1,
+      borderColor: 'transparent',
+      borderRadius: radius.m,
+    },
+    // Reddish tint flagging a set whose rep range failed validation on save.
+    rowError: {
+      borderColor: colors.error,
+      backgroundColor: colors.errorSubtle,
+    },
+    label: {
+      width: 48,
+    },
+    // Single column holding both range inputs and the "to" separator, centered.
+    rangeGroup: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.s,
+    },
+    rangeSeparator: {
+      color: colors.textSubtle,
+    },
+    removeButton: {
+      width: 32,
+      alignItems: 'center',
+    },
+    // Overrides for inputField: bounded width so both inputs + "to" fit on one line, centered text
+    input: {
+      width: 64,
+      paddingHorizontal: spacing.s,
+      paddingVertical: spacing.xs + 2,
+      textAlign: 'center',
+    },
+  });

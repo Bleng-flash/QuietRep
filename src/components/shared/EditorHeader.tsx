@@ -1,4 +1,5 @@
-import { colors, layout, spacing, typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { spacing } from '@/styles';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -12,6 +13,7 @@ interface EditorHeaderProps {
 // Shared Cancel / Title / Save top bar for editor screens (WorkoutEditor, New Exercise, …).
 // Owns the safe-area inset so each caller doesn't re-implement the same paddingTop convention.
 export default function EditorHeader({ title, onCancel, onSave, isSaving }: EditorHeaderProps) {
+  const { colors, layout, typography } = useTheme();
   const insets = useSafeAreaInsets();
 
   return (
@@ -33,7 +35,7 @@ export default function EditorHeader({ title, onCancel, onSave, isSaving }: Edit
         style={({ pressed }) => [pressed && layout.pressedButton]}
       >
         {isSaving ? (
-          <ActivityIndicator size="small" color={colors.dark.primary} />
+          <ActivityIndicator size="small" color={colors.primary} />
         ) : (
           <Text style={typography.actionPrimary}>Save</Text>
         )}

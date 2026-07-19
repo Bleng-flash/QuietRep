@@ -1,4 +1,5 @@
-import { spacing, typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { spacing } from '@/styles';
 import { StyleSheet, Text } from 'react-native';
 
 interface ListEmptyTextProps {
@@ -6,6 +7,7 @@ interface ListEmptyTextProps {
 }
 
 export default function ListEmptyText({ message }: ListEmptyTextProps) {
+  const { typography } = useTheme();
   return <Text style={[typography.caption, styles.text]}>{message}</Text>;
 }
 

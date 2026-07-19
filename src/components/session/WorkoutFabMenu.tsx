@@ -1,6 +1,7 @@
 import { useActiveSession } from '@/context/ActiveSessionContext';
+import { useTheme } from '@/context/ThemeContext';
 import { getActiveSplitId, getAllExercises, getSplits, getWorkouts } from '@/storage';
-import { colors, layout, radius, spacing, typography } from '@/styles';
+import { radius, spacing, type Palette } from '@/styles';
 import type { Exercise, Workout } from '@/types';
 import { matchesSearchQuery } from '@/utils/search';
 import { getTodayKey } from '@/utils/datetime';
@@ -22,6 +23,8 @@ interface WorkoutFabMenuProps {
 type SheetView = 'menu' | 'pickToday' | 'pickWorkout';
 
 export default function WorkoutFabMenu({ visible, onClose }: WorkoutFabMenuProps) {
+  const { colors, typography } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { activeSession, startSession } = useActiveSession();
@@ -161,13 +164,13 @@ export default function WorkoutFabMenu({ visible, onClose }: WorkoutFabMenuProps
             <>
               <SheetBackHeader title="Choose a workout" onBack={() => setView('menu')} />
               <View style={styles.searchBar}>
-                <Ionicons name="search" size={16} color={colors.dark.textSubtle} />
+                <Ionicons name="search" size={16} color={colors.textSubtle} />
                 <TextInput
                   style={[typography.body, styles.searchInput]}
                   value={searchQuery}
                   onChangeText={setSearchQuery}
                   placeholder="Search workouts…"
-                  placeholderTextColor={colors.dark.textDisabled}
+                  placeholderTextColor={colors.textDisabled}
                   autoCorrect={false}
                   clearButtonMode="while-editing"
                 />
@@ -204,6 +207,8 @@ interface SheetOptionRowProps {
 
 // A primary menu option: leading icon, title, and a contextual subtitle.
 function SheetOptionRow({ icon, title, subtitle, disabled = false, onPress }: SheetOptionRowProps) {
+  const { colors, layout, typography } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <Pressable
       onPress={onPress}
@@ -217,7 +222,7 @@ function SheetOptionRow({ icon, title, subtitle, disabled = false, onPress }: Sh
       <Ionicons
         name={icon}
         size={24}
-        color={disabled ? colors.dark.textDisabled : colors.dark.primary}
+        color={disabled ? colors.textDisabled : colors.primary}
       />
       <View style={{ flex: 1 }}>
         <Text style={typography.subheading} numberOfLines={1}>
@@ -239,6 +244,8 @@ interface WorkoutOptionRowProps {
 
 // A workout row in the pickToday / pickWorkout lists — name + the shared exercise-count subtitle.
 function WorkoutOptionRow({ workout, allExercises, onPress }: WorkoutOptionRowProps) {
+  const { colors, layout, typography } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <Pressable
       onPress={onPress}
@@ -261,80 +268,83 @@ interface SheetBackHeaderProps {
 
 // Back affordance + title shown above the pickToday / pickWorkout lists.
 function SheetBackHeader({ title, onBack }: SheetBackHeaderProps) {
+  const { colors, layout, typography } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={[layout.row, styles.backHeader]}>
       <Pressable onPress={onBack} hitSlop={8} style={({ pressed }) => [pressed && layout.pressedButton]}>
-        <Ionicons name="chevron-back" size={24} color={colors.dark.textSubtle} />
+        <Ionicons name="chevron-back" size={24} color={colors.textSubtle} />
       </Pressable>
       <Text style={typography.subheading}>{title}</Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: colors.dark.overlay,
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    backgroundColor: colors.dark.surface,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
-    borderTopWidth: 1,
-    borderColor: colors.dark.border,
-    paddingHorizontal: spacing.m,
-    paddingTop: spacing.s,
-    maxHeight: '70%',
-  },
-  // Small handle hinting the sheet can be dismissed.
-  grabber: {
-    alignSelf: 'center',
-    width: 36,
-    height: 4,
-    borderRadius: radius.s,
-    backgroundColor: colors.dark.border,
-    marginBottom: spacing.m,
-  },
-  optionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.m,
-    paddingVertical: spacing.m,
-    paddingHorizontal: spacing.s,
-  },
-  disabledRow: {
-    opacity: 0.4,
-  },
-  workoutRow: {
-    gap: spacing.xs,
-    paddingVertical: spacing.m,
-    paddingHorizontal: spacing.s,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.dark.borderSubtle,
-  },
-  backHeader: {
-    gap: spacing.s,
-    paddingBottom: spacing.s,
-  },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.s,
-    backgroundColor: colors.dark.inputBackground,
-    borderWidth: 1,
-    borderColor: colors.dark.border,
-    borderRadius: radius.m,
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.s,
-    marginBottom: spacing.s,
-  },
-  searchInput: {
-    flex: 1,
-    padding: 0,
-  },
-  emptyText: {
-    textAlign: 'center',
-    paddingVertical: spacing.l,
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: colors.overlay,
+      justifyContent: 'flex-end',
+    },
+    sheet: {
+      backgroundColor: colors.surface,
+      borderTopLeftRadius: radius.xl,
+      borderTopRightRadius: radius.xl,
+      borderTopWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: spacing.m,
+      paddingTop: spacing.s,
+      maxHeight: '70%',
+    },
+    // Small handle hinting the sheet can be dismissed.
+    grabber: {
+      alignSelf: 'center',
+      width: 36,
+      height: 4,
+      borderRadius: radius.s,
+      backgroundColor: colors.border,
+      marginBottom: spacing.m,
+    },
+    optionRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.m,
+      paddingVertical: spacing.m,
+      paddingHorizontal: spacing.s,
+    },
+    disabledRow: {
+      opacity: 0.4,
+    },
+    workoutRow: {
+      gap: spacing.xs,
+      paddingVertical: spacing.m,
+      paddingHorizontal: spacing.s,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderSubtle,
+    },
+    backHeader: {
+      gap: spacing.s,
+      paddingBottom: spacing.s,
+    },
+    searchBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.s,
+      backgroundColor: colors.inputBackground,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radius.m,
+      paddingHorizontal: spacing.m,
+      paddingVertical: spacing.s,
+      marginBottom: spacing.s,
+    },
+    searchInput: {
+      flex: 1,
+      padding: 0,
+    },
+    emptyText: {
+      textAlign: 'center',
+      paddingVertical: spacing.l,
+    },
+  });

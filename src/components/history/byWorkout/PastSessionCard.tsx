@@ -1,4 +1,5 @@
-import { layout, spacing, typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { spacing } from '@/styles';
 import { formatSessionDate, formatSessionDuration } from '@/utils/datetime';
 import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
@@ -24,6 +25,7 @@ const PastSessionCard = memo(function PastSessionCard({
   setCount,
   onPress,
 }: PastSessionCardProps) {
+  const { layout, typography } = useTheme();
   // Duration is '' only if finishedAt is null (shouldn't happen for a finished session) — filter it
   // out so the meta line never shows a dangling separator.
   const metaLine = [formatSessionDate(startedAt), formatSessionDuration(startedAt, finishedAt)]

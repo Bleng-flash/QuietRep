@@ -1,7 +1,8 @@
 import MonthlyStatsCard from '@/components/home/MonthlyStatsCard';
 import ListEmptyText from '@/components/shared/ListEmptyText';
+import { useTheme } from '@/context/ThemeContext';
 import { getMonthlyStatsHistory } from '@/storage';
-import { colors, layout, spacing, typography } from '@/styles';
+import { spacing } from '@/styles';
 import type { MonthlyStatsEntry } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -20,6 +21,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Owns its background via layout.screen.
 export default function MonthlyStatsScreen() {
+  const { colors, layout, typography } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -56,7 +58,7 @@ export default function MonthlyStatsScreen() {
           hitSlop={8}
           style={({ pressed }) => pressed && layout.pressedButton}
         >
-          <Ionicons name="chevron-back" size={24} color={colors.dark.textSubtle} />
+          <Ionicons name="chevron-back" size={24} color={colors.textSubtle} />
         </Pressable>
         <Text style={typography.heading} numberOfLines={1}>
           Monthly Stats

@@ -1,8 +1,9 @@
 import ListEmptyText from '@/components/shared/ListEmptyText';
 import SectionHeader from '@/components/shared/SectionHeader';
+import { useTheme } from '@/context/ThemeContext';
 import { MUSCLE_GROUPS } from '@/constants/muscleGroups';
 import { deleteExercise, getAllExercises } from '@/storage';
-import { colors, layout, picker, radius, spacing, typography } from '@/styles';
+import { radius, spacing, type Palette } from '@/styles';
 import { Exercise } from '@/types';
 import { matchesSearchQuery } from '@/utils/search';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,6 +13,7 @@ import { Alert, Pressable, SectionList, StyleSheet, Text, TextInput, View } from
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ExerciseListScreen() {
+  const { colors, layout, typography, picker } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -80,7 +82,7 @@ export default function ExerciseListScreen() {
           hitSlop={8}
           style={({ pressed }) => pressed && layout.pressedButton}
         >
-          <Ionicons name="chevron-back" size={24} color={colors.dark.textSubtle} />
+          <Ionicons name="chevron-back" size={24} color={colors.textSubtle} />
         </Pressable>
         <Text style={typography.heading}>All Exercises</Text>
         {/* Placeholder matches back button width to keep title visually centered */}
@@ -88,13 +90,13 @@ export default function ExerciseListScreen() {
       </View>
       <View style={{ flex: 1, paddingHorizontal: spacing.s }}>
         <View style={[picker.searchBar, { marginHorizontal: 0, marginTop: spacing.s }]}>
-          <Ionicons name="search" size={16} color={colors.dark.textSubtle} />
+          <Ionicons name="search" size={16} color={colors.textSubtle} />
           <TextInput
             style={picker.searchInput}
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholder="Search exercises…"
-            placeholderTextColor={colors.dark.textDisabled}
+            placeholderTextColor={colors.textDisabled}
             autoCorrect={false}
             clearButtonMode="while-editing"
           />
@@ -127,7 +129,7 @@ export default function ExerciseListScreen() {
               onPress={handleCreateNewExercise}
               style={({ pressed }) => [picker.createButton, pressed && layout.pressedButton]}
             >
-              <Ionicons name="add-circle-outline" size={18} color={colors.dark.primary} />
+              <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
               <Text style={picker.createLabel}>Create new exercise</Text>
             </Pressable>
           }
@@ -148,6 +150,8 @@ interface ExerciseEntryProps {
 // Receives primitive props (not the whole Exercise object) so memo can bail out of re-render
 // for unchanged rows even when the parent reloads a fresh array of objects from storage.
 const ExerciseEntry = memo(function ExerciseEntry({ id, name, isDefault, onDelete }: ExerciseEntryProps) {
+  const { colors, layout, typography } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={[layout.row, styles.exerciseEntry]}>
       <View style={{ flex: 1, paddingVertical: spacing.xs }}>
@@ -160,20 +164,21 @@ const ExerciseEntry = memo(function ExerciseEntry({ id, name, isDefault, onDelet
           hitSlop={8}
           style={({ pressed }) => pressed && layout.pressedButton}
         >
-          <Ionicons name="trash-outline" size={18} color={colors.dark.error} />
+          <Ionicons name="trash-outline" size={18} color={colors.error} />
         </Pressable>
       )}
     </View>
   );
 });
 
-const styles = StyleSheet.create({
-  exerciseEntry: {
-    backgroundColor: colors.dark.surface,
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.m,
-    borderBottomWidth: 1,
-    borderRadius: radius.xs,
-    borderColor: colors.dark.borderSubtle,
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    exerciseEntry: {
+      backgroundColor: colors.surface,
+      paddingHorizontal: spacing.m,
+      paddingVertical: spacing.m,
+      borderBottomWidth: 1,
+      borderRadius: radius.xs,
+      borderColor: colors.borderSubtle,
+    },
+  });

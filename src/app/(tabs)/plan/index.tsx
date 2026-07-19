@@ -8,13 +8,15 @@ import NamePromptModal from '@/components/shared/NamePromptModal';
 import SectionHeader from '@/components/shared/SectionHeader';
 import SplitCard from '@/components/plan/SplitCard';
 import WorkoutCard from '@/components/shared/WorkoutCard';
+import { useTheme } from '@/context/ThemeContext';
 import { addSplit, getActiveSplitId, getAllExercises, getSplits, getWorkouts } from '@/storage';
-import { colors, layout, spacing, typography } from '@/styles';
+import { spacing } from '@/styles';
 import type { Exercise, Split, Workout } from '@/types';
 import { createEmptyDays } from '@/utils/split';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function PlanScreen() {
+  const { colors, layout, typography } = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -120,12 +122,12 @@ export default function PlanScreen() {
         style={({ pressed }) => [layout.card, layout.row, pressed && layout.pressedButton]}
         onPress={() => router.push('/plan/exercise')}
       >
-        <MaterialCommunityIcons name="view-list-outline" size={20} color={colors.dark.text} />
+        <MaterialCommunityIcons name="view-list-outline" size={20} color={colors.text} />
         <Text style={[typography.body, styles.exerciseActionText]}>View all exercises</Text>
         <MaterialCommunityIcons
           name="chevron-right"
           size={20}
-          color={colors.dark.textSubtle}
+          color={colors.textSubtle}
           style={{ marginLeft: 'auto' }}
         />
       </Pressable>
@@ -145,6 +147,7 @@ export default function PlanScreen() {
 }
 
 function EmptyState({ message }: { message: string }) {
+  const { typography } = useTheme();
   return (
     <View style={styles.emptyState}>
       <Text style={typography.caption}>{message}</Text>

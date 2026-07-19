@@ -1,4 +1,5 @@
-import { layout, spacing, typography } from '@/styles';
+import { useTheme } from '@/context/ThemeContext';
+import { spacing } from '@/styles';
 import type { MuscleGroup } from '@/types';
 import { formatSessionDate } from '@/utils/datetime';
 import { memo } from 'react';
@@ -23,6 +24,7 @@ const PastExerciseCard = memo(function PastExerciseCard({
   lastPerformedAt,
   onPress,
 }: PastExerciseCardProps) {
+  const { layout, typography } = useTheme();
   const performanceLine = [
     `${sessionCount} session${sessionCount === 1 ? '' : 's'}`,
     `Last performed: ${formatSessionDate(lastPerformedAt)}`,
