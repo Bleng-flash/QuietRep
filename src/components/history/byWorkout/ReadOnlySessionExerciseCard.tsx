@@ -1,19 +1,32 @@
 import { useTheme } from '@/context/ThemeContext';
+import { useUnit } from '@/context/UnitContext';
 import { spacing } from '@/styles';
-import type { Exercise, LoggedSet } from '@/types';
+import type { Exercise, LoggedSet, WeightUnit } from '@/types';
+import { formatWeight } from '@/utils/units';
 import { StyleSheet, Text, View } from 'react-native';
 
 interface ReadOnlySessionExerciseCardProps {
   // undefined when the exercise was deleted from the catalog after this session was logged
   // (dangling FK) — falls back to "Unknown exercise", mirroring SessionExerciseCard.
   exercise: Exercise | undefined;
+  // The unit these sets were logged in, from the parent session. Converted for display below.
+  loggedUnit: WeightUnit;
   sets: LoggedSet[];
 }
 
 /** Read-only counterpart to SessionExerciseCard: renders a past session's logged sets as plain
- *  text (no TextInputs, no add/remove). Reuses the layout.card shell and column layout. */
-export default function ReadOnlySessionExerciseCard({ exercise, sets }: ReadOnlySessionExerciseCardProps) {
+ *  text (no TextInputs, no add/remove). Reuses the layout.card shell and column layout.
+ *
+ *  Converts inside the card rather than taking pre-formatted strings, mirroring the theming rule:
+ *  a component that renders a settings-driven value subscribes to that setting itself. */
+export default function ReadOnlySessionExerciseCard({
+  exercise,
+  loggedUnit,
+  sets,
+}: ReadOnlySessionExerciseCardProps) {
   const { layout, typography } = useTheme();
+  // The unit the viewer is reading in right now — different from loggedUnit.
+  const { unit: displayUnit } = useUnit();
   return (
     <View style={[layout.card, { marginBottom: spacing.m }]}>
       {/* Header */}
@@ -26,17 +39,20 @@ export default function ReadOnlySessionExerciseCard({ exercise, sets }: ReadOnly
         ) : null}
       </View>
 
-      {/* Column headers — widths mirror the set rows below (Load (kg) hardcoded, units deferred) */}
+      {/* Column headers — widths mirror the set rows below. The header carries the unit, so the
+          rows render a bare number rather than repeating it on every line. */}
       <View style={[layout.row, { gap: spacing.s, marginBottom: spacing.xs }]}>
         <View style={{ width: 48 }} />
-        <Text style={[typography.caption, styles.columnHeader]}>Load (kg)</Text>
+        <Text style={[typography.caption, styles.columnHeader]}>Load ({displayUnit})</Text>
         <Text style={[typography.caption, styles.columnHeader]}>Reps</Text>
       </View>
 
       {sets.map((loggedSet, setIndex) => (
         <View key={setIndex} style={[layout.row, styles.setRow]}>
           <Text style={[typography.caption, { width: 48 }]}>Set {setIndex + 1}</Text>
-          <Text style={[typography.body, styles.setValue]}>{loggedSet.weight}</Text>
+          <Text style={[typography.body, styles.setValue]}>
+            {formatWeight(loggedSet.weight, loggedUnit, displayUnit)}
+          </Text>
           <Text style={[typography.body, styles.setValue]}>{loggedSet.reps}</Text>
         </View>
       ))}

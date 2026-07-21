@@ -217,6 +217,9 @@ export default function WorkoutSession() {
                 <SessionExerciseCard
                   resolvedSessionExercise={item}
                   invalidSetKeys={invalidSetKeys}
+                  // Fallback is unreachable: resolvedSessionExercises is [] whenever
+                  // activeSession is null, so renderCard never runs in that state.
+                  loggedUnit={activeSession?.unit ?? 'kg'}
                   onSetsChange={(updatedSets) => handleSetsChange(item.exerciseId, updatedSets)}
                   onRemove={() => handleRemoveExercise(item.exerciseId)}
                 />

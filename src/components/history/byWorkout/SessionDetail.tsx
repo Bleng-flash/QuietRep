@@ -127,6 +127,7 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
             <ReadOnlySessionExerciseCard
               key={exerciseIndex}
               exercise={resolvedExercise.exercise}
+              loggedUnit={session.unit}
               sets={resolvedExercise.sets}
             />
           ))}

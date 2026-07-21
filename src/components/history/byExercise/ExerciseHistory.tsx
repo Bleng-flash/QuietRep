@@ -49,6 +49,7 @@ export default function ExerciseHistory({ exerciseId }: ExerciseHistoryProps) {
       <ExercisePerformanceCard
         sessionName={item.sessionName}
         performedAt={item.performedAt}
+        loggedUnit={item.unit}
         sets={item.sets}
       />
     ),

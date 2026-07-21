@@ -1,7 +1,12 @@
 import LoggedSetRow from '@/components/session/LoggedSetRow';
 import { useTheme } from '@/context/ThemeContext';
 import { spacing } from '@/styles';
-import type { EditableLoggedSet, LoggedSet, ResolvedEditableSessionExercise } from '@/types';
+import type {
+  EditableLoggedSet,
+  LoggedSet,
+  ResolvedEditableSessionExercise,
+  WeightUnit,
+} from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { v4 as uuid } from 'uuid';
@@ -9,6 +14,11 @@ import { v4 as uuid } from 'uuid';
 interface SessionExerciseCardProps {
   resolvedSessionExercise: ResolvedEditableSessionExercise;
   invalidSetKeys: Set<string>; // localKeys of sets to flag red after a failed finish
+  /** The unit this session is being logged in, passed down from the session itself rather than
+   *  read from useUnit(). The session is the single source of truth for its own unit, and it is
+   *  fixed for the session's life, so there is nothing to convert here — the user types in this
+   *  unit and the number is stored exactly as typed. */
+  loggedUnit: WeightUnit;
   onSetsChange: (sets: EditableLoggedSet[]) => void;
   onRemove: () => void;
 }
@@ -16,6 +26,7 @@ interface SessionExerciseCardProps {
 export default function SessionExerciseCard({
   resolvedSessionExercise,
   invalidSetKeys,
+  loggedUnit,
   onSetsChange,
   onRemove,
 }: SessionExerciseCardProps) {
@@ -68,7 +79,7 @@ export default function SessionExerciseCard({
       {/* Column headers — widths mirror LoggedSetRow layout */}
       <View style={[layout.row, { gap: spacing.s, marginBottom: spacing.xs }]}>
         <View style={{ width: 48 }} />
-        <Text style={[typography.caption, styles.columnHeader]}>Load (kg)</Text>
+        <Text style={[typography.caption, styles.columnHeader]}>Load ({loggedUnit})</Text>
         <Text style={[typography.caption, styles.columnHeader]}>Reps</Text>
         <View style={{ width: 32 }} />
       </View>
