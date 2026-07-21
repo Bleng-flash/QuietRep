@@ -5,6 +5,7 @@ import type {
   LoggedSet,
   PlannedSet,
   SessionExercise,
+  WeightUnit,
   WorkoutExercise,
   WorkoutSession,
 } from '@/types';
@@ -82,6 +83,7 @@ export function toCanonicalSession(
   id: string,
   name: string,
   startedAt: string,
+  unit: WeightUnit,
   editableExercises: EditableSessionExercise[],
 ): WorkoutSession {
   return {
@@ -89,6 +91,7 @@ export function toCanonicalSession(
     name,
     startedAt,
     finishedAt: null,
+    unit,
     exercises: stripToCanonicalExercises(editableExercises),
   };
 }

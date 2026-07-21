@@ -1,10 +1,11 @@
+import { useUnit } from '@/context/UnitContext';
 import {
   clearActiveSession,
   finishSession,
   getActiveSession,
   setActiveSession,
 } from '@/storage';
-import type { EditableSessionExercise } from '@/types';
+import type { EditableSessionExercise, WeightUnit } from '@/types';
 import { hydrateSessionExercises, toCanonicalSession } from '@/utils/session';
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import { Alert } from 'react-native';
@@ -17,6 +18,9 @@ export interface SessionBuffer {
   id: string;
   name: string;
   startedAt: string;
+  // Stamped once at startSession and never reassigned — the buffer owns its unit for its whole
+  // life, so finishActiveSession needs no unit parameter and cannot pick up a changed setting.
+  unit: WeightUnit;
   exercises: EditableSessionExercise[];
 }
 
@@ -39,6 +43,16 @@ const ActiveSessionContext = createContext<ActiveSessionContextValue | null>(nul
 export function ActiveSessionProvider({ children }: { children: ReactNode }) {
   // the name setActiveSession is already used in src/storage/sessions.ts
   const [activeSession, setSessionBuffer] = useState<SessionBuffer | null>(null);
+
+  // Read only to stamp a NEW session at creation. A live session's unit never follows this
+  // value — the Profile toggle is disabled while a session is active precisely so it can't.
+  //
+  // A plain closure is correct here, unlike the debounced persist below: startSession is
+  // invoked straight from a user event, so the version that runs is always the one from the
+  // latest committed render and its captured `unit` is current. Closure staleness only bites
+  // when execution is deferred past the render that created the closure (the setTimeout case),
+  // which is why that path needs latestSessionRef and this one does not.
+  const { unit } = useUnit();
 
   // Stale-closure guard for the debounced persist callback.
   // React renders are snapshots: every render produces a new updateActiveSession function
@@ -72,6 +86,7 @@ export function ActiveSessionProvider({ children }: { children: ReactNode }) {
           id: stored.id,
           name: stored.name,
           startedAt: stored.startedAt,
+          unit: stored.unit,
           // Re-attach fresh localKeys — they are stripped before storage writes, so they
           // are never present in the stored data and must be regenerated on hydration.
           exercises: hydrateSessionExercises(stored.exercises),
@@ -87,6 +102,7 @@ export function ActiveSessionProvider({ children }: { children: ReactNode }) {
       buffer.id,
       buffer.name,
       buffer.startedAt,
+      buffer.unit,
       buffer.exercises,
     );
     await setActiveSession(canonicalSession);
@@ -101,6 +117,7 @@ export function ActiveSessionProvider({ children }: { children: ReactNode }) {
       id: uuid(),
       name,
       startedAt: new Date().toISOString(),
+      unit,
       exercises,
     };
     setSessionBuffer(newSession);
@@ -134,6 +151,9 @@ export function ActiveSessionProvider({ children }: { children: ReactNode }) {
       // Trim session name before writing to history. Mirrors WorkoutEditor's onSave(name.trim()).
       activeSession.name.trim(),
       activeSession.startedAt,
+      // The session's own recorded unit, not the current setting — authoritative even if the
+      // user somehow changed units between starting and finishing.
+      activeSession.unit,
       activeSession.exercises,
     );
     await finishSession(canonicalSession);

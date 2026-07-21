@@ -78,10 +78,10 @@ export interface Split {
   // 0 to n workouts per day (empty array means rest day)
 }
 
-/** Runtime record of one performed set — weight (kg) + actual reps.
+/** Runtime record of one performed set — weight + actual reps.
  *  Load is intentionally absent from plan types (PlannedSet/WorkoutExercise); it belongs only here. */
 export interface LoggedSet {
-  weight: number; // in kg - units preference deferred
+  weight: number; // in the unit recorded on the parent WorkoutSession
   reps: number;
 }
 
@@ -97,6 +97,10 @@ export interface WorkoutSession {
   name: string;
   startedAt: string; // ISO 8601 timestamp
   finishedAt: string | null; // null while live; stamped on Finish
+  // The unit every weight in this session was logged in. Stamped at startSession from the
+  // user's setting and fixed for the session's whole life (the Profile toggle locks while
+  // a session is live), so the session is self-describing regardless of later setting changes.
+  unit: WeightUnit;
   exercises: SessionExercise[];
 }
 
@@ -132,6 +136,9 @@ export interface ExercisePerformance {
   sessionId: string;
   sessionName: string;
   performedAt: string; // ISO 8601 — the session's startedAt
+  // Copied from the parent session for the same reason sessionName is: collectExercisePerformances
+  // builds a flat record, so the WorkoutSession is not reachable from here downstream.
+  unit: WeightUnit;
   sets: LoggedSet[];
 }
 // ------------------------------------------------------------------------

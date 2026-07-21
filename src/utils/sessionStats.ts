@@ -87,6 +87,9 @@ export function collectExercisePerformances(
       sessionId: session.id,
       sessionName: session.name,
       performedAt: session.startedAt,
+      // Carried across for the same reason sessionName is: this record is flat, so the
+      // parent session (and its unit) is unreachable from the consuming card.
+      unit: session.unit,
       sets: setsForExercise,
     });
   }
