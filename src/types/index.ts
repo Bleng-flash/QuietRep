@@ -16,6 +16,11 @@ export type MuscleGroup =
 
 export type DayKey = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 
+/** The unit a load is expressed in. Weights are stored as typed — in whichever unit was
+ *  selected when they were logged — so every stored weight is tagged with the unit it
+ *  belongs to, and conversion happens only at display time. */
+export type WeightUnit = 'kg' | 'lbs';
+
 /** A planned set: a rep range only. Load is intentionally absent — it is a runtime value
  *  (what you actually lift), recorded on the live session, not something planned ahead.
  *  A fixed target is expressed as minReps === maxReps. */

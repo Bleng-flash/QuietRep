@@ -17,6 +17,9 @@ interface SegmentedControlProps<T extends string> {
   options: SegmentedControlOption<T>[];
   value: T;
   onChange: (key: T) => void;
+  /** Dims the control and blocks selection. The rule for WHEN to disable belongs to the
+   *  caller — this component only renders the state. */
+  disabled?: boolean;
 }
 
 /** Generic iOS-style segmented toggle. Kept in shared/ since it's reusable across
@@ -25,18 +28,20 @@ export default function SegmentedControl<T extends string>({
   options,
   value,
   onChange,
+  disabled = false,
 }: SegmentedControlProps<T>) {
   const { colors, layout, typography } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, disabled && layout.disabled]}>
       {options.map((option) => {
         const isActive = option.key === value;
         return (
           <Pressable
             key={option.key}
             onPress={() => onChange(option.key)}
+            disabled={disabled}
             style={({ pressed }) => [
               styles.segment,
               isActive && styles.segmentActive,

@@ -3,7 +3,15 @@ import { makeLayout, type Layout } from '@/styles/layout';
 import { makePicker, type Picker } from '@/styles/picker';
 import { makeTypography, type Typography } from '@/styles/typography';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 
 const THEME_MODE_KEY = '@quietrep/themeMode';
 const DEFAULT_MODE: ThemeMode = 'dark';
@@ -41,17 +49,27 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     hydrateThemeMode();
   }, []);
 
-  function setMode(nextMode: ThemeMode) {
+  // useCallback so this has a stable identity and can be listed honestly in the value memo's
+  // deps below. Closes over nothing but setModeState (a stable setter), hence [].
+  const setMode = useCallback((nextMode: ThemeMode) => {
     // In-memory state is the source of truth for the UI; persist is fire-and-forget.
     setModeState(nextMode);
     AsyncStorage.setItem(THEME_MODE_KEY, nextMode);
-  }
+  }, []);
 
   // `palettes` is a module-level constant, so `palettes.dark`/`palettes.light` are each a single
   // fixed object reference for the app's lifetime. Indexing (not cloning) means `colors` keeps the
   // SAME reference across re-renders while `mode` is unchanged, and only becomes a different
-  // reference when `mode` flips. That lets the useMemo shallow compare (`Object.is` on [colors])
-  // skip rebuilding the stylesheets every render and rebuild them only on an actual theme toggle.
+  // reference when `mode` flips. That reference stability is what the memos below key off.
+  //
+  // Note what those memos do and do not buy today: this provider's ONLY re-render trigger is
+  // `mode` changing (it consumes no context, and RootLayout holds no state), so every render it
+  // ever experiences also invalidates [colors] — the memos never actually skip work right now.
+  // They are kept deliberately, because the moment this provider gains a second piece of state
+  // (a 'system' mode following the device scheme, a hydration flag, an accent preference),
+  // renders decouple from mode changes and the memos immediately start earning their keep:
+  // rebuilding three StyleSheets and re-rendering every consumer on an unrelated render is not
+  // free. See "Context value memoisation" in CLAUDE.md.
   const colors = palettes[mode];
   const layout = useMemo(() => makeLayout(colors), [colors]);
   const typography = useMemo(() => makeTypography(colors), [colors]);
@@ -59,7 +77,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<ThemeContextValue>(
     () => ({ mode, setMode, colors, layout, typography, picker }),
-    [mode, colors, layout, typography, picker],
+    [mode, setMode, colors, layout, typography, picker],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

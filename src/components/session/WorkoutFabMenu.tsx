@@ -215,7 +215,7 @@ function SheetOptionRow({ icon, title, subtitle, disabled = false, onPress }: Sh
       disabled={disabled}
       style={({ pressed }) => [
         styles.optionRow,
-        disabled && styles.disabledRow,
+        disabled && layout.disabled,
         pressed && !disabled && layout.pressedCard,
       ]}
     >
@@ -312,9 +312,6 @@ const makeStyles = (colors: Palette) =>
       gap: spacing.m,
       paddingVertical: spacing.m,
       paddingHorizontal: spacing.s,
-    },
-    disabledRow: {
-      opacity: 0.4,
     },
     workoutRow: {
       gap: spacing.xs,

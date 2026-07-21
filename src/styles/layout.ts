@@ -94,6 +94,11 @@ export const makeLayout = (colors: Palette) =>
     pressedCard: {
       opacity: 0.75,
     },
+    // Dimming for a non-interactive control or row. Unlike the pressed states above, this is
+    // one value for any element, so it is not element-suffixed. Compose into a style array.
+    disabled: {
+      opacity: 0.4,
+    },
   });
 
 // The resolved layout stylesheet for one palette — the shape useTheme().layout returns.

@@ -6,6 +6,7 @@ import 'react-native-get-random-values';
 
 import { ActiveSessionProvider } from '@/context/ActiveSessionContext';
 import { ThemeProvider, useTheme } from '@/context/ThemeContext';
+import { UnitProvider } from '@/context/UnitContext';
 import { seedDefaultExercises } from '@/storage';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -48,9 +49,13 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider>
-        <ActiveSessionProvider>
-          <ThemedStack />
-        </ActiveSessionProvider>
+        {/* UnitProvider sits above ActiveSessionProvider: the session provider consumes
+            useUnit() to stamp each new session with the unit it is logged in. */}
+        <UnitProvider>
+          <ActiveSessionProvider>
+            <ThemedStack />
+          </ActiveSessionProvider>
+        </UnitProvider>
       </ThemeProvider>
     </GestureHandlerRootView>
   );

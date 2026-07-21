@@ -5,7 +5,7 @@ import { matchesSearchQuery } from '@/utils/search';
 import { Ionicons } from '@expo/vector-icons';
 import type { ReactElement } from 'react';
 import { memo, useCallback, useMemo, useState } from 'react';
-import { FlatList, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Modal, Pressable, Text, TextInput, View } from 'react-native';
 
 interface PickerModalProps<ItemType extends { name: string }> {
   visible: boolean;
@@ -156,7 +156,7 @@ const PickerRow = memo(function PickerRow<ItemType>({
       onPress={() => !isDisabled && onSelectId(keyId)}
       style={({ pressed }) => [
         picker.item,
-        isDisabled && styles.disabledItem,
+        isDisabled && layout.disabled,
         pressed && !isDisabled && layout.pressedCard,
       ]}
     >
@@ -164,9 +164,3 @@ const PickerRow = memo(function PickerRow<ItemType>({
     </Pressable>
   );
 }) as <ItemType>(props: PickerRowProps<ItemType>) => ReactElement;
-
-const styles = StyleSheet.create({
-  disabledItem: {
-    opacity: 0.4,
-  },
-});
