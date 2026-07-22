@@ -78,6 +78,16 @@ export interface Split {
   // 0 to n workouts per day (empty array means rest day)
 }
 
+/** One recorded bodyweight measurement. unit is tagged per entry (the setting may change between
+ *  entries), matching WorkoutSession.unit — stored data is self-describing, so a value is always
+ *  interpretable regardless of the current setting. */
+export interface BodyweightEntry {
+  id: string;
+  weight: number;
+  unit: WeightUnit;
+  recordedAt: string; // ISO 8601 timestamp
+}
+
 /** Runtime record of one performed set — weight + actual reps.
  *  Load is intentionally absent from plan types (PlannedSet/WorkoutExercise); it belongs only here. */
 export interface LoggedSet {
