@@ -4,7 +4,9 @@ import { useTheme } from '@/context/ThemeContext';
 import { useUnit } from '@/context/UnitContext';
 import { spacing, type ThemeMode } from '@/styles';
 import type { WeightUnit } from '@/types';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // The two modes the Appearance control switches between; keys are the ThemeMode union so the
@@ -23,10 +25,11 @@ const UNIT_OPTIONS: { key: WeightUnit; label: string }[] = [
 // Profile / Settings tab. Implements Appearance (theme) control, and Units.
 // Bodyweight and data export land in later steps.
 export default function ProfileScreen() {
-  const { mode, setMode, layout, typography } = useTheme();
+  const { mode, setMode, colors, layout, typography } = useTheme();
   const { unit, setUnit } = useUnit();
   const { activeSession } = useActiveSession();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   // Units lock for the duration of an active workout session, so every load in it is logged in one unit.
   // Only this control is disabled — the tab itself stays fully navigable.
@@ -64,6 +67,18 @@ export default function ProfileScreen() {
             You cannot change weight units during an active workout session.
           </Text>
         )}
+      </View>
+
+      {/* Bodyweight — opens the full-screen bodyweight log + progression chart. */}
+      <View style={styles.section}>
+        <Text style={[typography.caption, styles.sectionLabel]}>Bodyweight</Text>
+        <Pressable
+          onPress={() => router.push('/bodyweight')}
+          style={({ pressed }) => [layout.card, layout.rowBetween, pressed && layout.pressedCard]}
+        >
+          <Text style={typography.subheading}>Bodyweight log</Text>
+          <Ionicons name="chevron-forward" size={20} color={colors.textSubtle} />
+        </Pressable>
       </View>
     </ScrollView>
   );

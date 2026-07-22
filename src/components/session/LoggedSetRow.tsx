@@ -1,6 +1,7 @@
 import { useTheme } from '@/context/ThemeContext';
 import { radius, spacing, type Palette } from '@/styles';
 import type { EditableLoggedSet, LoggedSet } from '@/types';
+import { sanitizeWeight } from '@/utils/units';
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -19,17 +20,6 @@ interface LoggedSetRowProps {
 // the keyboard). The MAX_REPS cap is enforced at finish (isLoggedSetValid + red highlight), not here.
 function sanitizeReps(text: string): string {
   return text.replace(/\D/g, ''); // replace every character that is not a digit 0-9 with ''
-}
-
-// Keep digits and at most one decimal point, so the load field only ever holds a valid
-// non-negative decimal (e.g. "53.75"). A trailing "53." is preserved so mid-typing works;
-// parseFloat tolerates it. The MAX_WEIGHT cap is enforced at finish, not here.
-function sanitizeWeight(text: string): string {
-  const cleaned = text.replace(/[^0-9.]/g, ''); // strips any chars that are not 0-9 or a dot
-  const firstDot = cleaned.indexOf('.');
-  if (firstDot === -1) return cleaned;
-  // Keep the first decimal point, strip any subsequent ones.
-  return cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
 }
 
 export default function LoggedSetRow({

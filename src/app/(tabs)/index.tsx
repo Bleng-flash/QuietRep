@@ -1,3 +1,4 @@
+import LogBodyweightCard from '@/components/home/LogBodyweightCard';
 import MonthlyStatsCard from '@/components/home/MonthlyStatsCard';
 import RecentWorkouts from '@/components/home/RecentWorkouts';
 import { useTheme } from '@/context/ThemeContext';
@@ -77,6 +78,9 @@ export default function HomeScreen() {
 
       <MonthlyStatsCard {...currentMonth} />
 
+      <Text style={[typography.heading, styles.logBodyweightHeading]}>Log bodyweight</Text>
+      <LogBodyweightCard />
+
       <RecentWorkouts sessions={sessions} />
     </ScrollView>
   );
@@ -93,5 +97,10 @@ const makeStyles = (colors: Palette) =>
     },
     allMonthsLink: {
       gap: spacing.xs,
+    },
+    logBodyweightHeading: {
+      // Matches the "This month" header rhythm: a section gap above, a small gap down to its card.
+      marginTop: spacing.l,
+      marginBottom: spacing.s,
     },
   });
