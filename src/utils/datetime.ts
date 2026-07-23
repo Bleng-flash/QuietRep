@@ -51,6 +51,19 @@ export function formatSessionDate(iso: string): string {
   });
 }
 
+/** Formats an ISO timestamp as a compact date + clock time, e.g. "Jul 14, 2026, 8:04 AM".
+ *  No weekday — deliberately shorter than formatSessionDate, for dense rows (bodyweight entries)
+ *  where the time matters: it is what disambiguates multiple same-day readings. */
+export function formatDateTime(iso: string): string {
+  return new Date(iso).toLocaleString(undefined, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
 /** Formats a completed session's total length (startedAt -> finishedAt) in human-readable units,
  *  e.g. "4 hrs 30 mins", "45 mins", or "2 hrs" (minutes omitted when zero). Returns '' when finishedAt
  *  is null (should not happen for a finished session, but the type allows it, so we guard).
