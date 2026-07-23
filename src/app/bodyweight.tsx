@@ -118,7 +118,7 @@ export default function BodyweightScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         {hasLoaded &&
           (bodyweightEntries.length === 0 ? (
-            <ListEmptyText message="No bodyweight entries yet." />
+            <ListEmptyText message="No bodyweight entries yet. Log your weight from the Home tab." />
           ) : (
             <>
               <SegmentedControl

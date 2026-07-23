@@ -218,6 +218,7 @@ Each item is reviewed + committed separately by the user; this list grows as ite
 
 - **Data-export deferral recorded** — the "Next steps" section below now marks Step 4 as deferred to the backend transition (decided 2026-07-23), and `profile.tsx`'s header comment was updated to match.
 - `src/app/(tabs)/profile.tsx` — new **About** section below Bodyweight, same section pattern (uppercase caption label): a **non-pressable** `layout.card` + `layout.rowBetween` row, "QuietRep Version" (`typography.actionSubtle`) on the left, the version (`typography.caption`) on the right. Version comes from a module-scope `APP_VERSION = Constants.expoConfig?.version ?? 'unknown'` via **`expo-constants`** (already installed — no new dependency); module scope because it is static per build.
+- `src/app/bodyweight.tsx` + `src/app/bodyweight/entries.tsx` — the empty-state message is now actionable: "No bodyweight entries yet. Log your weight from the Home tab." Logging lives on Home (the action-vs-review split), but the empty state never said where — a dead end for a user who lands on the trend screen first. Same message on both screens (the entries screen reaches this state after deleting every entry).
 
 ## Next steps
 
