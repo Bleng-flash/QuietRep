@@ -5,6 +5,7 @@ import { useUnit } from '@/context/UnitContext';
 import { spacing, type ThemeMode } from '@/styles';
 import type { WeightUnit } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,14 +17,18 @@ const THEME_OPTIONS: { key: ThemeMode; label: string }[] = [
   { key: 'light', label: 'Light' },
 ];
 
+// App version from app.json via expo-constants; static per build, so read once at module scope.
+// The fallback covers environments where expoConfig is unavailable (never in a normal build).
+const APP_VERSION = Constants.expoConfig?.version ?? 'unknown';
+
 // Same pattern as THEME_OPTIONS, keyed to the WeightUnit union.
 const UNIT_OPTIONS: { key: WeightUnit; label: string }[] = [
   { key: 'kg', label: 'kg' },
   { key: 'lbs', label: 'lbs' },
 ];
 
-// Profile / Settings tab. Implements Appearance (theme) control, and Units.
-// Bodyweight and data export land in later steps.
+// Profile / Settings tab. Implements Appearance (theme) control, Units, and the Bodyweight nav row.
+// Data export is deferred to the backend transition.
 export default function ProfileScreen() {
   const { mode, setMode, colors, layout, typography } = useTheme();
   const { unit, setUnit } = useUnit();
@@ -79,6 +84,15 @@ export default function ProfileScreen() {
           <Text style={typography.subheading}>Bodyweight log</Text>
           <Ionicons name="chevron-forward" size={20} color={colors.textSubtle} />
         </Pressable>
+      </View>
+
+      {/* About — static app metadata; a plain (non-pressable) card row. */}
+      <View style={styles.section}>
+        <Text style={[typography.caption, styles.sectionLabel]}>About</Text>
+        <View style={[layout.card, layout.rowBetween]}>
+          <Text style={typography.actionSubtle}>QuietRep Version</Text>
+          <Text style={typography.caption}>{APP_VERSION}</Text>
+        </View>
       </View>
     </ScrollView>
   );

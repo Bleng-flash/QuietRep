@@ -212,15 +212,22 @@ Built in five reviewed stages (data layer → combined screen → Home/Profile s
 - `src/components/profile/BodyweightEntryRow.tsx` — memoised primitive-prop row; converts to the current display unit via its own `useUnit()` like the History cards. No card chrome — a dense log reads better as a divided list.
 - `src/app/(tabs)/profile.tsx` — a **Bodyweight** section nav row (card + chevron-forward) pushing `/bodyweight`.
 
+**New in Iteration 5, Step 5 (polish pass — IN PROGRESS, landing item by item):**
+
+Each item is reviewed + committed separately by the user; this list grows as items land.
+
+- **Data-export deferral recorded** — the "Next steps" section below now marks Step 4 as deferred to the backend transition (decided 2026-07-23), and `profile.tsx`'s header comment was updated to match.
+- `src/app/(tabs)/profile.tsx` — new **About** section below Bodyweight, same section pattern (uppercase caption label): a **non-pressable** `layout.card` + `layout.rowBetween` row, "QuietRep Version" (`typography.actionSubtle`) on the left, the version (`typography.caption`) on the right. Version comes from a module-scope `APP_VERSION = Constants.expoConfig?.version ?? 'unknown'` via **`expo-constants`** (already installed — no new dependency); module scope because it is static per build.
+
 ## Next steps
 
-**Iteration 5 (Profile tab) is in progress**, built as independently-committable steps (the user reviews + commits each one separately). Confirmed scope after discussion: **theming + units preference + bodyweight log**; **rest timer is deferred**; **data export** is a decision point pending the user's go-ahead.
+**Iteration 5 (Profile tab) is in progress**, built as independently-committable steps (the user reviews + commits each one separately). Confirmed scope after discussion: **theming + units preference + bodyweight log + polish pass**; **rest timer is deferred**; **data export is deferred to the backend transition** (decided 2026-07-23 — see Step 4 below).
 
 - **Step 1 — Dark/Light theming — DONE** (see Current State above).
 - **Step 2 — Units preference (kg / lbs) — DONE** (all three commits; see Current State above, and "Weight units" in Key Design Decisions).
 - **Step 3 — Bodyweight log + progression chart — DONE** (all five stages; see Current State above, and "Bodyweight is 'now'-only logging" in Key Design Decisions). Plan file: `/home/bryan/.claude/plans/read-claude-md-to-understand-velvety-crown.md`.
-- **Step 4 — Data export — DECISION POINT.** Optional, independent. Purpose: device-local data has no backup today; export dumps all AsyncStorage source keys to a shareable JSON file (manual backup + seed for a future import/restore + backend migration). If built: an "Export data" button reads all source keys via `AsyncStorage.getAllKeys()` + `multiGet`, assembles a versioned JSON object, and shares it. **Likely needs `expo-sharing` + `expo-file-system`** (not currently installed — the user installs deps; flag the exact command rather than run it).
-- **Step 5 — Polish pass — TODO.** Rough edges surfaced from using Profile end-to-end (empty states, spacing, safe-area, a possible "About/version" row).
+- **Step 4 — Data export — DEFERRED to the backend transition (decided 2026-07-23; do not re-raise).** Not built in Iteration 5. Rationale: the export logic ("read every AsyncStorage key → assemble structured data") is exactly the read side of the backend migration path, so building it now means building it twice or letting the format go stale as the schema evolves; the versioned JSON format is answered for free by the backend's API schema instead of guessed at now; and export **without import/restore** produces a file with no consumer — a backup you can read but not restore. At backend time it will be built as one coherent piece: export + import/restore + migration. Accepted risk in the meantime: dev-device data has no in-app backup (crude stopgaps like `adb backup` exist without building a feature).
+- **Step 5 — Polish pass — IN PROGRESS.** Rough edges surfaced from reading/using Profile end-to-end: an About/version section on Profile (via the already-installed `expo-constants`), an actionable bodyweight empty-state CTA pointing at the Home logging card, a delete confirm on the entries screen that names the entry (weight + date/time), and Home-screen keyboard handling (`KeyboardAvoidingView` + `keyboardShouldPersistTaps` — the one keyboard surface missing the app-wide recipe). Plan file: `/home/bryan/.claude/plans/read-through-claude-md-and-misty-sun.md`.
 
 Approved plan file for this iteration: `/home/bryan/.claude/plans/we-have-1-tab-serene-ladybug.md`.
 
