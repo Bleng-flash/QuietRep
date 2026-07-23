@@ -24,7 +24,7 @@ Iteration sequence for the frontend:
   Predefined exercise library. Animations and transitions. Empty state illustrations. Onboarding flow for first-time users. Any UX rough edges surfaced from using the app.
 
 \
-Iteration 1 is complete, **iteration 2 is complete** (all six steps done), **iteration 3 is complete**, and **iteration 4 (Home tab) is complete**. The table below details the progress within iteration 2.
+Iteration 1 is complete, **iteration 2 is complete** (all six steps done), **iteration 3 is complete**, **iteration 4 (Home tab) is complete**, and **iteration 5 (Profile tab) is complete** (data export deferred to the backend transition; rest timer descoped). The table below details the progress within iteration 2.
 | Step | Feature | Status |
 | ---- | ----------------------------------------------------------------------- | ----------- |
 | 1 | Session types, storage (`sessions.ts`), and utils (`session.ts`) | Done |
@@ -36,7 +36,7 @@ Iteration 1 is complete, **iteration 2 is complete** (all six steps done), **ite
 
 ## Current State
 
-Iteration 1 is complete, Iteration 2 is complete (Steps 1-6 done), Iteration 3 is complete, and Iteration 4 (Home tab) is complete. The following is fully functional:
+Iteration 1 is complete, Iteration 2 is complete (Steps 1-6 done), Iteration 3 is complete, Iteration 4 (Home tab) is complete, and Iteration 5 (Profile tab) is complete. The following is fully functional:
 
 **Iteration 1 (complete):**
 - Plan index screen with Splits, Workouts, and Exercises sections
@@ -212,9 +212,9 @@ Built in five reviewed stages (data layer → combined screen → Home/Profile s
 - `src/components/profile/BodyweightEntryRow.tsx` — memoised primitive-prop row; converts to the current display unit via its own `useUnit()` like the History cards. No card chrome — a dense log reads better as a divided list.
 - `src/app/(tabs)/profile.tsx` — a **Bodyweight** section nav row (card + chevron-forward) pushing `/bodyweight`.
 
-**New in Iteration 5, Step 5 (polish pass — IN PROGRESS, landing item by item):**
+**New in Iteration 5, Step 5 (polish pass — Step 5 complete, closing Iteration 5):**
 
-Each item is reviewed + committed separately by the user; this list grows as items land.
+Each item was reviewed + committed separately by the user.
 
 - **Data-export deferral recorded** — the "Next steps" section below now marks Step 4 as deferred to the backend transition (decided 2026-07-23), and `profile.tsx`'s header comment was updated to match.
 - `src/app/(tabs)/profile.tsx` — new **About** section below Bodyweight, same section pattern (uppercase caption label): a **non-pressable** `layout.card` + `layout.rowBetween` row, "QuietRep Version" (`typography.actionSubtle`) on the left, the version (`typography.caption`) on the right. Version comes from a module-scope `APP_VERSION = Constants.expoConfig?.version ?? 'unknown'` via **`expo-constants`** (already installed — no new dependency); module scope because it is static per build.
@@ -227,13 +227,13 @@ Each item is reviewed + committed separately by the user; this list grows as ite
 
 ## Next steps
 
-**Iteration 5 (Profile tab) is in progress**, built as independently-committable steps (the user reviews + commits each one separately). Confirmed scope after discussion: **theming + units preference + bodyweight log + polish pass**; **rest timer is deferred**; **data export is deferred to the backend transition** (decided 2026-07-23 — see Step 4 below).
+**Iteration 5 (Profile tab) is COMPLETE (2026-07-23)**, built as independently-committable steps (the user reviewed + committed each one separately). Confirmed scope after discussion: **theming + units preference + bodyweight log + polish pass**; **rest timer is deferred**; **data export is deferred to the backend transition** (decided 2026-07-23 — see Step 4 below). **Next up: bug fixes surfaced from dogfooding (on a separate branch), then Iteration 6** (predefined content, animations, empty-state illustrations, onboarding).
 
 - **Step 1 — Dark/Light theming — DONE** (see Current State above).
 - **Step 2 — Units preference (kg / lbs) — DONE** (all three commits; see Current State above, and "Weight units" in Key Design Decisions).
 - **Step 3 — Bodyweight log + progression chart — DONE** (all five stages; see Current State above, and "Bodyweight is 'now'-only logging" in Key Design Decisions). Plan file: `/home/bryan/.claude/plans/read-claude-md-to-understand-velvety-crown.md`.
 - **Step 4 — Data export — DEFERRED to the backend transition (decided 2026-07-23; do not re-raise).** Not built in Iteration 5. Rationale: the export logic ("read every AsyncStorage key → assemble structured data") is exactly the read side of the backend migration path, so building it now means building it twice or letting the format go stale as the schema evolves; the versioned JSON format is answered for free by the backend's API schema instead of guessed at now; and export **without import/restore** produces a file with no consumer — a backup you can read but not restore. At backend time it will be built as one coherent piece: export + import/restore + migration. Accepted risk in the meantime: dev-device data has no in-app backup (crude stopgaps like `adb backup` exist without building a feature).
-- **Step 5 — Polish pass — IN PROGRESS.** Rough edges surfaced from reading/using Profile end-to-end: an About/version section on Profile (via the already-installed `expo-constants`), an actionable bodyweight empty-state CTA pointing at the Home logging card, a delete confirm on the entries screen that names the entry (weight + date/time), and Home-screen keyboard handling (`KeyboardAvoidingView` + `keyboardShouldPersistTaps` — the one keyboard surface missing the app-wide recipe). Plan file: `/home/bryan/.claude/plans/read-through-claude-md-and-misty-sun.md`.
+- **Step 5 — Polish pass — DONE.** Rough edges surfaced from reading/using Profile end-to-end: an About/version section on Profile (via the already-installed `expo-constants`), an actionable bodyweight empty-state CTA pointing at the Home logging card, a delete confirm on the entries screen that names the entry (weight + date/time), and Home-screen keyboard handling (`KeyboardAvoidingView` + `keyboardShouldPersistTaps` — the one keyboard surface missing the app-wide recipe). Plan file: `/home/bryan/.claude/plans/read-through-claude-md-and-misty-sun.md`.
 
 Approved plan file for this iteration: `/home/bryan/.claude/plans/we-have-1-tab-serene-ladybug.md`.
 
