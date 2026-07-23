@@ -4,9 +4,9 @@ import { useCallback, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ScrollViewContainer } from 'react-native-reorderable-list';
 
+import SplitCard from '@/components/plan/SplitCard';
 import NamePromptModal from '@/components/shared/NamePromptModal';
 import SectionHeader from '@/components/shared/SectionHeader';
-import SplitCard from '@/components/plan/SplitCard';
 import WorkoutCard from '@/components/shared/WorkoutCard';
 import { useTheme } from '@/context/ThemeContext';
 import { addSplit, getActiveSplitId, getAllExercises, getSplits, getWorkouts } from '@/storage';
@@ -60,6 +60,11 @@ export default function PlanScreen() {
       style={layout.screen}
       contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + spacing.s }]}
       showsVerticalScrollIndicator={false}
+      // The Plan screen has no inline inputs, but RN's responder system walks the REACT tree —
+      // crossing Modal boundaries — so this container governs taps inside NamePromptModal
+      // (create/rename split) and WorkoutPicker while their keyboards are up. Without "handled",
+      // the default swallows the first tap on Save/Cancel to dismiss the keyboard.
+      keyboardShouldPersistTaps="handled"
     >
       {/* ── Splits ── */}
       {/* flushTop: leads the screen, so drop the default top margin to align with Home/History */}
@@ -79,6 +84,11 @@ export default function PlanScreen() {
           // disable FlatList's own scroll container so the outer ScrollView
           // (which wraps the whole screen) handles scrolling instead
           scrollEnabled={false}
+          // Responder capture runs outer->inner, so the outer container's "handled" cannot help
+          // content under THIS list: SplitCard's rename NamePromptModal and WorkoutPicker are
+          // React-descendants of it, and without "handled" it swallows their first tap while
+          // the keyboard is up (see the outer ScrollViewContainer comment).
+          keyboardShouldPersistTaps="handled"
           renderItem={({ item }) => (
             <SplitCard
               split={item}
@@ -106,6 +116,9 @@ export default function PlanScreen() {
           data={standaloneWorkouts}
           keyExtractor={(item) => item.id}
           scrollEnabled={false}
+          // Same as the splits list above — no input modals under this list today, but any
+          // future one would silently regress to two-tap without it.
+          keyboardShouldPersistTaps="handled"
           renderItem={({ item }) => (
             <WorkoutCard
               workout={item}

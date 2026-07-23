@@ -7,7 +7,7 @@ import { sanitizeWeight } from '@/utils/units';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 // Home "Log bodyweight" card: a present-moment logging action on the "today" surface (mirroring the
 // FAB for workouts). Self-contained — Home shows no bodyweight state and there is one fixed action,
@@ -31,6 +31,9 @@ export default function LogBodyweightCard() {
     // creation" rule sessions follow. The stored entry is self-describing thereafter.
     await addBodyweightEntry({ weight: weightValue, unit, recordedAt: new Date().toISOString() });
     setWeightText('');
+    // Logging completes the typing flow — nothing left to type — so the closing keyboard
+    // reinforces "saved" alongside the haptic.
+    Keyboard.dismiss();
     // Fire-and-forget feedback that the entry saved, since nothing on Home reflects it.
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   }

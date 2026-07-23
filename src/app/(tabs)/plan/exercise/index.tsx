@@ -106,6 +106,10 @@ export default function ExerciseListScreen() {
           sections={sections}
           keyExtractor={(item) => item.id}
           windowSize={5}
+          // The search keyboard is up while browsing results; without "handled" this list
+          // swallows the first tap on the Create-new footer / a row's trash icon to dismiss
+          // the keyboard (the app-wide keyboardShouldPersistTaps convention).
+          keyboardShouldPersistTaps="handled"
           renderSectionHeader={useCallback(
             ({ section }: { section: { title: string; data: Exercise[] } }) => (
               <SectionHeader title={section.title} />

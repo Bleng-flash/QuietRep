@@ -67,6 +67,11 @@ export default function DraggableCardList<ItemType>({
       onReorder={handleReorder}
       ItemSeparatorComponent={separatorHeight > 0 ? ItemSeparator : undefined}
       scrollEnabled={false}
+      // keyboardShouldPersistTaps is per-scroll-view and NOT inherited: this list is FlatList-based
+      // (a ScrollView underneath, even with scrolling disabled), so without its own "handled" it
+      // swallows the first tap on any child button to dismiss the keyboard — the outer
+      // ScrollViewContainer's "handled" cannot reach in here. Matches the app-wide convention.
+      keyboardShouldPersistTaps="handled"
     />
   );
 }

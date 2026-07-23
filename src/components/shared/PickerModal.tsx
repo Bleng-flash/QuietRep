@@ -115,6 +115,11 @@ export default function PickerModal<ItemType extends { name: string }>({
           data={filteredItems}
           keyExtractor={keyExtractor}
           contentContainerStyle={{ paddingBottom: spacing.xxl }}
+          // The search keyboard is almost always up when a result is tapped; without "handled"
+          // this FlatList (a ScrollView underneath, running its own tap interception) swallows
+          // the first tap on a row / Create-new to dismiss the keyboard — the DraggableCardList
+          // lesson: keyboardShouldPersistTaps is per-scroll-view and not inherited.
+          keyboardShouldPersistTaps="handled"
           renderItem={renderItem}
           ListEmptyComponent={<ListEmptyText message={emptyMessage} />}
           ListFooterComponent={
