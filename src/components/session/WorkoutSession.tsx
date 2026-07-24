@@ -1,6 +1,8 @@
 import SessionExerciseCard from '@/components/session/SessionExerciseCard';
 import SessionHeader from '@/components/session/SessionHeader';
-import DraggableCardList from '@/components/shared/DraggableCardList';
+import DraggableCardList, {
+  DRAG_LONG_PRESS_DELAY_MS,
+} from '@/components/shared/DraggableCardList';
 import ExercisePicker from '@/components/shared/ExercisePicker';
 import ListEmptyText from '@/components/shared/ListEmptyText';
 import { useActiveSession } from '@/context/ActiveSessionContext';
@@ -213,7 +215,7 @@ export default function WorkoutSession() {
             onReorder={handleReorderExercises}
             separatorHeight={spacing.m}
             renderCard={(item, drag) => (
-              <Pressable onLongPress={drag} delayLongPress={200}>
+              <Pressable onLongPress={drag} delayLongPress={DRAG_LONG_PRESS_DELAY_MS}>
                 <SessionExerciseCard
                   resolvedSessionExercise={item}
                   invalidSetKeys={invalidSetKeys}

@@ -1,5 +1,7 @@
 import WorkoutExerciseCard from '@/components/plan/WorkoutExerciseCard';
-import DraggableCardList from '@/components/shared/DraggableCardList';
+import DraggableCardList, {
+  DRAG_LONG_PRESS_DELAY_MS,
+} from '@/components/shared/DraggableCardList';
 import EditorHeader from '@/components/shared/EditorHeader';
 import ExercisePicker from '@/components/shared/ExercisePicker';
 import { useTheme } from '@/context/ThemeContext';
@@ -216,7 +218,7 @@ export default function WorkoutEditor({ initialWorkout, onSave, onDelete }: Work
           separatorHeight={spacing.m}
           renderCard={(item, drag) => (
             // WorkoutExerciseCard is View-rooted, so wrap in a Pressable to attach the drag trigger.
-            <Pressable onLongPress={drag} delayLongPress={200}>
+            <Pressable onLongPress={drag} delayLongPress={DRAG_LONG_PRESS_DELAY_MS}>
               <WorkoutExerciseCard
                 resolvedWorkoutExercise={item}
                 invalidSetKeys={invalidSetKeys}

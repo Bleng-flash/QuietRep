@@ -1,3 +1,4 @@
+import { DRAG_LONG_PRESS_DELAY_MS } from '@/components/shared/DraggableCardList';
 import { useTheme } from '@/context/ThemeContext';
 import { spacing } from '@/styles';
 import type { Exercise, Workout } from '@/types';
@@ -20,7 +21,8 @@ export default function WorkoutCard({ workout, allExercises, onLongPress }: Work
     <Pressable
       onPress={() => router.push(`/plan/workout/${workout.id}`)}
       onLongPress={onLongPress}
-      delayLongPress={200}
+      // Must stay <= the pan-arm delay in DraggableCardList so hold-to-drag arms before scroll.
+      delayLongPress={DRAG_LONG_PRESS_DELAY_MS}
       style={({ pressed }) => [layout.card, {marginBottom: spacing.xs}, pressed && layout.pressedCard]}
     >
       <Text style={typography.subheading} numberOfLines={1}>
