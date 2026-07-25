@@ -5,6 +5,7 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ScrollViewContainer } from 'react-native-reorderable-list';
 
 import SplitCard from '@/components/plan/SplitCard';
+import EmptyState from '@/components/shared/EmptyState';
 import NamePromptModal from '@/components/shared/NamePromptModal';
 import SectionHeader from '@/components/shared/SectionHeader';
 import WorkoutCard from '@/components/shared/WorkoutCard';
@@ -76,7 +77,11 @@ export default function PlanScreen() {
       />
 
       {splits.length === 0 ? (
-        <EmptyState message="No splits yet. Create one to get started." />
+        <EmptyState
+          icon="calendar-outline"
+          title="No splits yet"
+          message="Build a weekly split to plan which workouts land on which day."
+        />
       ) : (
         <FlatList
           data={splits}
@@ -110,7 +115,11 @@ export default function PlanScreen() {
         buttonLabel="New Workout"
       />
       {standaloneWorkouts.length === 0 ? (
-        <EmptyState message="No workouts yet. Create one to get started." />
+        <EmptyState
+          icon="clipboard-outline"
+          title="No workouts yet"
+          message="Create a workout template to reuse in your splits and workout sessions."
+        />
       ) : (
         <FlatList
           data={standaloneWorkouts}
@@ -159,15 +168,6 @@ export default function PlanScreen() {
   );
 }
 
-function EmptyState({ message }: { message: string }) {
-  const { typography } = useTheme();
-  return (
-    <View style={styles.emptyState}>
-      <Text style={typography.caption}>{message}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: spacing.m,
@@ -175,9 +175,5 @@ const styles = StyleSheet.create({
   },
   exerciseActionText: {
     marginLeft: spacing.s,
-  },
-  emptyState: {
-    paddingVertical: spacing.m,
-    paddingHorizontal: spacing.s,
   },
 });

@@ -4,7 +4,7 @@ import DraggableCardList, {
   DRAG_LONG_PRESS_DELAY_MS,
 } from '@/components/shared/DraggableCardList';
 import ExercisePicker from '@/components/shared/ExercisePicker';
-import ListEmptyText from '@/components/shared/ListEmptyText';
+import EmptyState from '@/components/shared/EmptyState';
 import { useActiveSession } from '@/context/ActiveSessionContext';
 import { useTheme } from '@/context/ThemeContext';
 import { getAllExercises } from '@/storage';
@@ -205,7 +205,11 @@ export default function WorkoutSession() {
         keyboardShouldPersistTaps="handled"
       >
         {resolvedSessionExercises.length === 0 ? (
-          <ListEmptyText message="No exercises yet. Add one to start logging." />
+          <EmptyState
+            icon="barbell-outline"
+            title="No exercises yet"
+            message="Add an exercise to start logging sets."
+          />
         ) : (
           <DraggableCardList
             data={resolvedSessionExercises}

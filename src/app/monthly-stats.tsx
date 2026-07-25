@@ -1,5 +1,5 @@
 import MonthlyStatsCard from '@/components/home/MonthlyStatsCard';
-import ListEmptyText from '@/components/shared/ListEmptyText';
+import EmptyState from '@/components/shared/EmptyState';
 import { useTheme } from '@/context/ThemeContext';
 import { getMonthlyStatsHistory } from '@/storage';
 import { spacing } from '@/styles';
@@ -73,7 +73,15 @@ export default function MonthlyStatsScreen() {
         windowSize={5}
         contentContainerStyle={styles.listContent}
         ItemSeparatorComponent={ItemSeparator}
-        ListEmptyComponent={hasLoaded ? <ListEmptyText message="No workouts logged yet." /> : null}
+        ListEmptyComponent={
+          hasLoaded ? (
+            <EmptyState
+              icon="stats-chart-outline"
+              title="No workouts logged yet"
+              message="Monthly totals appear once you finish a workout."
+            />
+          ) : null
+        }
       />
     </View>
   );

@@ -1,5 +1,5 @@
 import PastSessionCard from '@/components/history/byWorkout/PastSessionCard';
-import ListEmptyText from '@/components/shared/ListEmptyText';
+import EmptyState from '@/components/shared/EmptyState';
 import { spacing } from '@/styles';
 import type { WorkoutSession } from '@/types';
 import { useCallback } from 'react';
@@ -43,7 +43,11 @@ export default function PastSessionsList({ sessions, onOpen }: PastSessionsListP
       windowSize={5}
       ItemSeparatorComponent={() => <View style={{ height: spacing.s }} />}
       ListEmptyComponent={
-        <ListEmptyText message="No workouts yet. Finish a session to see it here." />
+        <EmptyState
+          icon="barbell-outline"
+          title="No workouts logged yet"
+          message="Finish a workout to see it here."
+        />
       }
       contentContainerStyle={{ padding: spacing.m, paddingBottom: spacing.xxl }}
     />

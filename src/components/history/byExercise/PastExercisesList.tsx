@@ -1,5 +1,5 @@
 import PastExerciseCard from '@/components/history/byExercise/PastExerciseCard';
-import ListEmptyText from '@/components/shared/ListEmptyText';
+import EmptyState from '@/components/shared/EmptyState';
 import { spacing } from '@/styles';
 import type { ExerciseHistorySummary } from '@/types';
 import { useCallback } from 'react';
@@ -36,7 +36,11 @@ export default function PastExercisesList({ summaries, onOpen }: PastExercisesLi
       windowSize={5}
       ItemSeparatorComponent={() => <View style={{ height: spacing.s }} />}
       ListEmptyComponent={
-        <ListEmptyText message="No exercise history yet. Finish a session to see progression here." />
+        <EmptyState
+          icon="trending-up-outline"
+          title="No exercise history yet"
+          message="Finish a workout to track progression per exercise."
+        />
       }
       contentContainerStyle={{ padding: spacing.m, paddingBottom: spacing.xxl }}
     />

@@ -1,5 +1,5 @@
 import BodyweightEntryRow from '@/components/profile/BodyweightEntryRow';
-import ListEmptyText from '@/components/shared/ListEmptyText';
+import EmptyState from '@/components/shared/EmptyState';
 import { useTheme } from '@/context/ThemeContext';
 import { useUnit } from '@/context/UnitContext';
 import { deleteBodyweightEntry, getBodyweightEntries } from '@/storage';
@@ -113,7 +113,11 @@ export default function BodyweightEntriesScreen() {
         ItemSeparatorComponent={RowDivider}
         ListEmptyComponent={
           hasLoaded ? (
-            <ListEmptyText message="No bodyweight entries yet. Log your weight from the Home tab." />
+            <EmptyState
+              icon="scale-outline"
+              title="No bodyweight entries yet"
+              message="Log your weight from the Home tab."
+            />
           ) : null
         }
       />

@@ -1,5 +1,5 @@
 import PastSessionCard from '@/components/history/byWorkout/PastSessionCard';
-import ListEmptyText from '@/components/shared/ListEmptyText';
+import EmptyState from '@/components/shared/EmptyState';
 import SectionHeader from '@/components/shared/SectionHeader';
 import { spacing } from '@/styles';
 import type { WorkoutSession } from '@/types';
@@ -36,7 +36,11 @@ export default function RecentWorkouts({ sessions }: RecentWorkoutsProps) {
     <View>
       <SectionHeader title="Recent workouts" />
       {recentSessions.length === 0 ? (
-        <ListEmptyText message="No workouts yet. Finish a session to see it here." />
+        <EmptyState
+          icon="barbell-outline"
+          title="No workouts yet"
+          message="Start your first workout session today!"
+        />
       ) : (
         recentSessions.map((session, index) => {
           const setCount = session.exercises.reduce(
