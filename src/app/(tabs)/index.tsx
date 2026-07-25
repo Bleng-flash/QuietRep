@@ -3,7 +3,7 @@ import MonthlyStatsCard from '@/components/home/MonthlyStatsCard';
 import RecentWorkouts from '@/components/home/RecentWorkouts';
 import { useTheme } from '@/context/ThemeContext';
 import { getCurrentMonthSummary, getSessions } from '@/storage';
-import { spacing, type Palette } from '@/styles';
+import { SCREEN_TOP_GAP, spacing, type Palette } from '@/styles';
 import type { MonthlyStatsEntry, WorkoutSession } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -59,7 +59,7 @@ export default function HomeScreen() {
     <KeyboardAvoidingView style={layout.screen} behavior="padding">
       <ScrollView
         contentContainerStyle={{
-          paddingTop: insets.top + spacing.s,
+          paddingTop: insets.top + SCREEN_TOP_GAP,
           paddingHorizontal: spacing.m,
           paddingBottom: spacing.xxl,
         }}

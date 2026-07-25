@@ -2,7 +2,7 @@ import SegmentedControl from '@/components/shared/SegmentedControl';
 import { useActiveSession } from '@/context/ActiveSessionContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useUnit } from '@/context/UnitContext';
-import { spacing, type ThemeMode } from '@/styles';
+import { SCREEN_TOP_GAP, spacing, type ThemeMode } from '@/styles';
 import type { WeightUnit } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
@@ -44,7 +44,7 @@ export default function ProfileScreen() {
     <ScrollView
       style={layout.screen}
       contentContainerStyle={{
-        paddingTop: insets.top + spacing.s,
+        paddingTop: insets.top + SCREEN_TOP_GAP,
         paddingHorizontal: spacing.m,
         paddingBottom: spacing.xxl,
       }}

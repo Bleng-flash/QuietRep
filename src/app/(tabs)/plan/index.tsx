@@ -10,7 +10,7 @@ import SectionHeader from '@/components/shared/SectionHeader';
 import WorkoutCard from '@/components/shared/WorkoutCard';
 import { useTheme } from '@/context/ThemeContext';
 import { addSplit, getActiveSplitId, getAllExercises, getSplits, getWorkouts } from '@/storage';
-import { spacing } from '@/styles';
+import { SCREEN_TOP_GAP, spacing } from '@/styles';
 import type { Exercise, Split, Workout } from '@/types';
 import { createEmptyDays } from '@/utils/split';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -58,7 +58,7 @@ export default function PlanScreen() {
   return (
     <ScrollViewContainer
       style={layout.screen}
-      contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + spacing.s }]}
+      contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + SCREEN_TOP_GAP }]}
       showsVerticalScrollIndicator={false}
       // The Plan screen has no inline inputs, but RN's responder system walks the REACT tree —
       // crossing Modal boundaries — so this container governs taps inside NamePromptModal
@@ -171,7 +171,7 @@ function EmptyState({ message }: { message: string }) {
 const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: spacing.m,
-    // paddingTop determined at runtime due to safe inset
+    // paddingTop is applied inline as insets.top + SCREEN_TOP_GAP — the inset is a runtime value
   },
   exerciseActionText: {
     marginLeft: spacing.s,

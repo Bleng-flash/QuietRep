@@ -3,7 +3,7 @@ import PastSessionsList from '@/components/history/byWorkout/PastSessionsList';
 import SegmentedControl from '@/components/shared/SegmentedControl';
 import { useTheme } from '@/context/ThemeContext';
 import { getExerciseHistorySummaries, getSessions } from '@/storage';
-import { spacing } from '@/styles';
+import { SCREEN_TOP_GAP, spacing } from '@/styles';
 import type { ExerciseHistorySummary, WorkoutSession } from '@/types';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -65,7 +65,7 @@ export default function HistoryScreen() {
   return (
     <View style={layout.screen}>
       {/* Pinned header — title + segmented control stay put while the list below scrolls */}
-      <View style={[styles.header, { paddingTop: insets.top + spacing.s }]}>
+      <View style={[styles.header, { paddingTop: insets.top + SCREEN_TOP_GAP }]}>
         <Text style={[typography.heading, styles.title]}>History</Text>
         <SegmentedControl options={LENS_OPTIONS} value={lens} onChange={setLens} />
       </View>
