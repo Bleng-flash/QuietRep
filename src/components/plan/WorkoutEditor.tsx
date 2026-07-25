@@ -19,7 +19,7 @@ import { isPlannedSetValid } from '@/utils/workout';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, TextInput } from 'react-native';
+import { Alert, Keyboard, Pressable, StyleSheet, Text, TextInput } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { ScrollViewContainer } from 'react-native-reorderable-list';
 import { v4 as uuid } from 'uuid';
@@ -208,7 +208,17 @@ export default function WorkoutEditor({ initialWorkout, onSave, onDelete }: Work
           separatorHeight={spacing.m}
           renderCard={(item, drag) => (
             // WorkoutExerciseCard is View-rooted, so wrap in a Pressable to attach the drag trigger.
-            <Pressable onLongPress={drag} delayLongPress={DRAG_LONG_PRESS_DELAY_MS}>
+            <Pressable
+              onLongPress={drag}
+              delayLongPress={DRAG_LONG_PRESS_DELAY_MS}
+              // This wrapper wins the responder for every tap on the card (a Pressable claims the
+              // touch start even with no onPress), which starves the ScrollView's
+              // onResponderRelease blur — the only thing that dismisses the keyboard under
+              // keyboardShouldPersistTaps="handled". Dismissing here restores "tap any non-button
+              // area to close the keyboard" across the card. Inner inputs and buttons are deeper,
+              // so they win the touch outright and this never fires for them.
+              onPress={Keyboard.dismiss}
+            >
               <WorkoutExerciseCard
                 resolvedWorkoutExercise={item}
                 invalidSetKeys={invalidSetKeys}
