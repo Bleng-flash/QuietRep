@@ -19,7 +19,8 @@ import { isLoggedSetValid } from '@/utils/session';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, Text } from 'react-native';
+import { Alert, Pressable, Text } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { ScrollViewContainer } from 'react-native-reorderable-list';
 import { v4 as uuid } from 'uuid';
 
@@ -189,10 +190,7 @@ export default function WorkoutSession() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={layout.screen}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <KeyboardAvoidingView style={layout.screen} behavior="padding">
       <SessionHeader
         name={activeSession?.name ?? ''}
         startedAt={activeSession?.startedAt ?? new Date().toISOString()}

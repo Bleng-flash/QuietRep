@@ -10,8 +10,6 @@ import { useMemo, useState } from 'react';
 import {
   Alert,
   Keyboard,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -19,6 +17,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 export default function NewExerciseScreen() {
   const { colors, layout, typography } = useTheme();
@@ -55,10 +54,10 @@ export default function NewExerciseScreen() {
 
   return (
     <KeyboardAvoidingView
-      // Own the dark background via layout.screen (like the session screen). 
+      // Own the dark background via layout.screen (like the session screen).
       // Since it's a root-stack route, it must set its own.
       style={layout.screen}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior="padding"
     >
       <EditorHeader
         title="New Exercise"

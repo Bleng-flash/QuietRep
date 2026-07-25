@@ -1,16 +1,8 @@
 import { useTheme } from '@/context/ThemeContext';
 import { radius, spacing, type Palette } from '@/styles';
 import { useEffect, useMemo, useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, KeyboardProvider } from 'react-native-keyboard-controller';
 
 interface NamePromptModalProps {
   visible: boolean;
@@ -53,48 +45,56 @@ export default function NamePromptModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      {/* Tap the dimmed backdrop to dismiss */}
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          {/* Stop taps on the dialog itself from bubbling up to the backdrop */}
-          <Pressable style={styles.dialog} onPress={() => {}}>
-            <Text style={[typography.subheading, styles.title]}>{title}</Text>
+      {/* A React Native <Modal> is a separate native window, and the root KeyboardProvider's
+          context does not cross that boundary — so KeyboardAvoidingView here needs its own
+          nested KeyboardProvider to read the keyboard height and lift the centered dialog clear
+          of the keyboard (KC's documented workaround for RN Modal). */}
+      <KeyboardProvider>
+        {/* Tap the dimmed backdrop to dismiss */}
+        <Pressable style={styles.overlay} onPress={onClose}>
+          {/* keyboardVerticalOffset lifts the centered dialog clear of the keyboard top so it
+              isn't flush against it — a positive offset increases the applied bottom padding. */}
+          <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={spacing.l}>
+            {/* Stop taps on the dialog itself from bubbling up to the backdrop */}
+            <Pressable style={styles.dialog} onPress={() => {}}>
+              <Text style={[typography.subheading, styles.title]}>{title}</Text>
 
-            <TextInput
-              style={[typography.body, layout.inputField]}
-              value={nameText}
-              onChangeText={setNameText}
-              placeholder="Name"
-              placeholderTextColor={colors.textDisabled}
-              autoFocus
-              autoCorrect={false}
-              returnKeyType="done"
-              maxLength={60}
-              onSubmitEditing={handleConfirm}
-            />
+              <TextInput
+                style={[typography.body, layout.inputField]}
+                value={nameText}
+                onChangeText={setNameText}
+                placeholder="Name"
+                placeholderTextColor={colors.textDisabled}
+                autoFocus
+                autoCorrect={false}
+                returnKeyType="done"
+                maxLength={60}
+                onSubmitEditing={handleConfirm}
+              />
 
-            <View style={[layout.rowBetween, styles.actions]}>
-              <Pressable
-                onPress={onClose}
-                hitSlop={8}
-                style={({ pressed }) => [pressed && layout.pressedButton]}
-              >
-                <Text style={typography.actionSubtle}>Cancel</Text>
-              </Pressable>
-              <Pressable
-                onPress={handleConfirm}
-                disabled={!canConfirm}
-                hitSlop={8}
-                style={({ pressed }) => [pressed && layout.pressedButton]}
-              >
-                <Text style={[typography.actionPrimary, !canConfirm && styles.disabledAction]}>
-                  {confirmLabel}
-                </Text>
-              </Pressable>
-            </View>
-          </Pressable>
-        </KeyboardAvoidingView>
-      </Pressable>
+              <View style={[layout.rowBetween, styles.actions]}>
+                <Pressable
+                  onPress={onClose}
+                  hitSlop={8}
+                  style={({ pressed }) => [pressed && layout.pressedButton]}
+                >
+                  <Text style={typography.actionSubtle}>Cancel</Text>
+                </Pressable>
+                <Pressable
+                  onPress={handleConfirm}
+                  disabled={!canConfirm}
+                  hitSlop={8}
+                  style={({ pressed }) => [pressed && layout.pressedButton]}
+                >
+                  <Text style={[typography.actionPrimary, !canConfirm && styles.disabledAction]}>
+                    {confirmLabel}
+                  </Text>
+                </Pressable>
+              </View>
+            </Pressable>
+          </KeyboardAvoidingView>
+        </Pressable>
+      </KeyboardProvider>
     </Modal>
   );
 }

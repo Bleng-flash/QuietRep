@@ -8,15 +8,8 @@ import type { MonthlyStatsEntry, WorkoutSession } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Zeroed current-month stats for the first paint before the async load resolves, so the dashboard
@@ -57,15 +50,13 @@ export default function HomeScreen() {
   );
 
   return (
-    // KeyboardAvoidingView because LogBodyweightCard's input sits mid-screen: on iOS the keyboard
-    // overlays the window (no auto-resize like Android's adjustResize, hence the platform gate), so
-    // without this the input and the "Log weight" button below it get covered. Same recipe as
-    // WorkoutSession/WorkoutEditor; persistTaps lets "Log weight" fire on the first tap while the
-    // keyboard is up instead of that tap merely dismissing it.
-    <KeyboardAvoidingView
-      style={layout.screen}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    // KeyboardAvoidingView (react-native-keyboard-controller) because LogBodyweightCard's input
+    // sits mid-screen: without avoidance the input and the "Log weight" button below it get covered
+    // when the keyboard opens. behavior="padding" on both platforms — the library consumes the IME
+    // inset under Android edge-to-edge, where the old adjustResize window shrink no longer fires.
+    // Same recipe as WorkoutSession/WorkoutEditor; persistTaps lets "Log weight" fire on the first
+    // tap while the keyboard is up instead of that tap merely dismissing it.
+    <KeyboardAvoidingView style={layout.screen} behavior="padding">
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + spacing.s,

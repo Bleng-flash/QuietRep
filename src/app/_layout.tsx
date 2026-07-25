@@ -12,6 +12,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 // Inner component so it can consume useTheme() — it sits below ThemeProvider. Drives the
 // root Stack's base background (repainted in one place on a theme toggle) and flips the
@@ -48,15 +49,22 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider>
-        {/* UnitProvider sits above ActiveSessionProvider: the session provider consumes
-            useUnit() to stamp each new session with the unit it is logged in. */}
-        <UnitProvider>
-          <ActiveSessionProvider>
-            <ThemedStack />
-          </ActiveSessionProvider>
-        </UnitProvider>
-      </ThemeProvider>
+      {/* KeyboardProvider (react-native-keyboard-controller) sits above the whole tree so every
+          screen's KeyboardAvoidingView can read the reactive keyboard height. This is what makes
+          keyboard avoidance work under Android edge-to-edge, where the OS no longer resizes the
+          window for the IME. Note: its context does NOT cross React Native <Modal> boundaries —
+          a modal that needs avoidance nests its own KeyboardProvider (see NamePromptModal). */}
+      <KeyboardProvider>
+        <ThemeProvider>
+          {/* UnitProvider sits above ActiveSessionProvider: the session provider consumes
+              useUnit() to stamp each new session with the unit it is logged in. */}
+          <UnitProvider>
+            <ActiveSessionProvider>
+              <ThemedStack />
+            </ActiveSessionProvider>
+          </UnitProvider>
+        </ThemeProvider>
+      </KeyboardProvider>
     </GestureHandlerRootView>
   );
 }

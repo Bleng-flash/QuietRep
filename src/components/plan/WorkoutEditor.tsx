@@ -19,15 +19,8 @@ import { isPlannedSetValid } from '@/utils/workout';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-} from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, TextInput } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { ScrollViewContainer } from 'react-native-reorderable-list';
 import { v4 as uuid } from 'uuid';
 
@@ -186,10 +179,7 @@ export default function WorkoutEditor({ initialWorkout, onSave, onDelete }: Work
   }
 
   return (
-    <KeyboardAvoidingView
-      style={layout.screen}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <KeyboardAvoidingView style={layout.screen} behavior="padding">
       <EditorHeader
         title={isEditMode ? 'Edit Workout' : 'New Workout'}
         onCancel={() => router.back()}
