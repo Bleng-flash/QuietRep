@@ -64,6 +64,17 @@ export function formatDateTime(iso: string): string {
   });
 }
 
+/** Formats an ISO timestamp as a bare wall-clock time, e.g. "7:42 PM". The date-free sibling of
+ *  formatDateTime — used where the date is implied by context (the ongoing-session notification,
+ *  which only ever describes a session started today). Device timezone, per the app-wide
+ *  "store UTC, render local" convention. */
+export function formatTimeOfDay(iso: string): string {
+  return new Date(iso).toLocaleTimeString(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
 /** Formats a completed session's total length (startedAt -> finishedAt) in human-readable units,
  *  e.g. "4 hrs 30 mins", "45 mins", or "2 hrs" (minutes omitted when zero). Returns '' when finishedAt
  *  is null (should not happen for a finished session, but the type allows it, so we guard).
