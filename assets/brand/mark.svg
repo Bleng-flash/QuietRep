@@ -1,0 +1,23 @@
+<!--
+  QuietRep mark - the `dumbbell` glyph from Material Design Icons.
+
+  Source:   node_modules/@mdi/svg/svg/dumbbell.svg
+  Project:  Material Design Icons by Pictogrammers - https://pictogrammers.com/
+  Licence:  Apache 2.0 (Pictogrammers Free License). Commercial use is explicitly permitted.
+
+  Copied in rather than read from node_modules at build time, so the mark is version-controlled
+  with the app and the icon packages can be uninstalled once the choice is made. The geometry
+  below is unmodified; the only change is the fill.
+
+  INK SLOT. #ff00ff is a sentinel, not a real colour. scripts/build-brand-assets.mjs replaces it
+  with the brand green for the colour outputs and with white for the alpha-only ones. Magenta on
+  purpose: if it ever escapes substitution the output screams rather than shipping a
+  plausible-looking green.
+
+  Note the mark is DIAGONAL, which constrains how large it can be drawn in the adaptive-icon
+  layers: its extreme points sit at the corners of its bounding box, so it is the worst case for
+  a circular launcher mask. See the coverage table in build-brand-assets.mjs.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <path fill="#ff00ff" d="M20.57,14.86L22,13.43L20.57,12L17,15.57L8.43,7L12,3.43L10.57,2L9.14,3.43L7.71,2L5.57,4.14L4.14,2.71L2.71,4.14L4.14,5.57L2,7.71L3.43,9.14L2,10.57L3.43,12L7,8.43L15.57,17L12,20.57L13.43,22L14.86,20.57L16.29,22L18.43,19.86L19.86,21.29L21.29,19.86L19.86,18.43L22,16.29L20.57,14.86Z"/>
+</svg>

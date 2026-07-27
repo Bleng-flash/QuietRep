@@ -42,3 +42,6 @@ app-example
 # generated native folders
 /ios
 /android
+
+# brand preview composites — derived from assets/brand/*.svg by `npm run brand`, never shipped
+assets/brand/preview/
