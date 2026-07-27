@@ -25,6 +25,10 @@ interface ThemeContextValue {
   layout: Layout;
   typography: Typography;
   picker: Picker;
+  /** False until the stored mode has been read on cold launch. Consumed by SplashGate, which
+   *  holds the native splash until every provider has hydrated. Without it a Light-mode user
+   *  sees the first frames painted in DEFAULT_MODE and then snap — a visible dark flash. */
+  hasHydrated: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -36,14 +40,22 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
  */
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>(DEFAULT_MODE);
+  const [hasHydrated, setHasHydrated] = useState(false);
 
   // Hydrate the persisted mode once on cold launch. useEffect (not useFocusEffect): a
   // provider has no navigation focus lifecycle, and this must run exactly once at startup.
   useEffect(() => {
     async function hydrateThemeMode() {
-      const storedMode = await AsyncStorage.getItem(THEME_MODE_KEY);
-      if (storedMode === 'dark' || storedMode === 'light') {
-        setModeState(storedMode);
+      try {
+        const storedMode = await AsyncStorage.getItem(THEME_MODE_KEY);
+        if (storedMode === 'dark' || storedMode === 'light') {
+          setModeState(storedMode);
+        }
+      } finally {
+        // finally, not the end of the try block: a storage read that throws must still release
+        // the splash, or the app hangs on it forever. Falling back to DEFAULT_MODE is the
+        // correct outcome in that case.
+        setHasHydrated(true);
       }
     }
     hydrateThemeMode();
@@ -62,22 +74,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // SAME reference across re-renders while `mode` is unchanged, and only becomes a different
   // reference when `mode` flips. That reference stability is what the memos below key off.
   //
-  // Note what those memos do and do not buy today: this provider's ONLY re-render trigger is
-  // `mode` changing (it consumes no context, and RootLayout holds no state), so every render it
-  // ever experiences also invalidates [colors] — the memos never actually skip work right now.
-  // They are kept deliberately, because the moment this provider gains a second piece of state
-  // (a 'system' mode following the device scheme, a hydration flag, an accent preference),
-  // renders decouple from mode changes and the memos immediately start earning their keep:
-  // rebuilding three StyleSheets and re-rendering every consumer on an unrelated render is not
-  // free. See "Context value memoisation" in CLAUDE.md.
+  // These memos are now load-bearing — due to the hydration flag below. This
+  // provider can now re-render with `mode` unchanged (hasHydrated flipping) and vice versa, so
+  // [colors] no longer invalidates on every render: the memos genuinely skip rebuilding three
+  // StyleSheets, and the value memo stops every useTheme() consumer re-rendering for free.
   const colors = palettes[mode];
   const layout = useMemo(() => makeLayout(colors), [colors]);
   const typography = useMemo(() => makeTypography(colors), [colors]);
   const picker = useMemo(() => makePicker(colors), [colors]);
 
   const value = useMemo<ThemeContextValue>(
-    () => ({ mode, setMode, colors, layout, typography, picker }),
-    [mode, setMode, colors, layout, typography, picker],
+    () => ({ mode, setMode, colors, layout, typography, picker, hasHydrated }),
+    [mode, setMode, colors, layout, typography, picker, hasHydrated],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

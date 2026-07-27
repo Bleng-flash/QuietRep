@@ -26,6 +26,11 @@ export interface SessionBuffer {
 
 interface ActiveSessionContextValue {
   activeSession: SessionBuffer | null;
+  /** False until the stored buffer has been read on cold launch. Consumed by SplashGate, which
+   *  holds the native splash until every provider has hydrated — otherwise the resume banner
+   *  pops in a beat after the first frame. Note this is NOT a "no session" signal: activeSession
+   *  is null while this is false even when a session exists. */
+  hasHydrated: boolean;
   /** Starts a new session. Rejects with an Alert if one is already live.
    *  Awaiting ensures the session is persisted before the caller navigates to /session. */
   startSession: (name: string, exercises: EditableSessionExercise[]) => Promise<void>;
@@ -43,6 +48,7 @@ const ActiveSessionContext = createContext<ActiveSessionContextValue | null>(nul
 export function ActiveSessionProvider({ children }: { children: ReactNode }) {
   // the name setActiveSession is already used in src/storage/sessions.ts
   const [activeSession, setSessionBuffer] = useState<SessionBuffer | null>(null);
+  const [hasHydrated, setHasHydrated] = useState(false);
 
   // Read only to stamp a NEW session at creation. A live session's unit never follows this
   // value — the Profile toggle is disabled while a session is active precisely so it can't.
@@ -80,17 +86,24 @@ export function ActiveSessionProvider({ children }: { children: ReactNode }) {
   // has no focus lifecycle. Hydration must run exactly once at mount.
   useEffect(() => {
     async function hydrate() {
-      const stored = await getActiveSession();
-      if (stored) {
-        setSessionBuffer({
-          id: stored.id,
-          name: stored.name,
-          startedAt: stored.startedAt,
-          unit: stored.unit,
-          // Re-attach fresh localKeys — they are stripped before storage writes, so they
-          // are never present in the stored data and must be regenerated on hydration.
-          exercises: hydrateSessionExercises(stored.exercises),
-        });
+      try {
+        const stored = await getActiveSession();
+        if (stored) {
+          setSessionBuffer({
+            id: stored.id,
+            name: stored.name,
+            startedAt: stored.startedAt,
+            unit: stored.unit,
+            // Re-attach fresh localKeys — they are stripped before storage writes, so they
+            // are never present in the stored data and must be regenerated on hydration.
+            exercises: hydrateSessionExercises(stored.exercises),
+          });
+        }
+      } finally {
+        // finally, not the end of the try block: a storage read that throws must still release
+        // the splash, or the app hangs on it forever. Starting with no active session is the
+        // correct outcome in that case.
+        setHasHydrated(true);
       }
     }
     hydrate();
@@ -174,10 +187,16 @@ export function ActiveSessionProvider({ children }: { children: ReactNode }) {
   // this exact object and re-renders automatically when any field in it changes.
   // {children} (the children here is the <Stack>) renders the rest of the app unchanged — the provider adds no visible UI,
   // it just wraps the tree in a context boundary so descendants can subscribe.
+  // Deliberately still NOT memoised, unlike ThemeContext and UnitContext. Adding hasHydrated
+  // does not change the analysis in CLAUDE.md's "Context value memoisation": every path that
+  // re-renders this provider still invalidates something in the value — startSession closes
+  // over `unit`, the other three close over `activeSession`, and hasHydrated flips exactly once
+  // at startup. A memo here would cost four useCallbacks to skip nothing.
   return (
     <ActiveSessionContext.Provider
       value={{
         activeSession,
+        hasHydrated,
         startSession,
         updateActiveSession,
         finishActiveSession,

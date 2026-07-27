@@ -4,15 +4,26 @@
 // uuid — hence it must be the absolute first import in the app entry point.
 import 'react-native-get-random-values';
 
+import { SplashGate } from '@/components/shared/SplashGate';
 import { ActiveSessionProvider } from '@/context/ActiveSessionContext';
 import { ThemeProvider, useTheme } from '@/context/ThemeContext';
 import { UnitProvider } from '@/context/UnitContext';
 import { seedDefaultExercises } from '@/storage';
 import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
+
+// Module scope, not an effect: the splash auto-hides as soon as the first frame renders, which
+// is earlier than any effect can run. SplashGate hides it once the providers have hydrated.
+//
+// This only takes effect in a PRODUCTION build, where the JS bundle is embedded and runs before
+// the splash would auto-hide. In a dev build expo-dev-client fetches the bundle from Metro first,
+// so the splash is already gone by the time this line executes and the call is a no-op — which
+// is why SplashGate also paints its own JS overlay rather than relying on this alone.
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 // Inner component so it can consume useTheme() — it sits below ThemeProvider. Drives the
 // root Stack's base background (repainted in one place on a theme toggle) and flips the
@@ -60,7 +71,12 @@ export default function RootLayout() {
               useUnit() to stamp each new session with the unit it is logged in. */}
           <UnitProvider>
             <ActiveSessionProvider>
-              <ThemedStack />
+              {/* Innermost, so it can read every provider's hasHydrated flag. Renders its
+                  children unconditionally and covers them with an overlay until hydration
+                  completes — so the app mounts on schedule but never paints in the wrong theme. */}
+              <SplashGate>
+                <ThemedStack />
+              </SplashGate>
             </ActiveSessionProvider>
           </UnitProvider>
         </ThemeProvider>
