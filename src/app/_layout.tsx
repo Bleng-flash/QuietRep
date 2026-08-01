@@ -4,6 +4,7 @@
 // uuid — hence it must be the absolute first import in the app entry point.
 import 'react-native-get-random-values';
 
+import SessionNotificationBridge from '@/components/session/SessionNotificationBridge';
 import { SplashGate } from '@/components/shared/SplashGate';
 import { ActiveSessionProvider } from '@/context/ActiveSessionContext';
 import { ThemeProvider, useTheme } from '@/context/ThemeContext';
@@ -58,6 +59,8 @@ export default function RootLayout() {
     runSeed();
   }, []);
 
+  // Every component below mounts once and stays mounted for the rest of the JS runtime.
+  // Backgrounding does NOT unmount. 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       {/* KeyboardProvider (react-native-keyboard-controller) sits above the whole tree so every
@@ -71,6 +74,11 @@ export default function RootLayout() {
               useUnit() to stamp each new session with the unit it is logged in. */}
           <UnitProvider>
             <ActiveSessionProvider>
+              {/* Renders nothing — an AppState controller that posts the ongoing-session
+                  notification when the app is backgrounded mid-workout and clears it on return.
+                  A plain context consumer, so it is mounted here rather than inside the provider
+                  (which would make ActiveSessionContext import a component that imports it back). */}
+              <SessionNotificationBridge />
               {/* Innermost, so it can read every provider's hasHydrated flag. Renders its
                   children unconditionally and covers them with an overlay until hydration
                   completes — so the app mounts on schedule but never paints in the wrong theme. */}

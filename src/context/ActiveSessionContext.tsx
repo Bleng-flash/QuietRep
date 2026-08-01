@@ -1,4 +1,5 @@
 import { useUnit } from '@/context/UnitContext';
+import { ensureNotificationPermission } from '@/notifications/sessionNotification';
 import {
   clearActiveSession,
   finishSession,
@@ -134,6 +135,10 @@ export function ActiveSessionProvider({ children }: { children: ReactNode }) {
       exercises,
     };
     setSessionBuffer(newSession);
+    // Fire-and-forget, deliberately not awaited: the prompt is contextual (asked the moment
+    // notifications become relevant, not at app launch) but it must never delay starting a
+    // workout, and a denial changes nothing — SessionNotificationBridge simply posts nothing.
+    ensureNotificationPermission();
     // Await the persist so the caller can navigate to /session knowing the buffer is saved —
     // important for crash-recovery: if the user immediately kills the app after starting.
     await persistSessionBuffer(newSession);
