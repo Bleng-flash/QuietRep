@@ -108,13 +108,16 @@ export default function WorkoutFabMenu({ visible, onClose }: WorkoutFabMenuProps
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      {/* Tap the dimmed backdrop to dismiss */}
-      <Pressable style={styles.backdrop} onPress={onClose}>
-        {/* Stop taps on the sheet itself from bubbling up to the backdrop */}
-        <Pressable
-          style={[styles.sheet, { paddingBottom: insets.bottom + spacing.l }]}
-          onPress={() => {}}
-        >
+      {/* The backdrop is a SIBLING of the sheet, not its parent. A Pressable claims the touch
+          start unconditionally, so wrapping the sheet in one (the usual "stop taps bubbling to
+          the backdrop" idiom) leaves any ScrollView below it fighting for every gesture. As
+          siblings, responder negotiation never offers a sheet touch to the backdrop at all,
+          since it walks ancestors only. */}
+      <View style={styles.container}>
+        <Pressable style={styles.backdrop} onPress={onClose} />
+
+        {/* Rendered after the backdrop, so it paints on top of it */}
+        <View style={[styles.sheet, { paddingBottom: insets.bottom + spacing.l }]}>
           <View style={styles.grabber} />
 
           {activeSession ? (
@@ -149,7 +152,7 @@ export default function WorkoutFabMenu({ visible, onClose }: WorkoutFabMenuProps
           ) : view === 'pickToday' ? (
             <>
               <SheetBackHeader title="Today's workouts" onBack={() => setView('menu')} />
-              <ScrollView keyboardShouldPersistTaps="handled">
+              <ScrollView style={styles.scrollArea} keyboardShouldPersistTaps="handled">
                 {todayWorkouts.map((workout) => (
                   <WorkoutOptionRow
                     key={workout.id}
@@ -175,7 +178,7 @@ export default function WorkoutFabMenu({ visible, onClose }: WorkoutFabMenuProps
                   clearButtonMode="while-editing"
                 />
               </View>
-              <ScrollView keyboardShouldPersistTaps="handled">
+              <ScrollView style={styles.scrollArea} keyboardShouldPersistTaps="handled">
                 {filteredStandaloneWorkouts.length === 0 ? (
                   <Text style={[typography.caption, styles.emptyText]}>No workouts found</Text>
                 ) : (
@@ -191,8 +194,8 @@ export default function WorkoutFabMenu({ visible, onClose }: WorkoutFabMenuProps
               </ScrollView>
             </>
           )}
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }
@@ -282,10 +285,17 @@ function SheetBackHeader({ title, onBack }: SheetBackHeaderProps) {
 
 const makeStyles = (colors: Palette) =>
   StyleSheet.create({
-    backdrop: {
+    // Holds the backdrop and the sheet as siblings; the sheet is the only in-flow child, so
+    // flex-end docks it to the bottom.
+    container: {
       flex: 1,
-      backgroundColor: colors.overlay,
       justifyContent: 'flex-end',
+    },
+    // Absolutely positioned so it covers the whole screen behind the sheet without being its
+    // ancestor — see the structural comment in the JSX above.
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: colors.overlay,
     },
     sheet: {
       backgroundColor: colors.surface,
@@ -343,5 +353,13 @@ const makeStyles = (colors: Palette) =>
     emptyText: {
       textAlign: 'center',
       paddingVertical: spacing.l,
+    },
+    // The height cap lives on the sheet above, not here, and RN's default flexShrink is 0
+    // (web CSS defaults to 1). Without this a workout list longer than the sheet lays out at
+    // its full content height, so its viewport equals its content, its scroll range is zero,
+    // and it silently refuses to scroll while the sheet clips the overflow. flexShrink (not
+    // flex) so a short list still hugs its content instead of stretching the sheet.
+    scrollArea: {
+      flexShrink: 1,
     },
   });

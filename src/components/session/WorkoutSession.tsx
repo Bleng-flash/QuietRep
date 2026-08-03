@@ -1,10 +1,11 @@
+import RecentPerformancesSheet from '@/components/session/RecentPerformancesSheet';
 import SessionExerciseCard from '@/components/session/SessionExerciseCard';
 import SessionHeader from '@/components/session/SessionHeader';
 import DraggableCardList, {
   DRAG_LONG_PRESS_DELAY_MS,
 } from '@/components/shared/DraggableCardList';
-import ExercisePicker from '@/components/shared/ExercisePicker';
 import EmptyState from '@/components/shared/EmptyState';
+import ExercisePicker from '@/components/shared/ExercisePicker';
 import { useActiveSession } from '@/context/ActiveSessionContext';
 import { useTheme } from '@/context/ThemeContext';
 import { getAllExercises } from '@/storage';
@@ -31,6 +32,12 @@ export default function WorkoutSession() {
 
   const [allExercises, setAllExercises] = useState<Exercise[]>([]);
   const [isPickerVisible, setIsPickerVisible] = useState(false);
+  // Which exercise the recent-history sheet is showing; null when closed. Held here rather than
+  // per-card so there is one Modal for the screen (like ExercisePicker) instead of one mounted
+  // inside every draggable row.
+  const [historyTarget, setHistoryTarget] = useState<{ exerciseId: string; name: string } | null>(
+    null,
+  );
   const [isFinishing, setIsFinishing] = useState(false);
   // Flipped true by the first failed finish; from then on invalid sets are highlighted red and
   // recomputed live from state, so the red clears as the user fixes each set.
@@ -120,6 +127,11 @@ export default function WorkoutSession() {
       { text: 'Keep it', style: 'cancel' },
       { text: 'Remove', style: 'destructive', onPress: () => removeExercise(exerciseId) },
     ]);
+  }
+
+  function handleShowHistory(exerciseId: string, name: string) {
+    Keyboard.dismiss();
+    setHistoryTarget({ exerciseId, name });
   }
 
   function handleSetsChange(exerciseId: string, updatedSets: EditableLoggedSet[]) {
@@ -236,6 +248,9 @@ export default function WorkoutSession() {
                   loggedUnit={activeSession?.unit ?? 'kg'}
                   onSetsChange={(updatedSets) => handleSetsChange(item.exerciseId, updatedSets)}
                   onRemove={() => handleRemoveExercise(item.exerciseId)}
+                  onShowHistory={() =>
+                    handleShowHistory(item.exerciseId, item.exercise?.name ?? 'Unknown exercise')
+                  }
                 />
               </Pressable>
             )}
@@ -275,6 +290,13 @@ export default function WorkoutSession() {
         alreadyAddedIds={alreadyAddedIds}
         onSelect={handleAddExercise}
         onClose={() => setIsPickerVisible(false)}
+      />
+
+      <RecentPerformancesSheet
+        visible={historyTarget !== null}
+        exerciseId={historyTarget?.exerciseId ?? null}
+        exerciseName={historyTarget?.name ?? ''}
+        onClose={() => setHistoryTarget(null)}
       />
     </KeyboardAvoidingView>
   );

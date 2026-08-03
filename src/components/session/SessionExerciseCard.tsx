@@ -21,6 +21,9 @@ interface SessionExerciseCardProps {
   loggedUnit: WeightUnit;
   onSetsChange: (sets: EditableLoggedSet[]) => void;
   onRemove: () => void;
+  /** Opens the recent-history sheet for this exercise. The sheet itself is owned by
+   *  WorkoutSession (one instance for the whole screen), not by each card. */
+  onShowHistory: () => void;
 }
 
 export default function SessionExerciseCard({
@@ -29,6 +32,7 @@ export default function SessionExerciseCard({
   loggedUnit,
   onSetsChange,
   onRemove,
+  onShowHistory,
 }: SessionExerciseCardProps) {
   const { colors, layout, typography } = useTheme();
   const { exercise, sets } = resolvedSessionExercise;
@@ -59,9 +63,22 @@ export default function SessionExerciseCard({
       {/* Header row */}
       <View style={[layout.rowBetween, { marginBottom: spacing.s }]}>
         <View style={{ flex: 1 }}>
-          <Text style={typography.subheading} numberOfLines={1}>
-            {exercise?.name ?? 'Unknown exercise'}
-          </Text>
+          <View style={[layout.row, styles.nameRow]}>
+            {/* flexShrink lets a long name compress rather than pushing the info button
+                out of the card */}
+            <Text style={[typography.subheading, styles.name]} numberOfLines={1}>
+              {exercise?.name ?? 'Unknown exercise'}
+            </Text>
+            {/* Deliberately in the left group, not beside the trash: this is tapped often
+                mid-workout and should never sit next to the destructive action. */}
+            <Pressable
+              onPress={onShowHistory}
+              hitSlop={8}
+              style={({ pressed }) => [pressed && layout.pressedButton]}
+            >
+              <Ionicons name="information-circle-outline" size={18} color={colors.textSubtle} />
+            </Pressable>
+          </View>
           {exercise?.muscleGroup ? (
             <Text style={typography.caption}>{exercise.muscleGroup}</Text>
           ) : null}
@@ -114,6 +131,12 @@ export default function SessionExerciseCard({
 }
 
 const styles = StyleSheet.create({
+  nameRow: {
+    gap: spacing.xs,
+  },
+  name: {
+    flexShrink: 1,
+  },
   columnHeader: {
     flex: 1,
     textAlign: 'center',

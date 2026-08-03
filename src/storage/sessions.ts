@@ -50,10 +50,24 @@ export async function getExerciseHistorySummaries(): Promise<ExerciseHistorySumm
 /** Returns every past session in which the given exercise was performed (its logged sets),
  *  newest-first. Drives the exercise-history detail screen. Mirrors a future
  *  GET /exercises/:id/performances. Today the filtering a backend database would do runs
- *  client-side via collectExercisePerformances; at backend transition only the internals change. */
-export async function getExercisePerformances(exerciseId: string): Promise<ExercisePerformance[]> {
+ *  client-side via collectExercisePerformances; at backend transition only the internals change.
+ *
+ *  `limit` caps the result to the N most recent performances (the list is already newest-first),
+ *  mirroring a future `?limit=` query param. How many records to fetch is a query concern, so it
+ *  belongs here rather than as a slice in the consuming component. Omit it for the full history —
+ *  the exercise-history screen does; the in-session history sheet passes 3.
+ *
+ *  Note this reads finished sessions only: the in-progress buffer lives under a separate
+ *  AsyncStorage key, so a live session never appears in its own "past performances". */
+export async function getExercisePerformances(
+  exerciseId: string,
+  limit?: number,
+): Promise<ExercisePerformance[]> {
   const sessions = await getSessions();
-  return collectExercisePerformances(sessions, exerciseId);
+  const performances = collectExercisePerformances(sessions, exerciseId);
+  return limit === undefined ? performances : performances.slice(0, limit);
+  // if performances.length < limit, the .slice method automatically COPIES the whole array.
+  // .slice always returns a new array copy
 }
 
 /** Returns the aggregated stats for the current calendar month, powering the Home dashboard.
