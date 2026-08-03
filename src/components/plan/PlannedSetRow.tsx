@@ -106,7 +106,9 @@ const makeStyles = (colors: Palette) =>
   StyleSheet.create({
     row: {
       gap: spacing.s,
-      paddingVertical: spacing.s,
+      // The row is the error-highlight box, so this padding is what keeps the rowError tint off
+      // the inputs' own borders — it is not row separation (the container's gap does that).
+      paddingVertical: spacing.xs,
       paddingHorizontal: spacing.xs,
       // Transparent border reserved so toggling the error border causes no layout shift.
       borderWidth: 1,
