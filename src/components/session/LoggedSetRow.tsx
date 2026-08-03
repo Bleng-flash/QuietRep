@@ -7,7 +7,7 @@ import {
   type Palette,
 } from '@/styles';
 import type { EditableLoggedSet, LoggedSet } from '@/types';
-import { sanitizeWeight } from '@/utils/units';
+import { sanitizeReps, sanitizeWeight } from '@/utils/inputs';
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -19,13 +19,6 @@ interface LoggedSetRowProps {
   hasError: boolean; // when true, the row is tinted red to flag an invalid set on finish
   onChange: (updated: LoggedSet) => void;
   onRemove: () => void;
-}
-
-// Strip anything that isn't a digit, so the reps field can only ever hold a non-negative integer
-// (negatives, decimals, and pasted letters are impossible by construction — not merely blocked by
-// the keyboard). The MAX_REPS cap is enforced at finish (isLoggedSetValid + red highlight), not here.
-function sanitizeReps(text: string): string {
-  return text.replace(/\D/g, ''); // replace every character that is not a digit 0-9 with ''
 }
 
 export default function LoggedSetRow({

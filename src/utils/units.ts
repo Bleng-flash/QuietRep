@@ -8,19 +8,6 @@ const KG_PER_LB = 0.45359237;
 // A display concern of formatWeight below, with one consumer. Same reasoning as KG_PER_LB.
 const WEIGHT_DISPLAY_DECIMALS = 2;
 
-/** Keeps digits and at most one decimal point, so a weight input only ever holds a valid
- *  non-negative decimal (e.g. "53.75") — negatives, letters, and extra dots are impossible by
- *  construction, not merely blocked by the keyboard. A trailing "53." is preserved so mid-typing
- *  works; parseFloat tolerates it. The MAX_WEIGHT magnitude cap is enforced by the caller, not here.
- *  Shared by the live-session logger (LoggedSetRow) and the bodyweight logger (LogBodyweightCard). */
-export function sanitizeWeight(text: string): string {
-  const cleaned = text.replace(/[^0-9.]/g, ''); // strips any chars that are not 0-9 or a dot
-  const firstDot = cleaned.indexOf('.');
-  if (firstDot === -1) return cleaned;
-  // Keep the first decimal point, strip any subsequent ones.
-  return cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
-}
-
 /** Converts a weight from the unit it was logged in to the unit the viewer is reading in.
  *
  *  Short-circuits when the units match, returning the number untouched. That matters: a user

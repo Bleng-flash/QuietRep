@@ -7,6 +7,7 @@ import {
   type Palette,
 } from '@/styles';
 import type { PlannedSet } from '@/types';
+import { sanitizeReps } from '@/utils/inputs';
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -18,16 +19,6 @@ interface PlannedSetRowProps {
   hasError: boolean; // when true, the row is tinted red to flag an invalid rep range on save
   onChange: (updated: PlannedSet) => void;
   onRemove: () => void;
-}
-
-// Strip anything that isn't a digit, so the field can only ever hold a non-negative integer
-// (negatives, decimals, and pasted letters are impossible by construction — not merely blocked
-// by the keyboard). 
-// The MAX_REPS cap and low<=high are deliberately NOT enforced here: a too-large
-// number is a real value the user may want to correct, so it is surfaced as a save-time error
-// (isPlannedSetValid + red highlight), like the low>high error.
-function sanitizeReps(text: string): string {
-  return text.replace(/\D/g, ''); // replace every character that is not a digit 0-9 with ''
 }
 
 export default function PlannedSetRow({

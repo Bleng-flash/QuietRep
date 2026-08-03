@@ -3,7 +3,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { useUnit } from '@/context/UnitContext';
 import { addBodyweightEntry } from '@/storage';
 import { spacing } from '@/styles';
-import { sanitizeWeight } from '@/utils/units';
+import { sanitizeWeight } from '@/utils/inputs';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';

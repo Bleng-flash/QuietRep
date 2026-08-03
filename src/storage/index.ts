@@ -8,7 +8,7 @@ export * from './workouts';
 Every function under storage follows the same pattern read the entire array from AsyncStorage, modify it in memory, write the entire array back.
 
 AsyncStorage is a simple persistent key-value store (identical to HashMap<String, String> in Java). 
-The keys are constant strings like @quietrep/exercises, and the values are always strings. 
+The keys are constant strings like @quietrep/workouts, and the values are always strings.
 It has no concept of types, nested structures, arrays, or objects, just strings mapped to strings, 
 persisted to the device's local storage so it survives app restarts.
 
