@@ -1,6 +1,6 @@
 import LoggedSetRow from '@/components/session/LoggedSetRow';
 import { useTheme } from '@/context/ThemeContext';
-import { spacing } from '@/styles';
+import { SET_LABEL_COLUMN_WIDTH, SET_REMOVE_COLUMN_WIDTH, spacing } from '@/styles';
 import type {
   EditableLoggedSet,
   LoggedSet,
@@ -95,10 +95,10 @@ export default function SessionExerciseCard({
 
       {/* Column headers — widths mirror LoggedSetRow layout */}
       <View style={[layout.row, { gap: spacing.s, marginBottom: spacing.xs }]}>
-        <View style={{ width: 48 }} />
+        <View style={{ width: SET_LABEL_COLUMN_WIDTH }} />
         <Text style={[typography.caption, styles.columnHeader]}>Load ({loggedUnit})</Text>
         <Text style={[typography.caption, styles.columnHeader]}>Reps</Text>
-        <View style={{ width: 32 }} />
+        <View style={{ width: SET_REMOVE_COLUMN_WIDTH }} />
       </View>
 
       {/* gap separates the set rows so adjacent error-state borders never touch/merge */}

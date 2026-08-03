@@ -1,6 +1,6 @@
 import { useTheme } from '@/context/ThemeContext';
 import { useUnit } from '@/context/UnitContext';
-import { spacing } from '@/styles';
+import { SET_LABEL_COLUMN_WIDTH, spacing } from '@/styles';
 import type { LoggedSet, WeightUnit } from '@/types';
 import { formatSessionDate } from '@/utils/datetime';
 import { formatWeight } from '@/utils/units';
@@ -46,7 +46,7 @@ function ExercisePerformanceCard({
       {/* Column headers — widths mirror the set rows below. The header carries the unit, so the
           rows render a bare number rather than repeating it on every line. */}
       <View style={[layout.row, { gap: spacing.s, marginBottom: spacing.xs }]}>
-        <View style={{ width: 48 }} />
+        <View style={{ width: SET_LABEL_COLUMN_WIDTH }} />
         <Text style={[typography.caption, styles.columnHeader]}>Load ({displayUnit})</Text>
         <Text style={[typography.caption, styles.columnHeader]}>Reps</Text>
       </View>
@@ -54,7 +54,9 @@ function ExercisePerformanceCard({
       {/* Static read-only rows that never reorder — index keys are safe */}
       {sets.map((loggedSet, setIndex) => (
         <View key={setIndex} style={[layout.row, styles.setRow]}>
-          <Text style={[typography.caption, { width: 48 }]}>Set {setIndex + 1}</Text>
+          <Text style={[typography.caption, { width: SET_LABEL_COLUMN_WIDTH }]}>
+            Set {setIndex + 1}
+          </Text>
           <Text style={[typography.body, styles.setValue]}>
             {formatWeight(loggedSet.weight, loggedUnit, displayUnit)}
           </Text>

@@ -138,8 +138,10 @@ const makeStyles = (colors: Palette) =>
     cardSlot: {
       flex: 1,
     },
-    // Fixed-width remove column — 36 matches PlannedSetRow's remove column for app-wide consistency,
-    // and the add button reserves the same width (removeColumn) so the two line up.
+    // Fixed-width remove column, deliberately wider than the set rows' SET_REMOVE_COLUMN_WIDTH:
+    // this column sits inside an expanded SplitCard rather than spanning the screen, so it needs
+    // the extra width to stay comfortably tappable. The add button reserves the same width
+    // (removeColumn) so the two line up.
     removeButton: {
       width: 36,
       alignItems: 'center',

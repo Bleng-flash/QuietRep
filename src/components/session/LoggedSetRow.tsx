@@ -1,5 +1,11 @@
 import { useTheme } from '@/context/ThemeContext';
-import { radius, spacing, type Palette } from '@/styles';
+import {
+  radius,
+  SET_LABEL_COLUMN_WIDTH,
+  SET_REMOVE_COLUMN_WIDTH,
+  spacing,
+  type Palette,
+} from '@/styles';
 import type { EditableLoggedSet, LoggedSet } from '@/types';
 import { sanitizeWeight } from '@/utils/units';
 import { Ionicons } from '@expo/vector-icons';
@@ -136,7 +142,7 @@ const makeStyles = (colors: Palette) =>
       backgroundColor: colors.errorSubtle,
     },
     label: {
-      width: 48,
+      width: SET_LABEL_COLUMN_WIDTH,
     },
     input: {
       flex: 1,
@@ -145,7 +151,7 @@ const makeStyles = (colors: Palette) =>
       textAlign: 'center',
     },
     removeButton: {
-      width: 32,
+      width: SET_REMOVE_COLUMN_WIDTH,
       alignItems: 'center',
     },
   });

@@ -1,5 +1,11 @@
 import { useTheme } from '@/context/ThemeContext';
-import { radius, spacing, type Palette } from '@/styles';
+import {
+  radius,
+  SET_LABEL_COLUMN_WIDTH,
+  SET_REMOVE_COLUMN_WIDTH,
+  spacing,
+  type Palette,
+} from '@/styles';
 import type { PlannedSet } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
@@ -113,7 +119,7 @@ const makeStyles = (colors: Palette) =>
       backgroundColor: colors.errorSubtle,
     },
     label: {
-      width: 48,
+      width: SET_LABEL_COLUMN_WIDTH,
     },
     // Single column holding both range inputs and the "to" separator, centered.
     rangeGroup: {
@@ -127,7 +133,7 @@ const makeStyles = (colors: Palette) =>
       color: colors.textSubtle,
     },
     removeButton: {
-      width: 32,
+      width: SET_REMOVE_COLUMN_WIDTH,
       alignItems: 'center',
     },
     // Overrides for inputField: bounded width so both inputs + "to" fit on one line, centered text

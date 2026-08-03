@@ -1,6 +1,11 @@
 // Colour-free tokens stay static and are imported directly from @/styles.
 export { radius } from './radius';
-export { SCREEN_TOP_GAP, spacing } from './spacing';
+export {
+  SCREEN_TOP_GAP,
+  SET_LABEL_COLUMN_WIDTH,
+  SET_REMOVE_COLUMN_WIDTH,
+  spacing,
+} from './spacing';
 
 // Colour-bearing tokens (colors, layout, typography, picker) are NOT exported here — they
 // are theme-reactive and must be read from useTheme() (src/context/ThemeContext.tsx) so

@@ -1,6 +1,6 @@
 import PlannedSetRow from '@/components/plan/PlannedSetRow';
 import { useTheme } from '@/context/ThemeContext';
-import { spacing } from '@/styles';
+import { SET_LABEL_COLUMN_WIDTH, SET_REMOVE_COLUMN_WIDTH, spacing } from '@/styles';
 import type { EditablePlannedSet, PlannedSet, ResolvedEditableWorkoutExercise } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -74,9 +74,9 @@ export default function WorkoutExerciseCard({
       </View>
 
       <View style={[layout.row, { gap: spacing.s, marginBottom: spacing.xs }]}>
-        <View style={{ width: 48 }} />
+        <View style={{ width: SET_LABEL_COLUMN_WIDTH }} />
         <Text style={[typography.caption, { flex: 1, textAlign: 'center' }]}>Rep Range</Text>
-        <View style={{ width: 32 }} />
+        <View style={{ width: SET_REMOVE_COLUMN_WIDTH }} />
       </View>
 
       {/* gap separates the set rows so adjacent error-state borders never touch/merge */}
