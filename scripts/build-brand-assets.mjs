@@ -25,6 +25,13 @@ const MARK_GREEN = '#32af6e'; // palettes.dark.primary
 const DARK_BACKGROUND = '#0d1210'; // palettes.dark.background
 const LIGHT_BACKGROUND = '#eceeed'; // palettes.light.background - the light splash backdrop
 
+// Mirrored by hand from app.json's expo-splash-screen `imageWidth`, for the same reason as the
+// colours above. Keep the two in sync: this is what the splash PREVIEW is drawn at, so if it
+// overstates the real value the preview stops catching the clipping it exists to catch. The value
+// is load-bearing - Android shows only the inner 2/3 of the 288dp splash canvas (a 192dp circle),
+// and a diagonal mark reaches its bounding-box corners, so 140 keeps the plates inside the mask.
+const SPLASH_IMAGE_WIDTH_DP = 140;
+
 // The sentinel colour both source SVGs are authored against. See the comment at the top of
 // mark.svg for why it is magenta rather than the real hex.
 const INK_SLOT = '#ff00ff';
@@ -181,19 +188,18 @@ async function buildNotificationPreview(glyphSvgText) {
 }
 
 /**
- * The launch screen as expo-splash-screen composes it: the mark drawn at imageWidth (200dp),
- * centred on a flat background colour.
+ * The launch screen as expo-splash-screen composes it: the mark drawn at imageWidth
+ * (SPLASH_IMAGE_WIDTH_DP), centred on a flat background colour.
  *
  * Rendered for BOTH backgrounds because one image has to serve both. The light variant is the
  * demanding one - #32af6e on #eceeed is only about 2.2:1, far and away the lowest-contrast pairing
  * anywhere in the brand, whereas the same green on #0d1210 is comfortable.
  */
 async function buildSplashPreview(svgText, backgroundColour) {
-  const CANVAS = 440;
-  const IMAGE_WIDTH = 200;
+  const CANVAS = 440; // roughly a phone's width in dp, so the mark reads at its true relative size
 
-  const art = await renderArt({ svgText, size: IMAGE_WIDTH, fill: 0.9 });
-  const offset = Math.round((CANVAS - IMAGE_WIDTH) / 2);
+  const art = await renderArt({ svgText, size: SPLASH_IMAGE_WIDTH_DP, fill: 0.9 });
+  const offset = Math.round((CANVAS - SPLASH_IMAGE_WIDTH_DP) / 2);
 
   return sharp({
     create: { width: CANVAS, height: CANVAS, channels: 4, background: backgroundColour },
@@ -225,7 +231,8 @@ async function main() {
     { file: 'android-icon-monochrome.png', svgText: alphaMark, size: 1024, fill: DIAGONAL_SAFE_COVERAGE },
     // Status-bar glyph - a DIFFERENT, chunkier source. See the comment in notification.svg.
     { file: 'notification-icon.png', svgText: alphaGlyph, size: 96, fill: 0.85 },
-    // Drawn at 200dp by expo-splash-screen on a flat background, with no mask, so it can be large.
+    // Drawn at SPLASH_IMAGE_WIDTH_DP by expo-splash-screen on a flat background, with no mask, so
+    // the art can fill most of this asset - the on-device size is set by imageWidth, not by here.
     { file: 'splash-icon.png', svgText: colourMark, size: 1024, fill: 0.9 },
     { file: 'favicon.png', svgText: colourMark, size: 48, fill: 0.78, background: DARK_BACKGROUND },
   ];
