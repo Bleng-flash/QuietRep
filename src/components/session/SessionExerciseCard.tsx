@@ -59,7 +59,7 @@ export default function SessionExerciseCard({
   }
 
   return (
-    <View style={[layout.card, { marginBottom: spacing.m }]}>
+    <View style={layout.card}>
       {/* Header row */}
       <View style={[layout.rowBetween, { marginBottom: spacing.s }]}>
         <View style={{ flex: 1 }}>

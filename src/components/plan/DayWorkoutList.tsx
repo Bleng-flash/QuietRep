@@ -89,6 +89,7 @@ export default function DayWorkoutList({
           data={dayWorkouts}
           keyExtractor={(item) => item.id}
           onReorder={handleReorder}
+          separatorHeight={spacing.s}
           renderCard={(workout, drag) => (
             <View style={layout.row}>
               <View style={styles.cardSlot}>
@@ -150,8 +151,10 @@ const makeStyles = (colors: Palette) =>
     emptyHint: {
       paddingVertical: spacing.s,
     },
+    // Owns the whole gap from the last workout card — the list's separator only renders
+    // between cards, never after the last one.
     addRow: {
-      marginTop: spacing.xs,
+      marginTop: spacing.s,
     },
     // Compact overrides on top of layout.addButton — smaller scale for nested day context.
     // flex: 1 so it spans the workout-card column only, not the reserved remove column.

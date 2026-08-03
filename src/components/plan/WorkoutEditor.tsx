@@ -233,7 +233,7 @@ export default function WorkoutEditor({ initialWorkout, onSave, onDelete }: Work
           onPress={() => setIsPickerVisible(true)}
           style={({ pressed }) => [
             layout.addButton,
-            { marginBottom: spacing.m },
+            { marginTop: spacing.m, marginBottom: spacing.m },
             pressed && layout.pressedButton,
           ]}
         >

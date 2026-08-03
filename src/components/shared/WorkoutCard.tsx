@@ -23,7 +23,7 @@ export default function WorkoutCard({ workout, allExercises, onLongPress }: Work
       onLongPress={onLongPress}
       // Must stay <= the pan-arm delay in DraggableCardList so hold-to-drag arms before scroll.
       delayLongPress={DRAG_LONG_PRESS_DELAY_MS}
-      style={({ pressed }) => [layout.card, {marginBottom: spacing.xs}, pressed && layout.pressedCard]}
+      style={({ pressed }) => [layout.card, pressed && layout.pressedCard]}
     >
       <Text style={typography.subheading} numberOfLines={1}>
         {workout.name}

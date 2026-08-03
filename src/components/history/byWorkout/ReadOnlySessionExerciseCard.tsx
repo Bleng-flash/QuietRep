@@ -27,8 +27,11 @@ export default function ReadOnlySessionExerciseCard({
   const { layout, typography } = useTheme();
   // The unit the viewer is reading in right now — different from loggedUnit.
   const { unit: displayUnit } = useUnit();
+  // This card owns its own bottom gap, unlike the list-rendered cards where the list's separator
+  // is the single source. Its one consumer (SessionDetail) maps it directly with no separator
+  // mechanism, so there is nothing here to conflict with.
   return (
-    <View style={[layout.card, { marginBottom: spacing.m }]}>
+    <View style={[layout.card, { marginBottom: spacing.s }]}>
       {/* Header */}
       <View style={{ marginBottom: spacing.s }}>
         <Text style={typography.subheading} numberOfLines={1}>
