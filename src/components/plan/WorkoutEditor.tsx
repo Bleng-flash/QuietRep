@@ -257,7 +257,7 @@ export default function WorkoutEditor({ initialWorkout, onSave, onDelete }: Work
               pressed && layout.pressedButton,
             ]}
           >
-            <Ionicons name="trash-outline" size={18} color={colors.error} />
+            <Ionicons name="trash-outline" size={20} color={colors.error} />
             <Text style={typography.actionDanger}>Delete Workout</Text>
           </Pressable>
         )}

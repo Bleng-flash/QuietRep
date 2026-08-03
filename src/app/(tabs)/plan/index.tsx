@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -146,8 +146,8 @@ export default function PlanScreen() {
       >
         <MaterialCommunityIcons name="view-list-outline" size={20} color={colors.text} />
         <Text style={[typography.body, styles.exerciseActionText]}>View all exercises</Text>
-        <MaterialCommunityIcons
-          name="chevron-right"
+        <Ionicons
+          name="chevron-forward"
           size={20}
           color={colors.textSubtle}
           style={{ marginLeft: 'auto' }}

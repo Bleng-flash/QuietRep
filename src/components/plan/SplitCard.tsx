@@ -119,7 +119,7 @@ export default function SplitCard({
             hitSlop={8}
             style={({ pressed }) => [pressed && layout.pressedButton]}
           >
-            <Ionicons name="trash-outline" size={18} color={colors.error} />
+            <Ionicons name="trash-outline" size={20} color={colors.error} />
           </Pressable>
         </View>
       </View>

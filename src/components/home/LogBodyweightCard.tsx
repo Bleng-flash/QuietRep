@@ -62,7 +62,7 @@ export default function LogBodyweightCard() {
           pressed && isValid && layout.pressedButton,
         ]}
       >
-        <Ionicons name="add" size={18} color={colors.primary} />
+        <Ionicons name="add" size={20} color={colors.primary} />
         <Text style={typography.actionPrimary}>Log weight</Text>
       </Pressable>
     </View>

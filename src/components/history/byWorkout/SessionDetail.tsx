@@ -101,7 +101,7 @@ export default function SessionDetail({ sessionId }: SessionDetailProps) {
             hitSlop={8}
             style={({ pressed }) => pressed && layout.pressedButton}
           >
-            <Ionicons name="trash-outline" size={22} color={colors.error} />
+            <Ionicons name="trash-outline" size={24} color={colors.error} />
           </Pressable>
         ) : (
           <View style={{ width: 24 }} />
