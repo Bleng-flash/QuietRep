@@ -1,6 +1,6 @@
 import ElapsedTimer from '@/components/session/ElapsedTimer';
 import { useTheme } from '@/context/ThemeContext';
-import { spacing } from '@/styles';
+import { COMPACT_INPUT_MIN_HEIGHT, spacing } from '@/styles';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -84,8 +84,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginHorizontal: spacing.s,
   },
+  // The compact height floor gives the title line room to be taller than RN measured it, which is
+  // what keeps it from being clipped on devices with a substituted UI font (see spacing.ts). This
+  // input has no padding of its own to convert, so it is the one field the floor grows.
   nameInput: {
     alignSelf: 'stretch',
     textAlign: 'center',
+    minHeight: COMPACT_INPUT_MIN_HEIGHT,
+    textAlignVertical: 'center',
   },
 });

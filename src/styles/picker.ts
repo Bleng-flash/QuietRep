@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 import type { Palette } from './colors';
 import { radius } from './radius';
-import { spacing } from './spacing';
+import { INPUT_MIN_HEIGHT, spacing } from './spacing';
 
 // Factory: shared chrome for pageSheet picker modals (ExercisePicker, WorkoutPicker, etc.).
 // Exposed reactively via useTheme().picker so it rebuilds when the theme toggles.
@@ -18,6 +18,8 @@ export const makePicker = (colors: Palette) =>
       paddingHorizontal: spacing.m,
       marginBottom: spacing.m,
     },
+    // No vertical padding here: the bar's height comes from the input's own INPUT_MIN_HEIGHT floor,
+    // so the field keeps the slack that stops its text being clipped (see spacing.ts).
     searchBar: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -27,7 +29,7 @@ export const makePicker = (colors: Palette) =>
       borderColor: colors.border,
       borderRadius: radius.m,
       paddingHorizontal: spacing.m,
-      paddingVertical: spacing.s + 2,
+      paddingVertical: 0,
       marginHorizontal: spacing.m,
       marginBottom: spacing.s,
     },
@@ -35,6 +37,8 @@ export const makePicker = (colors: Palette) =>
       flex: 1,
       color: colors.text,
       fontSize: 15,
+      minHeight: INPUT_MIN_HEIGHT,
+      textAlignVertical: 'center',
     },
     // Shared row chrome for picker list items — content layout is supplied by the caller
     item: {

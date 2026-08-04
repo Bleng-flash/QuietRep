@@ -1,7 +1,7 @@
 import { useActiveSession } from '@/context/ActiveSessionContext';
 import { useTheme } from '@/context/ThemeContext';
 import { getActiveSplitId, getAllExercises, getSplits, getWorkouts } from '@/storage';
-import { radius, spacing, type Palette } from '@/styles';
+import { INPUT_MIN_HEIGHT, radius, spacing, type Palette } from '@/styles';
 import type { Exercise, Workout } from '@/types';
 import { matchesSearchQuery } from '@/utils/search';
 import { getTodayKey } from '@/utils/datetime';
@@ -334,6 +334,9 @@ const makeStyles = (colors: Palette) =>
       gap: spacing.s,
       paddingBottom: spacing.s,
     },
+    // Mirrors picker.searchBar: no vertical padding, because the bar's height comes from the
+    // input's own INPUT_MIN_HEIGHT floor and that floor is what keeps the field's text from being
+    // clipped on devices whose UI font is taller than RN measured (see spacing.ts).
     searchBar: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -343,12 +346,14 @@ const makeStyles = (colors: Palette) =>
       borderColor: colors.border,
       borderRadius: radius.m,
       paddingHorizontal: spacing.m,
-      paddingVertical: spacing.s,
+      paddingVertical: 0,
       marginBottom: spacing.s,
     },
     searchInput: {
       flex: 1,
       padding: 0,
+      minHeight: INPUT_MIN_HEIGHT,
+      textAlignVertical: 'center',
     },
     emptyText: {
       textAlign: 'center',

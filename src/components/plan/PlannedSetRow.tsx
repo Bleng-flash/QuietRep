@@ -1,5 +1,6 @@
 import { useTheme } from '@/context/ThemeContext';
 import {
+  COMPACT_INPUT_MIN_HEIGHT,
   radius,
   SET_LABEL_COLUMN_WIDTH,
   SET_REMOVE_COLUMN_WIDTH,
@@ -129,11 +130,14 @@ const makeStyles = (colors: Palette) =>
       width: SET_REMOVE_COLUMN_WIDTH,
       alignItems: 'center',
     },
-    // Overrides for inputField: bounded width so both inputs + "to" fit on one line, centered text
+    // Overrides for inputField: bounded width so both inputs + "to" fit on one line, centered text,
+    // and the compact height floor that keeps these dense rows tighter than a standard field
+    // without giving up the anti-clipping slack (see COMPACT_INPUT_MIN_HEIGHT in spacing.ts).
     input: {
       width: 64,
       paddingHorizontal: spacing.s,
-      paddingVertical: spacing.xs + 2,
+      paddingVertical: 0,
+      minHeight: COMPACT_INPUT_MIN_HEIGHT,
       textAlign: 'center',
     },
   });

@@ -1,6 +1,8 @@
 // Colour-free tokens stay static and are imported directly from @/styles.
 export { radius } from './radius';
 export {
+  COMPACT_INPUT_MIN_HEIGHT,
+  INPUT_MIN_HEIGHT,
   SCREEN_TOP_GAP,
   SET_LABEL_COLUMN_WIDTH,
   SET_REMOVE_COLUMN_WIDTH,
