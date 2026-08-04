@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import type { ReactElement } from 'react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { FlatList, Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, KeyboardProvider } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface PickerModalProps<ItemType extends { name: string }> {
@@ -92,50 +93,60 @@ export default function PickerModal<ItemType extends { name: string }>({
     // smaller than the screen, at which point useSafeAreaInsets() would report the host
     // window's values instead of this one's.
     <Modal visible={visible} animationType="slide" onRequestClose={closePicker}>
-      {/* insets are runtime values, so they stay inline rather than in the picker factory */}
-      <View style={[picker.container, { paddingTop: insets.top + spacing.s }]}>
-        <View style={[layout.rowBetween, picker.header]}>
-          <Text style={typography.heading}>{title}</Text>
-          <Pressable onPress={closePicker} hitSlop={8}>
-            <Ionicons name="close" size={24} color={colors.textSubtle} />
-          </Pressable>
-        </View>
-
-        <View style={picker.searchBar}>
-          <Ionicons name="search" size={16} color={colors.textSubtle} />
-          <TextInput
-            style={picker.searchInput}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholder={searchPlaceholder}
-            placeholderTextColor={colors.textDisabled}
-            autoCorrect={false}
-            clearButtonMode="while-editing"
-          />
-        </View>
-
-        <FlatList
-          data={filteredItems}
-          keyExtractor={keyExtractor}
-          contentContainerStyle={{ paddingBottom: insets.bottom + spacing.l }}
-          // The search keyboard is almost always up when a result is tapped; without "handled"
-          // this FlatList (a ScrollView underneath, running its own tap interception) swallows
-          // the first tap on a row / Create-new to dismiss the keyboard — the DraggableCardList
-          // lesson: keyboardShouldPersistTaps is per-scroll-view and not inherited.
-          keyboardShouldPersistTaps="handled"
-          renderItem={renderItem}
-          ListEmptyComponent={<ListEmptyText message={emptyMessage} />}
-          ListFooterComponent={
-            <Pressable
-              onPress={handleCreateNew}
-              style={({ pressed }) => [picker.createButton, pressed && layout.pressedButton]}
-            >
-              <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
-              <Text style={picker.createLabel}>{createLabel}</Text>
+      {/* The root KeyboardProvider's context does not cross the Modal's native window boundary,
+          so the avoider needs its own — the same nesting NamePromptModal does. */}
+      <KeyboardProvider>
+        {/* The search bar is top-pinned and never covered; this is here for the LIST. Its frame
+            runs to the bottom of the window, under the keyboard, so without an avoider the tail
+            of the list and the create-new footer can never be scrolled above the IME. "padding"
+            shrinks the frame, which is what makes them reachable. */}
+        <KeyboardAvoidingView
+          behavior="padding"
+          style={[picker.container, { paddingTop: insets.top + spacing.s }]}
+        >
+          <View style={[layout.rowBetween, picker.header]}>
+            <Text style={typography.heading}>{title}</Text>
+            <Pressable onPress={closePicker} hitSlop={8}>
+              <Ionicons name="close" size={24} color={colors.textSubtle} />
             </Pressable>
-          }
-        />
-      </View>
+          </View>
+
+          <View style={picker.searchBar}>
+            <Ionicons name="search" size={16} color={colors.textSubtle} />
+            <TextInput
+              style={picker.searchInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder={searchPlaceholder}
+              placeholderTextColor={colors.textDisabled}
+              autoCorrect={false}
+              clearButtonMode="while-editing"
+            />
+          </View>
+
+          <FlatList
+            data={filteredItems}
+            keyExtractor={keyExtractor}
+            contentContainerStyle={{ paddingBottom: insets.bottom + spacing.l }}
+            // The search keyboard is almost always up when a result is tapped; without "handled"
+            // this FlatList (a ScrollView underneath, running its own tap interception) swallows
+            // the first tap on a row / Create-new to dismiss the keyboard — the DraggableCardList
+            // lesson: keyboardShouldPersistTaps is per-scroll-view and not inherited.
+            keyboardShouldPersistTaps="handled"
+            renderItem={renderItem}
+            ListEmptyComponent={<ListEmptyText message={emptyMessage} />}
+            ListFooterComponent={
+              <Pressable
+                onPress={handleCreateNew}
+                style={({ pressed }) => [picker.createButton, pressed && layout.pressedButton]}
+              >
+                <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
+                <Text style={picker.createLabel}>{createLabel}</Text>
+              </Pressable>
+            }
+          />
+        </KeyboardAvoidingView>
+      </KeyboardProvider>
     </Modal>
   );
 }
