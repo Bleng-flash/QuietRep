@@ -10,7 +10,9 @@ export const makePicker = (colors: Palette) =>
     container: {
       flex: 1,
       backgroundColor: colors.background,
-      paddingTop: spacing.m,
+      // No paddingTop here: the picker Modal is a full-screen edge-to-edge window, so its top
+      // gap is insets.top + spacing.s applied inline in PickerModal. A safe-area inset is a
+      // runtime value and cannot live in a StyleSheet.create factory.
     },
     header: {
       paddingHorizontal: spacing.m,

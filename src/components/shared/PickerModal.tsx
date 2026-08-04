@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import type { ReactElement } from 'react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { FlatList, Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface PickerModalProps<ItemType extends { name: string }> {
   visible: boolean;
@@ -41,6 +42,7 @@ export default function PickerModal<ItemType extends { name: string }>({
   onClose,
 }: PickerModalProps<ItemType>) {
   const { colors, layout, typography, picker } = useTheme();
+  const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
 
   const closePicker = useCallback(() => {
@@ -84,13 +86,14 @@ export default function PickerModal<ItemType extends { name: string }>({
   );
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={closePicker}
-    >
-      <View style={picker.container}>
+    // A RN <Modal> is a separate native window drawn edge-to-edge, so it owns its own insets
+    // exactly like a screen with headerShown: false. presentationStyle is deliberately not set:
+    // it is iOS-only (Android discards it), and pageSheet/formSheet would make the iOS window
+    // smaller than the screen, at which point useSafeAreaInsets() would report the host
+    // window's values instead of this one's.
+    <Modal visible={visible} animationType="slide" onRequestClose={closePicker}>
+      {/* insets are runtime values, so they stay inline rather than in the picker factory */}
+      <View style={[picker.container, { paddingTop: insets.top + spacing.s }]}>
         <View style={[layout.rowBetween, picker.header]}>
           <Text style={typography.heading}>{title}</Text>
           <Pressable onPress={closePicker} hitSlop={8}>
@@ -114,7 +117,7 @@ export default function PickerModal<ItemType extends { name: string }>({
         <FlatList
           data={filteredItems}
           keyExtractor={keyExtractor}
-          contentContainerStyle={{ paddingBottom: spacing.xxl }}
+          contentContainerStyle={{ paddingBottom: insets.bottom + spacing.l }}
           // The search keyboard is almost always up when a result is tapped; without "handled"
           // this FlatList (a ScrollView underneath, running its own tap interception) swallows
           // the first tap on a row / Create-new to dismiss the keyboard — the DraggableCardList
