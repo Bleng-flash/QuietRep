@@ -59,6 +59,12 @@
         "projectId": "c996906f-7cca-41aa-9e57-5c55b25f5d65"
       }
     },
-    "owner": "bleng"
+    "owner": "bleng",
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/c996906f-7cca-41aa-9e57-5c55b25f5d65"
+    }
   }
 }
