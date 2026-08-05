@@ -82,11 +82,18 @@ long-standing gap finally became visible.
 (`behavior="padding"`) was already doing the shrinking itself — it never depended on an OS resize.
 That's why the bug was Android-only.
 
-It surfaced first on the two reorderable screens (not, say, Home) partly for the below-the-fold
-reason above, and partly because they scroll through `ScrollViewContainer` — a Reanimated
-`Animated.ScrollView` from `react-native-reorderable-list` — which reflows far less forgivingly than
-a plain `ScrollView`. But the root cause was the same everywhere; the other screens were just closer
-to the edge of "still works".
+It surfaced first on the two reorderable screens (not, say, Home) for the below-the-fold reason
+above. The root cause was the same everywhere; the other screens were just closer to the edge of
+"still works".
+
+> **Correction (2026-08-05).** This paragraph originally added a second reason: that those screens
+> scroll through `ScrollViewContainer` — a Reanimated `Animated.ScrollView` from
+> `react-native-reorderable-list` — "which reflows far less forgivingly than a plain `ScrollView`".
+> That was speculation, and it is false. `GestureDetector` adds no wrapper view: it clones its child
+> with `collapsable: false` (`react-native-gesture-handler/src/handlers/gestures/GestureDetector/Wrap.tsx:17-20`),
+> so the `Animated.ScrollView` is a direct flex child and inherits RN's `baseVertical`
+> (`flexGrow: 1, flexShrink: 1`). It shrinks correctly by whatever padding it is given. Nothing
+> about the reorderable list contributed to this bug.
 
 ### A subtlety worth keeping straight
 
@@ -103,6 +110,14 @@ including edge-to-edge. React Native's built-in `KeyboardAvoidingView` was desig
 iOS-plus-`adjustResize` world; its Android measurement is unreliable under edge-to-edge, so simply
 changing `behavior` to `"padding"` on RN's own component would *not* have made Android dependable.
 
+The precise reason, confirmed later while chasing a follow-on bug: RN's component and the community
+one use the **identical** geometry formula (`Math.max(frame.y + frame.height - keyboardY, 0)`) — the
+library is a deliberate drop-in clone. What differs is where `keyboardY` comes from. RN derives it
+from `getWindowVisibleDisplayFrame().bottom` (`ReactRootView.java:890-919`), and that frame does not
+shrink for the IME under edge-to-edge, so the subtraction yields ~0 and you get no avoidance at all.
+The library reads `WindowInsets.Type.ime()` continuously instead. **The swap replaced the
+measurement source, not the geometry.**
+
 We standardized on **`react-native-keyboard-controller`**, the de-facto community solution. It
 ships a drop-in `KeyboardAvoidingView` with the same API, but its engine is different: a **native
 module** reads the *actual* keyboard/IME inset from the OS (Android `WindowInsets`, iOS keyboard
@@ -114,8 +129,17 @@ The change across the app was therefore:
 - swap the `KeyboardAvoidingView` import from `react-native` to `react-native-keyboard-controller`,
 - use `behavior="padding"` on **both** platforms (delete the `Platform.OS === 'ios' ? … : undefined`
   gate — that gate was the literal reason Android did nothing),
-- wrap the root in `<KeyboardProvider>` (and nest a second one inside `NamePromptModal`, because a
-  React Native `<Modal>` is a separate native window that the root provider's context can't reach).
+- wrap the root in `<KeyboardProvider>` — **exactly one, at the root, and never a second one
+  anywhere.**
+
+> **Correction (2026-08-05).** This bullet originally read: "*(and nest a second one inside
+> `NamePromptModal`, because a React Native `<Modal>` is a separate native window that the root
+> provider's context can't reach)*". **That instruction was wrong and it caused a second, worse
+> bug** — opening any picker modal silently killed keyboard tracking across the whole app. React
+> context crosses a `<Modal>` boundary perfectly well, and the library bridges the Dialog's native
+> window itself. Note the contradiction that sat in this file unnoticed: the sentence directly
+> above already said a single provider "feeds every screen". Full narrative in
+> [android-keyboard-modal-provider.md](android-keyboard-modal-provider.md).
 
 ## 5. Why the fix forced a development build (off Expo Go)
 
