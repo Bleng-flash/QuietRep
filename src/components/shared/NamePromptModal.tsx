@@ -1,8 +1,9 @@
 import { useTheme } from '@/context/ThemeContext';
 import { radius, spacing, type Palette } from '@/styles';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { KeyboardAvoidingView, KeyboardProvider } from 'react-native-keyboard-controller';
+import { KeyboardProvider, useGenericKeyboardHandler } from 'react-native-keyboard-controller';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
 interface NamePromptModalProps {
   visible: boolean;
@@ -45,16 +46,14 @@ export default function NamePromptModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      {/* A React Native <Modal> is a separate native window, and the root KeyboardProvider's
-          context does not cross that boundary — so KeyboardAvoidingView here needs its own
-          nested KeyboardProvider to read the keyboard height and lift the centered dialog clear
-          of the keyboard (KC's documented workaround for RN Modal). */}
+      {/* KeyboardProvider is a measurement engine, not just a context: it renders a native view
+          that reads the IME inset from the window it lives in. A React Native <Modal> is a
+          separate native window, so the root provider never sees this one's keyboard — hence its
+          own nested provider (KC's documented workaround for RN Modal). */}
       <KeyboardProvider>
         {/* Tap the dimmed backdrop to dismiss */}
         <Pressable style={styles.overlay} onPress={onClose}>
-          {/* keyboardVerticalOffset lifts the centered dialog clear of the keyboard top so it
-              isn't flush against it — a positive offset increases the applied bottom padding. */}
-          <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={spacing.l}>
+          <KeyboardLift>
             {/* Stop taps on the dialog itself from bubbling up to the backdrop */}
             <Pressable style={styles.dialog} onPress={() => {}}>
               <Text style={[typography.subheading, styles.title]}>{title}</Text>
@@ -92,11 +91,49 @@ export default function NamePromptModal({
                 </Pressable>
               </View>
             </Pressable>
-          </KeyboardAvoidingView>
+          </KeyboardLift>
         </Pressable>
       </KeyboardProvider>
     </Modal>
   );
+}
+
+/**
+ * Lifts a vertically-centered dialog clear of the keyboard.
+ *
+ * A centered dialog has to MOVE, not gain scrollable tail, so this is the transform sibling of
+ * KeyboardSpacer rather than a use of it. The overlay centers this view in the full window, so
+ * translating up by half the keyboard height re-centers it in the space that remains above the
+ * keyboard — which also leaves a comfortable gap without needing the old keyboardVerticalOffset.
+ *
+ * Must be a separate component: the hook has to run *below* NamePromptModal's KeyboardProvider,
+ * and NamePromptModal itself renders that provider rather than sitting under it.
+ *
+ * useGenericKeyboardHandler for the same reason as KeyboardSpacer — the useResizeMode() variants
+ * mutate the Activity-wide soft-input mode on mount and reset it on unmount.
+ */
+function KeyboardLift({ children }: { children: ReactNode }) {
+  const keyboardHeight = useSharedValue(0);
+
+  useGenericKeyboardHandler(
+    {
+      onMove: (event) => {
+        'worklet';
+        keyboardHeight.value = event.height;
+      },
+      onEnd: (event) => {
+        'worklet';
+        keyboardHeight.value = event.height;
+      },
+    },
+    [],
+  );
+
+  const liftStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: -Math.abs(keyboardHeight.value) / 2 }],
+  }));
+
+  return <Animated.View style={liftStyle}>{children}</Animated.View>;
 }
 
 const makeStyles = (colors: Palette) =>

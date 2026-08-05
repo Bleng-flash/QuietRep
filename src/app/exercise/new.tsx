@@ -17,7 +17,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 export default function NewExerciseScreen() {
   const { colors, layout, typography } = useTheme();
@@ -53,12 +52,14 @@ export default function NewExerciseScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      // Own the dark background via layout.screen (like the session screen).
-      // Since it's a root-stack route, it must set its own.
-      style={layout.screen}
-      behavior="padding"
-    >
+    // No keyboard avoidance here, deliberately: this screen has no scrollable and nothing below
+    // the fold. Both fields sit at the top under the header, Name autoFocuses, and the keyboard
+    // only ever covers empty space. The dropdown is not an exception — its trigger dismisses the
+    // keyboard before opening, so the two are never on screen together.
+    //
+    // Own the dark background via layout.screen (like the session screen).
+    // Since it's a root-stack route, it must set its own.
+    <View style={layout.screen}>
       <EditorHeader
         title="New Exercise"
         onCancel={() => router.back()}
@@ -114,7 +115,7 @@ export default function NewExerciseScreen() {
           </View>
         </View>
       </Pressable>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 

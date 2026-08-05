@@ -6,6 +6,7 @@ import DraggableCardList, {
 } from '@/components/shared/DraggableCardList';
 import EmptyState from '@/components/shared/EmptyState';
 import ExercisePicker from '@/components/shared/ExercisePicker';
+import KeyboardSpacer from '@/components/shared/KeyboardSpacer';
 import { useActiveSession } from '@/context/ActiveSessionContext';
 import { useTheme } from '@/context/ThemeContext';
 import { getAllExercises } from '@/storage';
@@ -20,8 +21,7 @@ import { isLoggedSetValid } from '@/utils/session';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, Keyboard, Pressable, Text } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { Alert, Keyboard, Pressable, Text, View } from 'react-native';
 import { ScrollViewContainer } from 'react-native-reorderable-list';
 import { v4 as uuid } from 'uuid';
 
@@ -202,7 +202,7 @@ export default function WorkoutSession() {
   }
 
   return (
-    <KeyboardAvoidingView style={layout.screen} behavior="padding">
+    <View style={layout.screen}>
       <SessionHeader
         name={activeSession?.name ?? ''}
         startedAt={activeSession?.startedAt ?? new Date().toISOString()}
@@ -282,6 +282,10 @@ export default function WorkoutSession() {
           <Ionicons name="trash-outline" size={20} color={colors.error} />
           <Text style={typography.actionDanger}>Discard session</Text>
         </Pressable>
+
+        {/* Collapses to nothing when the keyboard is closed; while it is open this is the tail
+            that lets "Add exercise" and "Discard session" be scrolled clear of it. */}
+        <KeyboardSpacer />
       </ScrollViewContainer>
 
       <ExercisePicker
@@ -298,6 +302,6 @@ export default function WorkoutSession() {
         exerciseName={historyTarget?.name ?? ''}
         onClose={() => setHistoryTarget(null)}
       />
-    </KeyboardAvoidingView>
+    </View>
   );
 }

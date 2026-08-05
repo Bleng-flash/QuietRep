@@ -4,6 +4,7 @@ import DraggableCardList, {
 } from '@/components/shared/DraggableCardList';
 import EditorHeader from '@/components/shared/EditorHeader';
 import ExercisePicker from '@/components/shared/ExercisePicker';
+import KeyboardSpacer from '@/components/shared/KeyboardSpacer';
 import { useTheme } from '@/context/ThemeContext';
 import { getAllExercises } from '@/storage';
 import { INPUT_MIN_HEIGHT, spacing, type Palette } from '@/styles';
@@ -19,8 +20,7 @@ import { isPlannedSetValid } from '@/utils/workout';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, Keyboard, Pressable, StyleSheet, Text, TextInput } from 'react-native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { Alert, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ScrollViewContainer } from 'react-native-reorderable-list';
 import { v4 as uuid } from 'uuid';
 
@@ -179,7 +179,7 @@ export default function WorkoutEditor({ initialWorkout, onSave, onDelete }: Work
   }
 
   return (
-    <KeyboardAvoidingView style={layout.screen} behavior="padding">
+    <View style={layout.screen}>
       <EditorHeader
         title={isEditMode ? 'Edit Workout' : 'New Workout'}
         onCancel={() => router.back()}
@@ -261,6 +261,10 @@ export default function WorkoutEditor({ initialWorkout, onSave, onDelete }: Work
             <Text style={typography.actionDanger}>Delete Workout</Text>
           </Pressable>
         )}
+
+        {/* Collapses to nothing when the keyboard is closed; while it is open this is the tail
+            that lets "Add exercise" and "Delete Workout" be scrolled clear of it. */}
+        <KeyboardSpacer />
       </ScrollViewContainer>
 
       <ExercisePicker
@@ -270,7 +274,7 @@ export default function WorkoutEditor({ initialWorkout, onSave, onDelete }: Work
         onSelect={handleAddExercise}
         onClose={() => setIsPickerVisible(false)}
       />
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
