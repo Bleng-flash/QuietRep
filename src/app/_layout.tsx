@@ -66,8 +66,15 @@ export default function RootLayout() {
       {/* KeyboardProvider (react-native-keyboard-controller) sits above the whole tree so every
           screen's KeyboardAvoidingView can read the reactive keyboard height. This is what makes
           keyboard avoidance work under Android edge-to-edge, where the OS no longer resizes the
-          window for the IME. Note: its context does NOT cross React Native <Modal> boundaries —
-          a modal that needs avoidance nests its own KeyboardProvider (see NamePromptModal). */}
+          window for the IME.
+
+          THIS IS THE ONLY ONE. Never nest a second KeyboardProvider, including inside a <Modal>.
+          Its context reaches modal content fine (a Modal's children are React descendants), and
+          the library bridges the Dialog's own native window itself via ModalAttachedWatcher.
+          A second provider registers a second watcher on the global event dispatcher; both react
+          to the same modal show and both call setOnDismissListener, which is a setter, so one
+          overwrites the other. Only one resume fires and the loser's callback stays suspended for
+          the rest of the process — killing keyboard tracking app-wide. See PickerModal. */}
       <KeyboardProvider>
         <ThemeProvider>
           {/* UnitProvider sits above ActiveSessionProvider: the session provider consumes
