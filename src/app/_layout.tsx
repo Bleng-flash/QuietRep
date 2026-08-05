@@ -64,15 +64,10 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       {/* KeyboardProvider (react-native-keyboard-controller) sits above the whole tree so every
-          KeyboardSpacer can read the reactive keyboard height. This is what makes keyboard
-          avoidance work under Android edge-to-edge, where the OS no longer resizes the window
-          for the IME.
-          It is a measurement engine, not merely a context: it renders a native view that reads
-          the IME inset from the window it lives in. React context would cross a React Native
-          <Modal> boundary perfectly well (a Modal's children are React descendants) — what does
-          NOT cross is that native measurement, because a Modal is a separate native window whose
-          keyboard this view never sees. Hence a modal needing avoidance nests its own provider
-          (see NamePromptModal, PickerModal). */}
+          screen's KeyboardAvoidingView can read the reactive keyboard height. This is what makes
+          keyboard avoidance work under Android edge-to-edge, where the OS no longer resizes the
+          window for the IME. Note: its context does NOT cross React Native <Modal> boundaries —
+          a modal that needs avoidance nests its own KeyboardProvider (see NamePromptModal). */}
       <KeyboardProvider>
         <ThemeProvider>
           {/* UnitProvider sits above ActiveSessionProvider: the session provider consumes

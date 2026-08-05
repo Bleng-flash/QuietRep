@@ -1,4 +1,3 @@
-import KeyboardSpacer from '@/components/shared/KeyboardSpacer';
 import ListEmptyText from '@/components/shared/ListEmptyText';
 import { useTheme } from '@/context/ThemeContext';
 import { spacing } from '@/styles';
@@ -7,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import type { ReactElement } from 'react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { FlatList, Modal, Pressable, Text, TextInput, View } from 'react-native';
-import { KeyboardProvider } from 'react-native-keyboard-controller';
+import { KeyboardAvoidingView, KeyboardProvider } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface PickerModalProps<ItemType extends { name: string }> {
@@ -94,12 +93,17 @@ export default function PickerModal<ItemType extends { name: string }>({
     // smaller than the screen, at which point useSafeAreaInsets() would report the host
     // window's values instead of this one's.
     <Modal visible={visible} animationType="slide" onRequestClose={closePicker}>
-      {/* KeyboardProvider is a measurement engine, not just a context: it renders a native view
-          that reads the IME inset from the window it lives in. A Modal is a separate native
-          window, so the root provider never sees this one's keyboard — hence its own, the same
-          nesting NamePromptModal does. */}
+      {/* The root KeyboardProvider's context does not cross the Modal's native window boundary,
+          so the avoider needs its own — the same nesting NamePromptModal does. */}
       <KeyboardProvider>
-        <View style={[picker.container, { paddingTop: insets.top + spacing.s }]}>
+        {/* The search bar is top-pinned and never covered; this is here for the LIST. Its frame
+            runs to the bottom of the window, under the keyboard, so without an avoider the tail
+            of the list and the create-new footer can never be scrolled above the IME. "padding"
+            shrinks the frame, which is what makes them reachable. */}
+        <KeyboardAvoidingView
+          behavior="padding"
+          style={[picker.container, { paddingTop: insets.top + spacing.s }]}
+        >
           <View style={[layout.rowBetween, picker.header]}>
             <Text style={typography.heading}>{title}</Text>
             <Pressable onPress={closePicker} hitSlop={8}>
@@ -131,24 +135,17 @@ export default function PickerModal<ItemType extends { name: string }>({
             keyboardShouldPersistTaps="handled"
             renderItem={renderItem}
             ListEmptyComponent={<ListEmptyText message={emptyMessage} />}
-            // The search bar is top-pinned and never covered; the spacer is here for the LIST.
-            // Its frame runs to the bottom of the window, under the keyboard, so without extra
-            // tail the end of the list and the create-new footer can never be scrolled above the
-            // IME — unreachable exactly while the user is typing to filter.
             ListFooterComponent={
-              <>
-                <Pressable
-                  onPress={handleCreateNew}
-                  style={({ pressed }) => [picker.createButton, pressed && layout.pressedButton]}
-                >
-                  <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
-                  <Text style={picker.createLabel}>{createLabel}</Text>
-                </Pressable>
-                <KeyboardSpacer />
-              </>
+              <Pressable
+                onPress={handleCreateNew}
+                style={({ pressed }) => [picker.createButton, pressed && layout.pressedButton]}
+              >
+                <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
+                <Text style={picker.createLabel}>{createLabel}</Text>
+              </Pressable>
             }
           />
-        </View>
+        </KeyboardAvoidingView>
       </KeyboardProvider>
     </Modal>
   );

@@ -1,7 +1,6 @@
 import LogBodyweightCard from '@/components/home/LogBodyweightCard';
 import MonthlyStatsCard from '@/components/home/MonthlyStatsCard';
 import RecentWorkouts from '@/components/home/RecentWorkouts';
-import KeyboardSpacer from '@/components/shared/KeyboardSpacer';
 import { useTheme } from '@/context/ThemeContext';
 import { getCurrentMonthSummary, getSessions } from '@/storage';
 import { SCREEN_TOP_GAP, spacing, type Palette } from '@/styles';
@@ -10,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Zeroed current-month stats for the first paint before the async load resolves, so the dashboard
@@ -50,47 +50,48 @@ export default function HomeScreen() {
   );
 
   return (
-    // The trailing KeyboardSpacer is what keeps LogBodyweightCard usable: its input sits mid-screen,
-    // so without extra scroll tail the input and the "Log weight" button below it stay covered when
-    // the keyboard opens. Same recipe as WorkoutSession/WorkoutEditor; persistTaps lets "Log weight"
-    // fire on the first tap while the keyboard is up instead of that tap merely dismissing it.
-    <ScrollView
-      style={layout.screen}
-      contentContainerStyle={{
-        paddingTop: insets.top + SCREEN_TOP_GAP,
-        paddingHorizontal: spacing.m,
-        paddingBottom: spacing.xxl,
-      }}
-      keyboardShouldPersistTaps="handled"
-    >
-      {/* QuietRep wordmark — brands the Home tab so it opens on the app identity. */}
-      <Text style={[typography.appTitle, styles.brand]}>QuietRep</Text>
+    // KeyboardAvoidingView (react-native-keyboard-controller) because LogBodyweightCard's input
+    // sits mid-screen: without avoidance the input and the "Log weight" button below it get covered
+    // when the keyboard opens. behavior="padding" on both platforms — the library consumes the IME
+    // inset under Android edge-to-edge, where the old adjustResize window shrink no longer fires.
+    // Same recipe as WorkoutSession/WorkoutEditor; persistTaps lets "Log weight" fire on the first
+    // tap while the keyboard is up instead of that tap merely dismissing it.
+    <KeyboardAvoidingView style={layout.screen} behavior="padding">
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: insets.top + SCREEN_TOP_GAP,
+          paddingHorizontal: spacing.m,
+          paddingBottom: spacing.xxl,
+        }}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* QuietRep wordmark — brands the Home tab so it opens on the app identity. */}
+        <Text style={[typography.appTitle, styles.brand]}>QuietRep</Text>
 
-      <View style={[layout.rowBetween, styles.sectionHeader]}>
-        <Text style={typography.heading}>This month</Text>
-        <Pressable
-          onPress={() => router.push('/monthly-stats')}
-          hitSlop={8}
-          style={({ pressed }) => [
-            layout.row,
-            styles.allMonthsLink,
-            pressed && layout.pressedButton,
-          ]}
-        >
-          <Text style={typography.actionSubtle}>All months</Text>
-          <Ionicons name="chevron-forward" size={16} color={colors.textSubtle} />
-        </Pressable>
-      </View>
+        <View style={[layout.rowBetween, styles.sectionHeader]}>
+          <Text style={typography.heading}>This month</Text>
+          <Pressable
+            onPress={() => router.push('/monthly-stats')}
+            hitSlop={8}
+            style={({ pressed }) => [
+              layout.row,
+              styles.allMonthsLink,
+              pressed && layout.pressedButton,
+            ]}
+          >
+            <Text style={typography.actionSubtle}>All months</Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.textSubtle} />
+          </Pressable>
+        </View>
 
-      <MonthlyStatsCard {...currentMonth} />
+        <MonthlyStatsCard {...currentMonth} />
 
-      <Text style={[typography.heading, styles.logBodyweightHeading]}>Log bodyweight</Text>
-      <LogBodyweightCard />
+        <Text style={[typography.heading, styles.logBodyweightHeading]}>Log bodyweight</Text>
+        <LogBodyweightCard />
 
-      <RecentWorkouts sessions={sessions} />
-
-      <KeyboardSpacer />
-    </ScrollView>
+        <RecentWorkouts sessions={sessions} />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
