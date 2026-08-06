@@ -31,7 +31,7 @@ The app requires a **dev build** (`eas build --profile development`) — `react-
 | `src/utils/` | Pure helpers grouped by concern: `session` (lifecycle transforms), `datetime` (formatting), `sessionStats` (aggregations), `units` (weight conversion), `inputs` (text sanitisers), plus `split`, `workout`, `exercise`, `search`. |
 | `src/notifications/` | The only module importing `expo-notifications`. Post/dismiss/permission/tap-listener for the ongoing-session notification. |
 | `src/styles/` | `spacing`/`radius` (colour-free, static) and the `palettes` registry plus `makeLayout`/`makeTypography`/`makePicker` factories. |
-| `src/constants/` | `DEFAULT_EXERCISES` (161 seeded exercises), `MUSCLE_GROUPS`, `DAY_KEYS`/labels, `MAX_REPS` (100) / `MAX_WEIGHT` (1500). |
+| `src/constants/` | `DEFAULT_EXERCISES` (164 seeded exercises), `MUSCLE_GROUPS`, `DAY_KEYS`/labels, `MAX_REPS` (100) / `MAX_WEIGHT` (1500). |
 | `src/types/` | One `index.ts`: canonical entities, editor/session view models, history and stats view models. |
 
 ### Routes
@@ -72,7 +72,7 @@ The last two are the **documented exception** to "AsyncStorage lives in `src/sto
 
 ## Current State
 
-**Plan tab.** Three sections on one screen. *Splits* are edited inline (no editor screen): rename, set active, delete, and add/remove a day's workouts all write immediately. *Workouts* are created and edited in `WorkoutEditor` — name, add/remove/reorder exercises, configure sets as rep ranges, with an exercise picker offering live search and a create-new escape hatch. *Exercises* live in a searchable library at `/plan/exercise`; 161 defaults seed on first launch and user-created ones can be added and deleted.
+**Plan tab.** Three sections on one screen. *Splits* are edited inline (no editor screen): rename, set active, delete, and add/remove a day's workouts all write immediately. *Workouts* are created and edited in `WorkoutEditor` — name, add/remove/reorder exercises, configure sets as rep ranges, with an exercise picker offering live search and a create-new escape hatch. *Exercises* live in a searchable library at `/plan/exercise`; 164 defaults seed on first launch and user-created ones can be added and deleted.
 
 **Live session.** The centre-tab FAB is the single entry point, opening a bottom sheet with three starts: today's workout (resolved from the active split), any workout, or an empty "Quick Workout". The session screen logs weight and reps per set, supports mid-session add/remove/reorder/swap of exercises, and can be **minimised** — it keeps running behind a resume banner docked above the tab bar on every tab. An info button on each exercise card opens a sheet showing the last 3 sessions that included it, without leaving the session. While backgrounded, a sticky notification names the session and its start time and taps back into it. The session survives a full app kill: every mutation debounce-persists, and the provider rehydrates on cold launch. Finish validates and writes to history; Discard is a footer danger button.
 
