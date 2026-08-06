@@ -1,5 +1,6 @@
 import { DEFAULT_EXERCISES } from '@/constants/defaultExercises';
 import type { Exercise } from '@/types';
+import { orderExercisesForDisplay } from '@/utils/exercise';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 import { v4 as uuid } from 'uuid';
@@ -19,8 +20,10 @@ export async function getUserExercises(): Promise<Exercise[]> {
   return userExercises;
 }
 
-// Returns all exercises — defaults first, then user-created.
-export async function getAllExercises(): Promise<Exercise[]> {
+/** Unordered read of both keys — the plain concat, for internal callers that only need to find
+ *  or count. Deliberately NOT exported: getAllExercises is the one public list read, so a
+ *  display surface cannot accidentally pick up raw storage order. */
+async function readAllExercises(): Promise<Exercise[]> {
   const [defaultExercises, userExercises] = await Promise.all([
     getDefaultExercises(),
     getUserExercises(),
@@ -28,12 +31,26 @@ export async function getAllExercises(): Promise<Exercise[]> {
   return [...defaultExercises, ...userExercises];
 }
 
+// Returns all exercises in display order: grouped by muscle group in MUSCLE_GROUPS order, each
+// group's seeded defaults in DEFAULT_EXERCISES order then user-created ones in creation order.
+// Ordering lives here, not in each screen — it is the ORDER BY of a future GET /exercises, and
+// the library SectionList and the flat ExercisePicker both consume it.
+export async function getAllExercises(): Promise<Exercise[]> {
+  const [defaultExercises, userExercises] = await Promise.all([
+    getDefaultExercises(),
+    getUserExercises(),
+  ]);
+  return orderExercisesForDisplay(defaultExercises, userExercises);
+}
+
 /** Returns a single exercise by id, or null if not found (e.g. a dangling FK after a user
  *  exercise was deleted). Mirrors a future GET /exercises/:id — components needing one exercise
- *  call this rather than scanning getAllExercises() themselves, so at backend transition only
- *  these internals change. Sibling of getSessionById in sessions.ts. */
+ *  call this rather than scanning the full list themselves, so at backend transition only these
+ *  internals change. Sibling of getSessionById in sessions.ts.
+ *  Reads unordered: a lookup by id has no use for display order, and sorting the whole catalog
+ *  to return one row would be wasted work. */
 export async function getExerciseById(exerciseId: string): Promise<Exercise | null> {
-  const allExercises = await getAllExercises();
+  const allExercises = await readAllExercises();
   return allExercises.find((exercise) => exercise.id === exerciseId) ?? null;
 }
 
