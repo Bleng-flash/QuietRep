@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, SectionList, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ExerciseListScreen() {
@@ -69,7 +70,12 @@ export default function ExerciseListScreen() {
   }, []);
 
   return (
-    <View style={{ flex: 1 }}>
+    // The search bar is top-pinned and never covered; this avoider is here for the LIST. Its
+    // frame runs to the bottom of the screen area, under the keyboard, so without one the tail
+    // of the results and the create-new footer can never be scrolled above the IME. "padding"
+    // shrinks the frame, which is what makes them reachable. Same case as PickerModal.
+    // flex: 1 rather than layout.screen — the Plan stack's _layout already sets contentStyle.
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
       <View
         style={[
           layout.rowBetween,
@@ -140,7 +146,7 @@ export default function ExerciseListScreen() {
           contentContainerStyle={{ paddingBottom: spacing.xxl }}
         />
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
