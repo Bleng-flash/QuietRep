@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface WorkoutFabMenuProps {
@@ -113,7 +114,12 @@ export default function WorkoutFabMenu({ visible, onClose }: WorkoutFabMenuProps
           the backdrop" idiom) leaves any ScrollView below it fighting for every gesture. As
           siblings, responder negotiation never offers a sheet touch to the backdrop at all,
           since it walks ancestors only. */}
-      <View style={styles.container}>
+      {/* Docks the sheet above the keyboard. The container is flex-end, so bottom padding shrinks
+          its content box and the sheet re-docks to the new bottom edge, moving up as a unit with
+          the search field inside it. No keyboardVerticalOffset: a bottom sheet should sit flush
+          against the IME, unlike NamePromptModal's centered dialog which needs a visible gap.
+          Deliberately NO nested KeyboardProvider — the root one in _layout.tsx serves this. */}
+      <KeyboardAvoidingView style={styles.container} behavior="padding">
         <Pressable style={styles.backdrop} onPress={onClose} />
 
         {/* Rendered after the backdrop, so it paints on top of it */}
@@ -195,7 +201,7 @@ export default function WorkoutFabMenu({ visible, onClose }: WorkoutFabMenuProps
             </>
           )}
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
