@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 import type { Palette } from './colors';
 import { radius } from './radius';
-import { INPUT_MIN_HEIGHT, spacing } from './spacing';
+import { INPUT_SLACK, spacing } from './spacing';
 
 // Factory: shared chrome for pageSheet picker modals (ExercisePicker, WorkoutPicker, etc.).
 // Exposed reactively via useTheme().picker so it rebuilds when the theme toggles.
@@ -18,7 +18,7 @@ export const makePicker = (colors: Palette) =>
       paddingHorizontal: spacing.m,
       marginBottom: spacing.m,
     },
-    // No vertical padding here: the bar's height comes from the input's own INPUT_MIN_HEIGHT floor,
+    // No vertical padding here: the bar's height comes from the input's own INPUT_SLACK floor,
     // so the field keeps the slack that stops its text being clipped (see spacing.ts).
     searchBar: {
       flexDirection: 'row',
@@ -33,12 +33,14 @@ export const makePicker = (colors: Palette) =>
       marginHorizontal: spacing.m,
       marginBottom: spacing.s,
     },
+    // No horizontal padding of its own — searchBar above owns that. The vertical slack still
+    // belongs on the field: the EditText's own box is what clips, and padding on the wrapper is
+    // not slack for the input inside it.
     searchInput: {
       flex: 1,
       color: colors.text,
       fontSize: 15,
-      minHeight: INPUT_MIN_HEIGHT,
-      textAlignVertical: 'center',
+      ...INPUT_SLACK,
     },
     // Shared row chrome for picker list items — content layout is supplied by the caller
     item: {

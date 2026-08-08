@@ -1,12 +1,12 @@
 // Colour-free tokens stay static and are imported directly from @/styles.
 export { radius } from './radius';
 export {
-  COMPACT_INPUT_MIN_HEIGHT,
-  INPUT_MIN_HEIGHT,
+  COMPACT_INPUT_SLACK,
+  INPUT_SLACK,
   SCREEN_TOP_GAP,
   SET_LABEL_COLUMN_WIDTH,
   SET_REMOVE_COLUMN_WIDTH,
-  spacing,
+  spacing
 } from './spacing';
 
 // Colour-bearing tokens (colors, layout, typography, picker) are NOT exported here — they
@@ -15,3 +15,4 @@ export {
 // theme layer and anywhere a mode needs to be reasoned about.
 export { palettes } from './colors';
 export type { Palette, ThemeMode } from './colors';
+

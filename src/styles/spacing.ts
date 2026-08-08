@@ -1,4 +1,4 @@
-import { PixelRatio } from 'react-native';
+import { PixelRatio, type TextStyle } from 'react-native';
 
 export const spacing = {
   xs: 4,
@@ -44,6 +44,12 @@ export const SET_REMOVE_COLUMN_WIDTH = 32;
  * Minimum heights for single-line TextInputs, in two tiers: INPUT_MIN_HEIGHT for standard bordered
  * fields, COMPACT_INPUT_MIN_HEIGHT for the dense set rows and the session title.
  *
+ * MODULE-PRIVATE on purpose — the public surface is INPUT_SLACK / COMPACT_INPUT_SLACK below. A
+ * height floor alone is not the fix, and offering it alone is precisely what let three fields ship
+ * with the floor but no paddingVertical: 0. Same reasoning as readAllExercises() in storage: the
+ * incomplete primitive stays unexported so no caller can reach for it by mistake. If something that
+ * is genuinely not a TextInput ever needs to match an input's height, export it then and say why.
+ *
  * Load-bearing, not cosmetic. React Native measures an input's box with Typeface.DEFAULT while the
  * native EditText draws the glyphs with the theme's typeface, so on an android device where those differ (a
  * vendor font picker, a CJK UI font, the Bold-text accessibility adjustment) the drawn line is
@@ -66,5 +72,41 @@ export const SET_REMOVE_COLUMN_WIDTH = 32;
  * scale of 2 a 15sp line is ~36dp against an 80dp floor, so the upper bound never bites in real use.
  */
 const fontScale = Math.min(Math.max(PixelRatio.getFontScale(), 1), 2);
-export const INPUT_MIN_HEIGHT = 40 * fontScale;
-export const COMPACT_INPUT_MIN_HEIGHT = 32 * fontScale;
+const INPUT_MIN_HEIGHT = 40 * fontScale;
+const COMPACT_INPUT_MIN_HEIGHT = 32 * fontScale;
+
+/**
+ * The COMPLETE anti-clipping recipe for a single-line TextInput, as one spreadable token per tier.
+ * Spread one of these into every TextInput style — never re-type the three properties by hand.
+ *
+ * All three parts are load-bearing together, and a field carrying only two of them looks correct on
+ * a device whose UI font matches Typeface.DEFAULT. That is not hypothetical: an audit found three
+ * fields with the floor and the alignment but no padding reset, which is what made these tokens
+ * necessary. Bundling them makes a partial application impossible to write by accident.
+ *
+ * paddingVertical: 0 is the part that looks redundant and is not. This app runs the New
+ * Architecture (app.json newArchEnabled), where AndroidTextInputComponentDescriptor reads the
+ * THEME's default TextInput padding and applies it as the component's default — so a field with no
+ * padding style keeps Android's theme padding, and the usable interior becomes
+ * (minHeight - themePadding) rather than minHeight. Zeroing it is what converts padding into
+ * interior room instead of extra height.
+ *
+ * Horizontal padding is deliberately NOT included: it varies by field (bordered fields want it,
+ * fields inside a padded bar want none), and it has nothing to do with vertical clipping.
+ */
+// `satisfies` rather than `: TextStyle` on purpose. An annotation would widen these to the full
+// TextStyle type, and layout.inputField (which spreads INPUT_SLACK) is also applied to the
+// muscle-group dropdown Pressable in exercise/new.tsx — a ViewStyle slot that TextStyle is not
+// assignable to. `satisfies` type-checks the three properties while keeping the narrow inferred
+// shape, so the token stays usable on both a TextInput and a View.
+export const INPUT_SLACK = {
+  paddingVertical: 0,
+  minHeight: INPUT_MIN_HEIGHT,
+  textAlignVertical: 'center',
+} satisfies TextStyle;
+
+export const COMPACT_INPUT_SLACK = {
+  paddingVertical: 0,
+  minHeight: COMPACT_INPUT_MIN_HEIGHT,
+  textAlignVertical: 'center',
+} satisfies TextStyle;

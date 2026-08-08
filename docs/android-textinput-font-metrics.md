@@ -148,10 +148,18 @@ The fix converts that padding into interior room instead of adding height. Every
 now carries:
 
 ```ts
+...INPUT_SLACK,          // or COMPACT_INPUT_SLACK for the dense set rows
+```
+
+which is the three properties bundled as one spreadable token:
+
+```ts
 paddingVertical: 0,
-minHeight: INPUT_MIN_HEIGHT,        // or COMPACT_INPUT_MIN_HEIGHT for dense rows
+minHeight: INPUT_MIN_HEIGHT,        // or COMPACT_INPUT_MIN_HEIGHT
 textAlignVertical: 'center',
 ```
+
+**They were originally written out by hand at each field, and that was a mistake — see section 8.**
 
 Pinning the floor at the height the field already had means the layout is unchanged on screen, but
 the ~20dp that used to be reserved as padding above and below the line is now room the centred line
@@ -179,10 +187,9 @@ Two properties worth keeping:
 
 ## 7. Rules that follow
 
-- **Every single-line `TextInput` gets a height floor, zero vertical padding, and
-  `textAlignVertical: 'center'`.** Two tiers exist: `INPUT_MIN_HEIGHT` for standard bordered fields,
-  `COMPACT_INPUT_MIN_HEIGHT` for the dense set rows and the session title. A new input picks one; it
-  never sizes itself from padding alone.
+- **Every single-line `TextInput` spreads one slack token** — `INPUT_SLACK` for standard bordered
+  fields, `COMPACT_INPUT_SLACK` for the dense set rows and the session title. A new input picks one;
+  it never sizes itself from padding alone, and it never re-types the three properties (section 8).
 - **Never use `includeFontPadding: false`** to "fix" input alignment. It is the most-copied remedy
   online and it is backwards here: it shrinks the measured box, which makes clipping *more* likely.
 - **Padding on a wrapper is not slack for the field inside it.** The `EditText`'s own box is what
@@ -190,3 +197,39 @@ Two properties worth keeping:
 - **Two devices are not a test matrix.** This class of bug is invisible on stock Android by
   construction. A build that has only run on a Pixel-like device and an emulator has not been tested
   against OEM font substitution at all.
+
+## 8. Sequel (2026-08-08): the fix was correct and applied incompletely
+
+The original fix wrote the three properties out by hand at each field. Four months later an audit of
+CLAUDE.md against the code found **three of the ten input sites carrying only two of the three**:
+
+| Field | Floor | `textAlignVertical` | `paddingVertical: 0` |
+|---|---|---|---|
+| `picker.searchInput` (PickerModal **and** ExerciseListScreen) | yes | yes | **missing** |
+| `WorkoutEditor.nameInput` | yes | yes | **missing** |
+| `SessionHeader.nameInput` | yes | yes | **missing** |
+
+A fourth, `WorkoutFabMenu.searchInput`, used `padding: 0` instead — correct in effect, but a
+different idiom for the same job, which is how a reader loses track of what the rule even is.
+
+**The omitted property is the one that looks redundant, and it is not.** This app runs the New
+Architecture, where `AndroidTextInputComponentDescriptor` reads the **theme's** default TextInput
+padding and applies it as the component's default padding. A field with no padding style therefore
+keeps Android's theme padding, and its usable interior is `minHeight - themePadding` rather than
+`minHeight` — the slack quietly reduced by exactly the amount the rule exists to remove. Invisible
+on a device whose UI font matches `Typeface.DEFAULT`, which is the same blind spot that caused the
+original bug.
+
+**Why it happened, and the general lesson.** The rule was stated as prose and re-implemented by hand
+at every call site. A field satisfying two thirds of it compiles, renders correctly on the
+developer's device, and reads as finished. Nothing anywhere could tell you it was wrong.
+
+**A safety rule that must be applied identically in N places should be one spreadable token, not a
+sentence in a document.** The three properties are now `INPUT_SLACK` / `COMPACT_INPUT_SLACK` in
+`src/styles/spacing.ts`, next to the explanation of why they exist, and the bare
+`INPUT_MIN_HEIGHT` / `COMPACT_INPUT_MIN_HEIGHT` constants are now **module-private** — not exported
+at all, so a component cannot take the floor without the rest. Partial application went from "easy
+to write by accident" to "unavailable".
+
+Corollary worth carrying to any similar rule: **prose in a doc cannot enforce anything.** If
+correctness depends on N properties always travelling together, make them travel together in code.

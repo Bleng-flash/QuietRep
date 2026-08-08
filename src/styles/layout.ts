@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 import type { Palette } from './colors';
 import { radius } from './radius';
-import { INPUT_MIN_HEIGHT, spacing } from './spacing';
+import { INPUT_SLACK, spacing } from './spacing';
 
 // Factory: builds the layout StyleSheet for a given palette. Called by ThemeProvider
 // and exposed reactively via useTheme().layout, so styles rebuild when the theme toggles.
@@ -81,19 +81,17 @@ export const makeLayout = (colors: Palette) =>
     // Base surface style for TextInput fields. Compose with typography.body for the text style.
     // Callers may add overrides (e.g. width, padding, textAlign) for specific input shapes.
     //
-    // The height comes from INPUT_MIN_HEIGHT rather than vertical padding, and the line is centred
-    // inside it: that leaves the whole box as slack for a drawn line taller than RN measured, which
-    // is what stops the glyph tops being clipped on devices with a substituted UI font. Same total
-    // height as the padding it replaced — see the INPUT_MIN_HEIGHT comment in spacing.ts.
+    // The height comes from INPUT_SLACK's floor rather than vertical padding, and the line is
+    // centred inside it: that leaves the whole box as slack for a drawn line taller than RN
+    // measured, which is what stops the glyph tops being clipped on devices with a substituted UI
+    // font. Same total height as the padding it replaced — see INPUT_SLACK in spacing.ts.
     inputField: {
       backgroundColor: colors.inputBackground,
       borderWidth: 1,
       borderColor: colors.border,
       borderRadius: radius.m,
       paddingHorizontal: spacing.m,
-      paddingVertical: 0,
-      minHeight: INPUT_MIN_HEIGHT,
-      textAlignVertical: 'center',
+      ...INPUT_SLACK,
     },
     pressedButton: {
       opacity: 0.6,

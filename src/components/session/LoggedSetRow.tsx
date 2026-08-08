@@ -1,6 +1,6 @@
 import { useTheme } from '@/context/ThemeContext';
 import {
-  COMPACT_INPUT_MIN_HEIGHT,
+  COMPACT_INPUT_SLACK,
   radius,
   SET_LABEL_COLUMN_WIDTH,
   SET_REMOVE_COLUMN_WIDTH,
@@ -140,14 +140,14 @@ const makeStyles = (colors: Palette) =>
     label: {
       width: SET_LABEL_COLUMN_WIDTH,
     },
-    // Overrides for inputField: the compact height floor keeps these dense rows tighter than a
-    // standard field without giving up the anti-clipping slack (see spacing.ts).
+    // Overrides for inputField: the compact tier keeps these dense rows tighter than a standard
+    // field without giving up the anti-clipping slack (see INPUT_SLACK in spacing.ts). Spread
+    // last in the style array so it replaces inputField's standard tier wholesale.
     input: {
       flex: 1,
       paddingHorizontal: spacing.s,
-      paddingVertical: 0,
-      minHeight: COMPACT_INPUT_MIN_HEIGHT,
       textAlign: 'center',
+      ...COMPACT_INPUT_SLACK,
     },
     removeButton: {
       width: SET_REMOVE_COLUMN_WIDTH,

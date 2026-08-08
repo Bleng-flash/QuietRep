@@ -6,7 +6,7 @@ import EditorHeader from '@/components/shared/EditorHeader';
 import ExercisePicker from '@/components/shared/ExercisePicker';
 import { useTheme } from '@/context/ThemeContext';
 import { getAllExercises } from '@/storage';
-import { INPUT_MIN_HEIGHT, spacing, type Palette } from '@/styles';
+import { INPUT_SLACK, spacing, type Palette } from '@/styles';
 import type {
   EditablePlannedSet,
   EditableWorkoutExercise,
@@ -283,12 +283,12 @@ const makeStyles = (colors: Palette) =>
     // The gap between the name and its underline comes from centring the line inside the height
     // floor, not from paddingBottom — padding would eat the slack that keeps the text from being
     // clipped on devices whose UI font is taller than RN measured (see spacing.ts).
+    // Underlined rather than boxed, so it takes the slack token without inputField's chrome.
     nameInput: {
       marginBottom: spacing.l,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
-      minHeight: INPUT_MIN_HEIGHT,
-      textAlignVertical: 'center',
+      ...INPUT_SLACK,
     },
     emptyHint: {
       textAlign: 'center',

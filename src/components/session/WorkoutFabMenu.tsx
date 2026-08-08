@@ -1,7 +1,7 @@
 import { useActiveSession } from '@/context/ActiveSessionContext';
 import { useTheme } from '@/context/ThemeContext';
 import { getActiveSplitId, getAllExercises, getSplits, getWorkouts } from '@/storage';
-import { INPUT_MIN_HEIGHT, radius, spacing, type Palette } from '@/styles';
+import { INPUT_SLACK, radius, spacing, type Palette } from '@/styles';
 import type { Exercise, Workout } from '@/types';
 import { matchesSearchQuery } from '@/utils/search';
 import { getTodayKey } from '@/utils/datetime';
@@ -341,7 +341,7 @@ const makeStyles = (colors: Palette) =>
       paddingBottom: spacing.s,
     },
     // Mirrors picker.searchBar: no vertical padding, because the bar's height comes from the
-    // input's own INPUT_MIN_HEIGHT floor and that floor is what keeps the field's text from being
+    // input's own INPUT_SLACK floor and that floor is what keeps the field's text from being
     // clipped on devices whose UI font is taller than RN measured (see spacing.ts).
     searchBar: {
       flexDirection: 'row',
@@ -355,11 +355,12 @@ const makeStyles = (colors: Palette) =>
       paddingVertical: 0,
       marginBottom: spacing.s,
     },
+    // paddingHorizontal: 0 because searchBar above owns the horizontal padding; the vertical
+    // slack still belongs on the field itself, since the EditText's own box is what clips.
     searchInput: {
       flex: 1,
-      padding: 0,
-      minHeight: INPUT_MIN_HEIGHT,
-      textAlignVertical: 'center',
+      paddingHorizontal: 0,
+      ...INPUT_SLACK,
     },
     emptyText: {
       textAlign: 'center',
