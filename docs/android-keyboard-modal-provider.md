@@ -170,6 +170,29 @@ of fact is easy to skim past; a bullet telling you what to write gets followed.
 **Two lines of your own documentation disagreeing about a mechanism is a defect, not a nuance.**
 Reconcile it the moment you notice, even when neither line is the thing you came to read.
 
+## 9. A second symptom of the same leak: the "ghost keyboard"
+
+A separate bug was logged the same day: a blank **keyboard-sized cut-out** occupying screen space
+with no keyboard visible, provoked by tapping quickly. It was left open on the suspicion that it
+might be this leak wearing a different face. It was.
+
+Section 6 explains why the leak usually presents as "nothing happens" — a suspended provider's KAV
+keeps its last computed padding, and that is *usually* zero. It is not always zero. If the provider
+is suspended while the keyboard is **up**, which is exactly what opening a picker mid-typing does,
+the frozen value is a full keyboard height. `behavior="padding"` then reserves a keyboard-sized
+empty strip that nothing will ever clear, because the events that would clear it are the ones no
+longer arriving. Same defect, opposite starting state — which is why it looked like a second bug.
+
+Re-tested on 2026-08-08 on the physical phone, against a bundle four commits after `956384b`:
+eleven provocations covering every Modal surface in the app dismissed by tap with the IME genuinely
+up, repeat-opens, and the three non-Modal keyboard surfaces. **No gap on any of them.** Closed as
+resolved by `956384b`; no separate fix was needed.
+
+One protocol note for anyone re-running this: **the hardware back button is not a valid "dismiss
+with the keyboard up" test.** Android's IME consumes the first back press to close itself, so the
+dismissal that follows happens with the keyboard already down. Only tap-driven exits — selecting a
+row, Save, the backdrop, a back chevron — actually exercise the race.
+
 ---
 
 ## The rule
